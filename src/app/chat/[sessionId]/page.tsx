@@ -277,10 +277,9 @@ function ChatPageContent() {
   return (
     <div className="flex-1 flex flex-col max-w-4xl w-full mx-auto bg-white shadow-sm border-x border-slate-200 h-screen">
       {/* 1. Research Simulation Disclaimer Banner */}
-      <div className="bg-amber-500 text-white text-xs font-medium py-1.5 px-4 flex items-center justify-center gap-2 text-center shadow-inner">
-        <ShieldAlert className="w-4 h-4 shrink-0" />
+      <div className="bg-slate-100 text-slate-600 border-b border-slate-200 text-xs font-medium py-1.5 px-4 flex items-center justify-center gap-1.5 text-center">
         <span>
-          <strong>SIMULASI PENELITIAN:</strong> Seluruh saldo, data finansial, dan transaksi adalah simulasi buatan. Tidak terhubung ke rekening uang nyata.
+          Simulasi Penelitian • Seluruh data keuangan adalah profil skenario eksperimen.
         </span>
       </div>
 

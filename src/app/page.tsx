@@ -42,9 +42,6 @@ export default function HomePage() {
               Mulai Kuesioner Penelitian
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <p className="text-[11px] text-slate-500 text-center mt-3 leading-relaxed">
-              Tahapan: Persetujuan Partisipasi &rarr; Karakteristik Responden &rarr; Skenario &rarr; Diskusi Asisten &rarr; Kuesioner Akhir
-            </p>
           </div>
         </div>
       </div>

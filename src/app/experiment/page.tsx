@@ -78,6 +78,7 @@ function ExperimentContent() {
     chatbotExperience: "",
     financialKnowledge: "",
   });
+  const [occupationOther, setOccupationOther] = useState("");
 
   // Step 4: Early Decision (Comprehension Check)
   const [earlyDecision, setEarlyDecision] = useState({
@@ -150,10 +151,9 @@ function ExperimentContent() {
     initParticipant();
   }, [searchParams]);
 
-  // Anti Copy-Paste Handler
+  // Copy-Paste Prevention Handler
   const handlePreventCopy = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    alert("Penyalinan teks skenario dinonaktifkan sesuai petunjuk pelaksanaan penelitian.");
   };
 
   // Submit Step 1: Consent
@@ -207,6 +207,11 @@ function ExperimentContent() {
       return;
     }
 
+    if (demographics.occupation === "Lainnya" && !occupationOther.trim()) {
+      alert("Harap sebutkan pekerjaan Anda pada kolom yang disediakan.");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMessage(null);
 
@@ -219,6 +224,10 @@ function ExperimentContent() {
           participantId: participant.id,
           demographics: {
             ...demographics,
+            occupation:
+              demographics.occupation === "Lainnya"
+                ? `Lainnya (${occupationOther.trim()})`
+                : demographics.occupation,
             age: parseInt(demographics.age, 10),
           },
         }),
@@ -438,10 +447,7 @@ function ExperimentContent() {
         {step === 1 && (
           <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                Bagian A.1
-              </span>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">
+              <h2 className="text-lg font-bold text-slate-900">
                 Informasi dan Persetujuan Partisipasi Penelitian
               </h2>
             </div>
@@ -531,10 +537,7 @@ function ExperimentContent() {
         {step === 2 && (
           <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                Bagian A.2
-              </span>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">
+              <h2 className="text-lg font-bold text-slate-900">
                 Karakteristik Responden
               </h2>
               <p className="text-xs text-slate-500 mt-1">
@@ -631,6 +634,18 @@ function ExperimentContent() {
                     </option>
                   ))}
                 </select>
+                {demographics.occupation === "Lainnya" && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      value={occupationOther}
+                      onChange={(e) => setOccupationOther(e.target.value)}
+                      placeholder="Sebutkan pekerjaan Anda..."
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-xs sm:text-sm"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               {/* 5. Pendapatan Bulanan Pribadi (Screening) */}
@@ -672,7 +687,7 @@ function ExperimentContent() {
                   6. Apakah Anda pernah menggunakan chatbot AI untuk mencari informasi atau membantu mempertimbangkan keputusan keuangan pribadi? *
                 </label>
                 <p className="text-xs text-slate-500 mb-2">
-                  Contoh: Bertanya kepada chatbot AI mengenai cara mengatur pengeluaran, menyusun anggaran, atau merencanakan tabungan.
+                  Contoh: Bertanya kepada chatbot AI (seperti ChatGPT, Gemini, Copilot, atau asisten AI lainnya) mengenai cara mengatur pengeluaran, menyusun anggaran, atau merencanakan tabungan.
                 </p>
                 <div className="grid grid-cols-2 gap-2">
                   {DEMOGRAPHIC_OPTIONS.chatbotExperience.map((exp) => (
@@ -765,22 +780,16 @@ function ExperimentContent() {
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-xs sm:text-sm text-blue-900 leading-relaxed">
               <h3 className="font-bold text-sm mb-1 flex items-center gap-2">
                 <HelpCircle className="w-4 h-4 text-blue-600" />
-                A.3.1. Petunjuk Eksperimen
+                Petunjuk Eksperimen
               </h3>
-              <p className="mb-2">
+              <p>
                 Pada bagian ini, Anda akan dihadapkan pada sebuah skenario pengambilan keputusan keuangan dalam kehidupan sehari-hari. Bayangkan bahwa Anda sedang berada dalam situasi yang dijelaskan dan <strong>anggap seluruh informasi yang diberikan sebagai kondisi keuangan Anda sendiri</strong>.
               </p>
-              <div className="bg-amber-100/70 border border-amber-300/80 p-2.5 rounded-lg text-amber-900 text-xs font-semibold flex items-center gap-2">
-                <Lock className="w-4 h-4 shrink-0 text-amber-700" />
-                <span>
-                  Perhatian: Anda <strong>TIDAK diperbolehkan copy-paste teks skenario</strong> ke dalam percakapan dengan chatbot. Skenario di bawah telah dikunci dari penyalinan.
-                </span>
-              </div>
             </div>
 
             {/* Side by Side Layout: Skenario & Profil (Kiri) vs Comprehension Check (Kanan) */}
             <div className="grid lg:grid-cols-12 gap-6 items-start">
-              {/* Kolom Kiri: Skenario + Profil Keuangan (Anti Copy-Paste Protected) */}
+              {/* Kolom Kiri: Skenario + Profil Keuangan */}
               <div
                 className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm select-none relative"
                 style={{
@@ -792,13 +801,10 @@ function ExperimentContent() {
                 onCut={handlePreventCopy}
                 onContextMenu={(e) => e.preventDefault()}
               >
-                <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
-                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                <div className="pb-3 mb-4 border-b border-slate-100">
+                  <h3 className="text-sm font-bold text-slate-900">
                     Materi Skenario Penelitian
-                  </span>
-                  <span className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono flex items-center gap-1">
-                    <Lock className="w-3 h-3" /> Anti Copy-Paste Aktif
-                  </span>
+                  </h3>
                 </div>
 
                 <div className="space-y-5 text-xs sm:text-sm text-slate-800 leading-relaxed">
@@ -951,56 +957,44 @@ function ExperimentContent() {
         {/* TAHAP 5: PENGANTAR MASUK KE CHATBOT */}
         {/* ============================================================== */}
         {step === 5 && participant && (
-          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center">
-            <div className="w-14 h-14 bg-slate-100 border border-slate-200 text-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <FileText className="w-6 h-6 text-slate-800" />
-            </div>
-
-            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-              Tahap Interaksi
-            </span>
-            <h2 className="text-xl font-bold text-slate-900 mt-1 mb-3">
-              Diskusi dengan Asisten Finansial
+          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
+              Diskusi dengan Chatbot
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-              Anda sekarang akan diarahkan ke antarmuka <strong>Asisten Percakapan Finansial</strong>. Gunakan asisten ini untuk mengevaluasi keputusan Anda, meminta perhitungan, membandingkan opsi, atau mempertimbangkan konsekuensi finansial.
-              <br />
-              <br />
-              <em>Ingat: Jangan copy-paste teks skenario ke chatbot. Diskusikan rencana Anda secara wajar.</em>
+              Silakan berdiskusi dengan chatbot untuk mengevaluasi keputusan keuangan Anda pada skenario ini. Anda dapat menanyakan dampak pengeluaran, sisa anggaran pos terkait, atau konsekuensi finansial lainnya.
             </p>
 
-            <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 mb-6 text-left">
-              <strong>Petunjuk:</strong> Setelah Anda merasa cukup berdiskusi dan mengambil kesimpulan bersama asisten, klik tombol <strong>&quot;Selesai Diskusi & Lanjut ke Keputusan Akhir&quot;</strong> di halaman chat untuk kembali ke kuesioner akhir.
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="w-full sm:w-auto px-4 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Kembali ke Skenario
-              </button>
+            <div className="space-y-3">
               <a
                 href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 flex-1 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition"
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-center shadow-sm"
               >
                 Buka Chatbot Finansial
                 <ExternalLink className="w-4 h-4" />
               </a>
-            </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-100">
-              <button
-                onClick={() => setStep(6)}
-                className="text-xs text-slate-700 hover:text-slate-900 underline font-semibold"
-              >
-                Sudah selesai berdiskusi di tab chatbot? Lanjut ke Keputusan Akhir &rarr;
-              </button>
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setStep(3)}
+                  className="text-xs text-slate-500 hover:text-slate-800 transition flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  Kembali ke Skenario
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStep(6)}
+                  className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition flex items-center gap-1"
+                >
+                  Lanjut ke Keputusan Akhir
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -1133,10 +1127,7 @@ function ExperimentContent() {
         {step === 7 && (
           <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                Bagian A.4
-              </span>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">
+              <h2 className="text-lg font-bold text-slate-900">
                 Alat Ukur Pascainteraksi
               </h2>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
@@ -1241,10 +1232,7 @@ function ExperimentContent() {
               <CheckCircle className="w-9 h-9" />
             </div>
 
-            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-              Bagian A.5
-            </span>
-            <h2 className="text-xl font-bold text-slate-900 mt-1 mb-4">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">
               Penutup
             </h2>
 
