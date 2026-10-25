@@ -15,6 +15,7 @@ import {
   User,
   Info,
   ArrowRight,
+  MessageSquare,
 } from "lucide-react";
 
 interface ActionData {
@@ -287,7 +288,7 @@ function ChatPageContent() {
       <header className="border-b border-slate-200 px-4 py-3 bg-white flex items-center justify-between">
         <div>
           <h1 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Bot className="w-5 h-5 text-blue-600" />
+            <MessageSquare className="w-5 h-5 text-slate-800" />
             Asisten Finansial Percakapan
           </h1>
           <p className="text-xs text-slate-500">
@@ -373,15 +374,15 @@ function ChatPageContent() {
             }`}
           >
             {msg.role === "assistant" && (
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                <Bot className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <MessageSquare className="w-4 h-4" />
               </div>
             )}
 
             <div
               className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-sm ${
                 msg.role === "user"
-                  ? "bg-blue-600 text-white rounded-br-xs"
+                  ? "bg-slate-900 text-white rounded-br-xs"
                   : "bg-white text-slate-800 border border-slate-200/80 rounded-bl-xs"
               }`}
             >
@@ -389,7 +390,7 @@ function ChatPageContent() {
             </div>
 
             {msg.role === "user" && (
-              <div className="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center shrink-0">
                 <User className="w-4 h-4" />
               </div>
             )}
@@ -398,11 +399,11 @@ function ChatPageContent() {
 
         {isSending && (
           <div className="flex items-start gap-2.5 justify-start">
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm animate-pulse">
-              <Bot className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-sm animate-pulse">
+              <MessageSquare className="w-4 h-4" />
             </div>
             <div className="bg-white text-slate-600 border border-slate-200 rounded-2xl rounded-bl-xs px-4 py-3 shadow-sm flex items-center gap-2 text-sm">
-              <RefreshCw className="w-4 h-4 animate-spin text-blue-600" />
+              <RefreshCw className="w-4 h-4 animate-spin text-slate-700" />
               <span>Asisten sedang mengevaluasi konsekuensi finansial...</span>
             </div>
           </div>

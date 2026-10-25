@@ -14,6 +14,7 @@ import {
   Lock,
   AlertTriangle,
   Award,
+  FileText,
 } from "lucide-react";
 import {
   POST_QUESTIONNAIRE_ITEMS,
@@ -387,12 +388,12 @@ function ExperimentContent() {
       <header className="bg-white border-b border-slate-200 px-6 py-3.5 sticky top-0 z-30">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
               UI
             </div>
             <div>
               <h1 className="text-sm font-bold text-slate-900 leading-tight">
-                Penelitian Penggunaan Chatbot AI dalam Keputusan Keuangan
+                Penelitian Asisten Percakapan dalam Keputusan Keuangan
               </h1>
               <p className="text-[11px] text-slate-500">
                 Fakultas Ilmu Komputer, Universitas Indonesia
@@ -400,7 +401,17 @@ function ExperimentContent() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            {step > 1 && step < 8 && (
+              <button
+                type="button"
+                onClick={() => setStep((prev) => Math.max(1, prev - 1))}
+                className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 transition"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Kembali
+              </button>
+            )}
             <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-md font-mono text-slate-600">
               Tahap {step} dari 8
             </span>
@@ -501,7 +512,7 @@ function ExperimentContent() {
               <button
                 type="submit"
                 disabled={submitting || !consentChoice}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
+                className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
               >
                 {submitting ? "Memproses..." : "Lanjutkan ke Karakteristik Responden"}
                 <ArrowRight className="w-4 h-4" />
@@ -718,14 +729,24 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
-              >
-                {submitting ? "Menyimpan & Mengalokasikan Skenario..." : "Lanjut ke Petunjuk & Skenario"}
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Kembali
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
+                >
+                  {submitting ? "Menyimpan & Mengalokasikan Skenario..." : "Lanjut ke Petunjuk & Skenario"}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </form>
           </div>
         )}
@@ -898,14 +919,24 @@ function ExperimentContent() {
                     />
                   </div>
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm"
-                  >
-                    {submitting ? "Menyimpan..." : "Simpan & Lanjut ke Chatbot"}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setStep(2)}
+                      className="px-3.5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      Kembali
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      {submitting ? "Menyimpan..." : "Simpan & Lanjut ke Chatbot"}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>
@@ -917,11 +948,11 @@ function ExperimentContent() {
         {/* ============================================================== */}
         {step === 5 && participant && (
           <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center">
-            <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-500/20">
-              <Bot className="w-8 h-8" />
+            <div className="w-14 h-14 bg-slate-100 border border-slate-200 text-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-3">
+              <FileText className="w-6 h-6 text-slate-800" />
             </div>
 
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-wider">
               Tahap Interaksi
             </span>
             <h2 className="text-xl font-bold text-slate-900 mt-1 mb-3">
@@ -929,30 +960,40 @@ function ExperimentContent() {
             </h2>
 
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-              Anda sekarang akan diarahkan ke antarmuka <strong>Chatbot Asisten Finansial</strong>. Gunakan asisten ini untuk mengevaluasi keputusan Anda, meminta perhitungan, membandingkan opsi, atau mempertimbangkan konsekuensi finansial.
+              Anda sekarang akan diarahkan ke antarmuka <strong>Asisten Percakapan Finansial</strong>. Gunakan asisten ini untuk mengevaluasi keputusan Anda, meminta perhitungan, membandingkan opsi, atau mempertimbangkan konsekuensi finansial.
               <br />
               <br />
               <em>Ingat: Jangan copy-paste teks skenario ke chatbot. Diskusikan rencana Anda secara wajar.</em>
             </p>
 
             <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 mb-6 text-left">
-              <strong>Petunjuk:</strong> Setelah Anda merasa cukup berdiskusi dan mengambil kesimpulan bersama chatbot, klik tombol <strong>&quot;Selesai Diskusi & Lanjut ke Keputusan Akhir&quot;</strong> di halaman chat untuk kembali ke kuesioner akhir.
+              <strong>Petunjuk:</strong> Setelah Anda merasa cukup berdiskusi dan mengambil kesimpulan bersama asisten, klik tombol <strong>&quot;Selesai Diskusi & Lanjut ke Keputusan Akhir&quot;</strong> di halaman chat untuk kembali ke kuesioner akhir.
             </div>
 
-            <a
-              href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md transition"
-            >
-              Buka Chatbot Finansial
-              <ExternalLink className="w-4 h-4" />
-            </a>
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="w-full sm:w-auto px-4 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Kembali ke Skenario
+              </button>
+              <a
+                href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 flex-1 w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition"
+              >
+                Buka Chatbot Finansial
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
 
             <div className="mt-6 pt-4 border-t border-slate-100">
               <button
                 onClick={() => setStep(6)}
-                className="text-xs text-slate-500 hover:text-slate-800 underline font-medium"
+                className="text-xs text-slate-700 hover:text-slate-900 underline font-semibold"
               >
                 Sudah selesai berdiskusi di tab chatbot? Lanjut ke Keputusan Akhir &rarr;
               </button>
@@ -1060,14 +1101,24 @@ function ExperimentContent() {
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
-              >
-                {submitting ? "Menyimpan..." : "Lanjut ke Kuesioner Akhir (Alat Ukur)"}
-                <ArrowRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(5)}
+                  className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Buka Chatbot Lagi
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
+                >
+                  {submitting ? "Menyimpan..." : "Lanjut ke Kuesioner Akhir (Alat Ukur)"}
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
             </form>
           </div>
         )}
@@ -1155,14 +1206,24 @@ function ExperimentContent() {
                 }
               )}
 
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2"
-              >
-                {submitting ? "Menyimpan Jawaban..." : "Selesaikan Penelitian & Lihat Penutup"}
-                <CheckCircle className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setStep(6)}
+                  className="px-5 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Kembali
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center justify-center gap-2"
+                >
+                  {submitting ? "Menyimpan Jawaban..." : "Selesaikan Penelitian & Lihat Penutup"}
+                  <CheckCircle className="w-4 h-4" />
+                </button>
+              </div>
             </form>
           </div>
         )}
