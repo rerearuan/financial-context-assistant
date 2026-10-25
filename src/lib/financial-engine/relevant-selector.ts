@@ -33,8 +33,8 @@ export function selectRelevantFinancialContext(
       return (
         catLower.includes(targetCategoryLower) ||
         targetCategoryLower.includes(catLower) ||
-        (action.type === "spending" && catLower.includes("gadget")) ||
-        (action.type === "saving" && catLower.includes("tabungan"))
+        (action.type === "spending" && (catLower.includes("laptop") || catLower.includes("gadget"))) ||
+        (action.type === "saving" && (catLower.includes("tabungan") || catLower.includes("pendapatan") || catLower.includes("darurat")))
       );
     }) || null;
 

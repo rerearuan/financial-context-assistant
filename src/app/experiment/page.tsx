@@ -1,0 +1,1246 @@
+"use client";
+
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import {
+  ShieldAlert,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle,
+  HelpCircle,
+  Bot,
+  User,
+  ExternalLink,
+  Lock,
+  AlertTriangle,
+  Award,
+} from "lucide-react";
+import {
+  POST_QUESTIONNAIRE_ITEMS,
+  LIKERT_OPTIONS,
+  DEMOGRAPHIC_OPTIONS,
+} from "@/lib/survey-questions";
+
+interface ParticipantData {
+  id: string;
+  participantCode: string;
+  consent: boolean;
+  cellNumber?: number;
+  scenarioId?: string;
+  condition?: "basic" | "context_aware";
+  sessionId?: string;
+  currentStep: number;
+  isCompleted: boolean;
+  disqualified: boolean;
+  disqualifiedReason?: string;
+}
+
+interface ScenarioDetails {
+  id: string;
+  code: string;
+  title: string;
+  actionType: "spending" | "saving";
+  situasiText: string;
+  kondisiKeuanganText: string;
+  tugasText: string;
+  descriptionText: string;
+  tugasQuestions: Array<{
+    id: string;
+    question: string;
+    options?: string[];
+    type: "radio" | "text";
+  }>;
+}
+
+function ExperimentContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [step, setStep] = useState<number>(1);
+  const [participant, setParticipant] = useState<ParticipantData | null>(null);
+  const [scenario, setScenario] = useState<ScenarioDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Form states
+  // Step 1: Consent
+  const [consentChoice, setConsentChoice] = useState<string>("");
+
+  // Step 2: Demographics
+  const [demographics, setDemographics] = useState({
+    age: "",
+    gender: "",
+    education: "",
+    occupation: "",
+    monthlyIncome: "",
+    chatbotExperience: "",
+    financialKnowledge: "",
+  });
+
+  // Step 4: Early Decision (Comprehension Check)
+  const [earlyDecision, setEarlyDecision] = useState({
+    q1: "",
+    q2: "",
+    q3: "",
+  });
+
+  // Step 6: Final Decision
+  const [finalDecision, setFinalDecision] = useState({
+    q1: "",
+    q2: "",
+    q3: "",
+  });
+
+  // Step 7: Post Questionnaire (Likert 1-5)
+  const [postAnswers, setPostAnswers] = useState<Record<string, number>>({});
+
+  // Initialize or fetch participant from query param / localStorage
+  useEffect(() => {
+    const initParticipant = async () => {
+      setLoading(true);
+      const urlPartId = searchParams.get("participantId");
+      const urlStep = searchParams.get("step");
+      const savedPartId = urlPartId || localStorage.getItem("exp_participant_id");
+
+      if (savedPartId) {
+        try {
+          const res = await fetch(`/api/experiment/${savedPartId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setParticipant(data.participant);
+            if (data.scenario) setScenario(data.scenario);
+
+            if (urlStep) {
+              setStep(parseInt(urlStep, 10));
+            } else {
+              setStep(data.participant.currentStep || 1);
+            }
+            setLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error("Gagal memuat partisipan yang ada:", e);
+        }
+      }
+
+      // If no valid participant, start a new one
+      try {
+        const res = await fetch("/api/experiment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "start" }),
+        });
+        const data = await res.json();
+        setParticipant(data.participant);
+        localStorage.setItem("exp_participant_id", data.participant.id);
+        setStep(1);
+      } catch (err) {
+        setErrorMessage("Gagal menginisialisasi sesi penelitian.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initParticipant();
+  }, [searchParams]);
+
+  // Anti Copy-Paste Handler
+  const handlePreventCopy = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    alert("Penyalinan teks skenario dinonaktifkan sesuai petunjuk pelaksanaan penelitian.");
+  };
+
+  // Submit Step 1: Consent
+  const handleConsentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consentChoice || !participant) return;
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    const isConsented = consentChoice === "yes";
+    try {
+      const res = await fetch("/api/experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "consent",
+          participantId: participant.id,
+          consent: isConsented,
+        }),
+      });
+
+      const data = await res.json();
+      if (!isConsented || data.disqualified) {
+        setParticipant((prev) => (prev ? { ...prev, disqualified: true } : null));
+      } else {
+        setStep(2);
+      }
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat menyimpan persetujuan.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit Step 2: Demographics
+  const handleDemographicsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!participant) return;
+
+    if (
+      !demographics.age ||
+      !demographics.gender ||
+      !demographics.education ||
+      !demographics.occupation ||
+      !demographics.monthlyIncome ||
+      !demographics.chatbotExperience ||
+      !demographics.financialKnowledge
+    ) {
+      alert("Harap lengkapi seluruh pertanyaan karakteristik responden.");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "demographics",
+          participantId: participant.id,
+          demographics: {
+            ...demographics,
+            age: parseInt(demographics.age, 10),
+          },
+        }),
+      });
+
+      const data = await res.json();
+      if (data.disqualified) {
+        setParticipant((prev) => (prev ? { ...prev, disqualified: true, disqualifiedReason: data.message } : null));
+      } else {
+        setScenario(data.scenario);
+        setParticipant((prev) =>
+          prev
+            ? {
+                ...prev,
+                cellNumber: data.cellNumber,
+                scenarioId: data.scenarioId,
+                condition: data.condition,
+                sessionId: data.sessionId,
+                currentStep: 3,
+              }
+            : null
+        );
+        setStep(3);
+      }
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat menyimpan data demografi.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit Step 4: Early Decision (Comprehension Check)
+  const handleEarlyDecisionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!participant) return;
+
+    if (!earlyDecision.q1 || !earlyDecision.q3.trim()) {
+      alert("Mohon jawab seluruh pertanyaan keputusan awal Anda.");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "early_decision",
+          participantId: participant.id,
+          earlyDecision,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setStep(5);
+      }
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat menyimpan keputusan awal.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit Step 6: Final Decision (Post Chat)
+  const handleFinalDecisionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!participant) return;
+
+    if (!finalDecision.q1 || !finalDecision.q3.trim()) {
+      alert("Mohon jawab seluruh pertanyaan keputusan akhir Anda.");
+      return;
+    }
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "final_decision",
+          participantId: participant.id,
+          finalDecision,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setStep(7);
+      }
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat menyimpan keputusan akhir.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Submit Step 7: Post Questionnaire
+  const handlePostQuestionnaireSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!participant) return;
+
+    // Check completeness
+    for (const item of POST_QUESTIONNAIRE_ITEMS) {
+      if (!postAnswers[item.code]) {
+        alert(`Harap isi penilaian untuk butir pertanyaan: "${item.statement}"`);
+        return;
+      }
+    }
+
+    setSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch("/api/experiment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "post_questionnaire",
+          participantId: participant.id,
+          postQuestionnaire: postAnswers,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setStep(8);
+      }
+    } catch {
+      setErrorMessage("Terjadi kesalahan saat menyimpan kuesioner akhir.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="text-slate-600 font-medium">Memuat instrumen penelitian...</p>
+      </div>
+    );
+  }
+
+  // Disqualified Screen
+  if (participant?.disqualified) {
+    return (
+      <div className="flex-1 max-w-xl mx-auto my-auto p-6 text-center">
+        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <AlertTriangle className="w-12 h-12 text-amber-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Sesi Penelitian Selesai</h2>
+          <p className="text-sm text-slate-600 mb-6 leading-relaxed">
+            {participant.disqualifiedReason ||
+              "Terima kasih atas kesediaan dan waktu Anda. Berdasarkan kriteria penelitian, sesi survei Anda telah selesai."}
+          </p>
+          <p className="text-xs text-slate-400">
+            Alfian Bassam Firjatullah & Regina Meilani Aruan • Universitas Indonesia
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      {/* Top Academic Header */}
+      <header className="bg-white border-b border-slate-200 px-6 py-3.5 sticky top-0 z-30">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+              UI
+            </div>
+            <div>
+              <h1 className="text-sm font-bold text-slate-900 leading-tight">
+                Penelitian Penggunaan Chatbot AI dalam Keputusan Keuangan
+              </h1>
+              <p className="text-[11px] text-slate-500">
+                Fakultas Ilmu Komputer, Universitas Indonesia
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-md font-mono text-slate-600">
+              Tahap {step} dari 8
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
+        {errorMessage && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-xs mb-6 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 1: INFORMASI & PERSETUJUAN PARTISIPASI (INFORMED CONSENT) */}
+        {/* ============================================================== */}
+        {step === 1 && (
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-6">
+              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                Bagian A.1
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mt-1">
+                Informasi dan Persetujuan Partisipasi Penelitian
+              </h2>
+            </div>
+
+            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed mb-6">
+              <p>Kepada responden yang terhormat,</p>
+              <p>
+                Kami, <strong>Alfian Bassam Firjatullah</strong> dan <strong>Regina Meilani Aruan</strong>, mahasiswa Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas Indonesia, sedang melakukan penelitian tugas akhir mengenai penggunaan asisten percakapan berbasis kecerdasan buatan (AI) dalam pengambilan keputusan keuangan.
+              </p>
+              <p>
+                Penelitian ini ditujukan kepada individu yang <strong>telah memiliki pendapatan pribadi</strong>. Dalam penelitian ini, Anda akan dihadapkan pada sebuah skenario keuangan yang mengharuskan Anda berdiskusi dengan chatbot yang disediakan untuk menjawab sejumlah pertanyaan.
+              </p>
+              <p>
+                Partisipasi Anda bersifat sukarela dan Anda dapat menghentikannya kapan saja tanpa konsekuensi. Jawaban kuesioner dan riwayat percakapan Anda dengan chatbot akan disimpan selama penelitian berlangsung untuk keperluan analisis. Data tersebut akan dijaga kerahasiaannya, hanya dapat diakses oleh tim peneliti, dan digunakan untuk kepentingan akademis. Seluruh data yang dikumpulkan akan dihapus setelah penelitian selesai dan laporan akhir disahkan.
+              </p>
+              <p>Terima kasih atas waktu dan kesediaan Anda untuk berpartisipasi.</p>
+              <div className="pt-2 text-xs text-slate-500 font-medium">
+                Hormat kami,
+                <br />
+                Alfian Bassam Firjatullah & Regina Meilani Aruan
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide mb-2">
+                Persetujuan Partisipasi (Informed Consent)
+              </h3>
+              <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+                Dengan memilih <strong>&quot;Ya, saya bersedia&quot;</strong>, Anda menyatakan bahwa:
+              </p>
+              <ol className="text-xs text-slate-600 list-decimal list-inside space-y-1 leading-relaxed">
+                <li>Anda telah membaca dan memahami informasi mengenai tujuan serta prosedur penelitian.</li>
+                <li>Anda bersedia berpartisipasi secara sukarela dan memahami bahwa partisipasi dapat dihentikan kapan saja tanpa konsekuensi.</li>
+                <li>Anda memahami bahwa jawaban kuesioner dan riwayat percakapan dengan chatbot akan disimpan dan digunakan untuk keperluan analisis penelitian.</li>
+                <li>Anda memahami bahwa data penelitian akan dijaga kerahasiaannya, hanya dapat diakses oleh tim peneliti, dan akan dihapus setelah penelitian selesai dan laporan akhir disahkan.</li>
+              </ol>
+            </div>
+
+            <form onSubmit={handleConsentSubmit} className="space-y-6">
+              <div>
+                <label className="block text-xs font-bold text-slate-800 mb-2">
+                  Apakah Anda bersedia berpartisipasi dalam penelitian ini? *
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm">
+                    <input
+                      type="radio"
+                      name="consent"
+                      value="yes"
+                      checked={consentChoice === "yes"}
+                      onChange={(e) => setConsentChoice(e.target.value)}
+                      className="w-4 h-4 text-blue-600"
+                      required
+                    />
+                    <span className="font-medium text-slate-800">Ya, saya bersedia.</span>
+                  </label>
+                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm">
+                    <input
+                      type="radio"
+                      name="consent"
+                      value="no"
+                      checked={consentChoice === "no"}
+                      onChange={(e) => setConsentChoice(e.target.value)}
+                      className="w-4 h-4 text-blue-600"
+                      required
+                    />
+                    <span className="font-medium text-slate-800">Tidak, saya tidak bersedia.</span>
+                  </label>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting || !consentChoice}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
+              >
+                {submitting ? "Memproses..." : "Lanjutkan ke Karakteristik Responden"}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 2: KARAKTERISTIK RESPONDEN (DEMOGRAFI) */}
+        {/* ============================================================== */}
+        {step === 2 && (
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-6">
+              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                Bagian A.2
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mt-1">
+                Karakteristik Responden
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Mohon lengkapi profil diri Anda di bawah ini secara jujur. Seluruh pertanyaan bertanda bintang (*) wajib diisi.
+              </p>
+            </div>
+
+            <form onSubmit={handleDemographicsSubmit} className="space-y-6 text-xs sm:text-sm">
+              {/* 1. Usia */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  1. Berapa usia Anda? *
+                </label>
+                <div className="flex items-center gap-2 max-w-xs">
+                  <input
+                    type="number"
+                    min={15}
+                    max={100}
+                    value={demographics.age}
+                    onChange={(e) => setDemographics({ ...demographics, age: e.target.value })}
+                    placeholder="Contoh: 23"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    required
+                  />
+                  <span className="text-slate-500 text-xs">tahun</span>
+                </div>
+              </div>
+
+              {/* 2. Jenis Kelamin */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  2. Apa jenis kelamin Anda? *
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {DEMOGRAPHIC_OPTIONS.gender.map((g) => (
+                    <label
+                      key={g}
+                      className={`p-3 rounded-lg border text-center cursor-pointer transition ${
+                        demographics.gender === g
+                          ? "bg-blue-50 border-blue-600 text-blue-700 font-semibold"
+                          : "border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="gender"
+                        value={g}
+                        checked={demographics.gender === g}
+                        onChange={(e) => setDemographics({ ...demographics, gender: e.target.value })}
+                        className="sr-only"
+                        required
+                      />
+                      {g}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Jenjang Pendidikan */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  3. Apa jenjang pendidikan terakhir atau yang sedang Anda tempuh? *
+                </label>
+                <select
+                  value={demographics.education}
+                  onChange={(e) => setDemographics({ ...demographics, education: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                  required
+                >
+                  <option value="">-- Pilih Jenjang Pendidikan --</option>
+                  {DEMOGRAPHIC_OPTIONS.education.map((ed) => (
+                    <option key={ed} value={ed}>
+                      {ed}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 4. Pekerjaan */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  4. Apa pekerjaan saat ini? *
+                </label>
+                <select
+                  value={demographics.occupation}
+                  onChange={(e) => setDemographics({ ...demographics, occupation: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                  required
+                >
+                  <option value="">-- Pilih Pekerjaan --</option>
+                  {DEMOGRAPHIC_OPTIONS.occupation.map((oc) => (
+                    <option key={oc} value={oc}>
+                      {oc}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* 5. Pendapatan Bulanan Pribadi (Screening) */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  5. Berapa pendapatan bulanan pribadi Anda? (tidak termasuk pemberian orang tua) *
+                </label>
+                <div className="space-y-1.5 mt-2">
+                  {DEMOGRAPHIC_OPTIONS.monthlyIncome.map((inc) => (
+                    <label
+                      key={inc}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer text-xs transition ${
+                        demographics.monthlyIncome === inc
+                          ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                          : "bg-white border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="monthlyIncome"
+                        value={inc}
+                        checked={demographics.monthlyIncome === inc}
+                        onChange={(e) => setDemographics({ ...demographics, monthlyIncome: e.target.value })}
+                        className="w-4 h-4 text-blue-600"
+                        required
+                      />
+                      <span>{inc}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-[11px] text-slate-500 mt-2">
+                  * Catatan: Partisipan disyaratkan memiliki pendapatan pribadi.
+                </p>
+              </div>
+
+              {/* 6. Pengalaman Menggunakan Chatbot AI */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  6. Apakah Anda pernah menggunakan chatbot AI untuk mencari informasi atau membantu mempertimbangkan keputusan keuangan pribadi? *
+                </label>
+                <p className="text-xs text-slate-500 mb-2">
+                  Contoh: Bertanya kepada chatbot AI mengenai cara mengatur pengeluaran, menyusun anggaran, atau merencanakan tabungan.
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {DEMOGRAPHIC_OPTIONS.chatbotExperience.map((exp) => (
+                    <label
+                      key={exp}
+                      className={`p-3 rounded-lg border text-center cursor-pointer transition ${
+                        demographics.chatbotExperience === exp
+                          ? "bg-blue-50 border-blue-600 text-blue-700 font-semibold"
+                          : "border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="chatbotExperience"
+                        value={exp}
+                        checked={demographics.chatbotExperience === exp}
+                        onChange={(e) =>
+                          setDemographics({ ...demographics, chatbotExperience: e.target.value })
+                        }
+                        className="sr-only"
+                        required
+                      />
+                      {exp}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 7. Tingkat Pengetahuan Pengelolaan Keuangan Pribadi */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  7. Bagaimana Anda menilai tingkat pengetahuan Anda mengenai pengelolaan keuangan pribadi? *
+                </label>
+                <div className="grid grid-cols-5 gap-1.5 mt-2">
+                  {DEMOGRAPHIC_OPTIONS.financialKnowledge.map((lvl) => (
+                    <label
+                      key={lvl}
+                      className={`p-2.5 rounded-lg border text-center cursor-pointer text-xs transition ${
+                        demographics.financialKnowledge === lvl
+                          ? "bg-blue-600 border-blue-600 text-white font-semibold"
+                          : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="financialKnowledge"
+                        value={lvl}
+                        checked={demographics.financialKnowledge === lvl}
+                        onChange={(e) =>
+                          setDemographics({ ...demographics, financialKnowledge: e.target.value })
+                        }
+                        className="sr-only"
+                        required
+                      />
+                      {lvl}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
+              >
+                {submitting ? "Menyimpan & Mengalokasikan Skenario..." : "Lanjut ke Petunjuk & Skenario"}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 3 & 4: PETUNJUK, SKENARIO & PROFILE (ANTI COPY-PASTE) +   */}
+        {/* COMPREHENSION CHECK (SIDE-BY-SIDE WITH EARLY DECISION)         */}
+        {/* ============================================================== */}
+        {(step === 3 || step === 4) && scenario && (
+          <div className="space-y-6">
+            {/* Petunjuk Eksperimen */}
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-xs sm:text-sm text-blue-900 leading-relaxed">
+              <h3 className="font-bold text-sm mb-1 flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-blue-600" />
+                A.3.1. Petunjuk Eksperimen
+              </h3>
+              <p className="mb-2">
+                Pada bagian ini, Anda akan dihadapkan pada sebuah skenario pengambilan keputusan keuangan dalam kehidupan sehari-hari. Bayangkan bahwa Anda sedang berada dalam situasi yang dijelaskan dan <strong>anggap seluruh informasi yang diberikan sebagai kondisi keuangan Anda sendiri</strong>.
+              </p>
+              <div className="bg-amber-100/70 border border-amber-300/80 p-2.5 rounded-lg text-amber-900 text-xs font-semibold flex items-center gap-2">
+                <Lock className="w-4 h-4 shrink-0 text-amber-700" />
+                <span>
+                  Perhatian: Anda <strong>TIDAK diperbolehkan copy-paste teks skenario</strong> ke dalam percakapan dengan chatbot. Skenario di bawah telah dikunci dari penyalinan.
+                </span>
+              </div>
+            </div>
+
+            {/* Side by Side Layout: Skenario & Profil (Kiri) vs Comprehension Check (Kanan) */}
+            <div className="grid lg:grid-cols-12 gap-6 items-start">
+              {/* Kolom Kiri: Skenario + Profil Keuangan (Anti Copy-Paste Protected) */}
+              <div
+                className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm select-none relative"
+                style={{
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  MozUserSelect: "none",
+                }}
+                onCopy={handlePreventCopy}
+                onCut={handlePreventCopy}
+                onContextMenu={(e) => e.preventDefault()}
+              >
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+                    Materi Skenario Penelitian
+                  </span>
+                  <span className="text-[11px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono flex items-center gap-1">
+                    <Lock className="w-3 h-3" /> Anti Copy-Paste Aktif
+                  </span>
+                </div>
+
+                <div className="space-y-5 text-xs sm:text-sm text-slate-800 leading-relaxed">
+                  {/* Bagian Situasi */}
+                  <div>
+                    <h4 className="font-bold text-slate-900 text-sm mb-1.5 pb-1 border-b border-slate-100">
+                      Situasi
+                    </h4>
+                    <div className="whitespace-pre-line text-slate-700">
+                      {scenario.situasiText}
+                    </div>
+                  </div>
+
+                  {/* Bagian Kondisi Keuangan Anda */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <h4 className="font-bold text-slate-900 text-sm mb-2 pb-1 border-b border-slate-200">
+                      Kondisi Keuangan Anda
+                    </h4>
+                    <div className="whitespace-pre-line text-slate-700 font-normal">
+                      {scenario.kondisiKeuanganText}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Kolom Kanan: Comprehension Check / Tugas Keputusan Awal */}
+              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm sticky top-20">
+                <div className="pb-3 mb-4 border-b border-slate-100">
+                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                    Comprehension Check & Keputusan Awal
+                  </span>
+                  <h3 className="font-bold text-slate-900 text-sm mt-0.5">
+                    Evaluasi Pemahaman Skenario
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Sebelum berdiskusi dengan chatbot, tentukan pertimbangan awal Anda berdasarkan informasi di samping.
+                  </p>
+                </div>
+
+                <form onSubmit={handleEarlyDecisionSubmit} className="space-y-4 text-xs sm:text-sm">
+                  {/* Pertanyaan 1 */}
+                  <div>
+                    <label className="block font-semibold text-slate-800 mb-1.5">
+                      1. {scenario.actionType === "spending"
+                        ? "Apakah Anda berencana melakukan pembelian laptop tersebut?"
+                        : "Apakah Anda berencana menambah Dana Darurat dari pendapatan bulan ini?"} *
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Ya", "Tidak"].map((opt) => (
+                        <label
+                          key={opt}
+                          className={`p-2.5 rounded-lg border text-center cursor-pointer text-xs font-medium transition ${
+                            earlyDecision.q1 === opt
+                              ? "bg-blue-50 border-blue-600 text-blue-700 font-bold"
+                              : "border-slate-200 hover:bg-slate-50"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="early_q1"
+                            value={opt}
+                            checked={earlyDecision.q1 === opt}
+                            onChange={(e) => setEarlyDecision({ ...earlyDecision, q1: e.target.value })}
+                            className="sr-only"
+                            required
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pertanyaan 2 */}
+                  {earlyDecision.q1 === "Ya" && (
+                    <div>
+                      <label className="block font-semibold text-slate-800 mb-1.5">
+                        2. {scenario.actionType === "spending"
+                          ? "Metode pembayaran apa yang Anda rencanakan?"
+                          : "Berapa jumlah yang rencananya akan Anda tambahkan?"} *
+                      </label>
+                      <div className="space-y-1.5">
+                        {(scenario.actionType === "spending"
+                          ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
+                          : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
+                        ).map((opt) => (
+                          <label
+                            key={opt}
+                            className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                              earlyDecision.q2 === opt
+                                ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                                : "border-slate-200 hover:bg-slate-50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="early_q2"
+                              value={opt}
+                              checked={earlyDecision.q2 === opt}
+                              onChange={(e) => setEarlyDecision({ ...earlyDecision, q2: e.target.value })}
+                              className="w-3.5 h-3.5 text-blue-600"
+                              required={earlyDecision.q1 === "Ya"}
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Pertanyaan 3 */}
+                  <div>
+                    <label className="block font-semibold text-slate-800 mb-1.5">
+                      3. Jelaskan alasan pertimbangan keputusan awal Anda! *
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={earlyDecision.q3}
+                      onChange={(e) => setEarlyDecision({ ...earlyDecision, q3: e.target.value })}
+                      placeholder="Tuliskan alasan pertimbangan Anda berdasarkan kondisi keuangan di samping..."
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                      required
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    {submitting ? "Menyimpan..." : "Simpan & Lanjut ke Chatbot"}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 5: PENGANTAR MASUK KE CHATBOT */}
+        {/* ============================================================== */}
+        {step === 5 && participant && (
+          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center">
+            <div className="w-16 h-16 bg-blue-600 text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-md shadow-blue-500/20">
+              <Bot className="w-8 h-8" />
+            </div>
+
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+              Tahap Interaksi
+            </span>
+            <h2 className="text-xl font-bold text-slate-900 mt-1 mb-3">
+              Diskusi dengan Asisten Finansial
+            </h2>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
+              Anda sekarang akan diarahkan ke antarmuka <strong>Chatbot Asisten Finansial</strong>. Gunakan asisten ini untuk mengevaluasi keputusan Anda, meminta perhitungan, membandingkan opsi, atau mempertimbangkan konsekuensi finansial.
+              <br />
+              <br />
+              <em>Ingat: Jangan copy-paste teks skenario ke chatbot. Diskusikan rencana Anda secara wajar.</em>
+            </p>
+
+            <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 mb-6 text-left">
+              <strong>Petunjuk:</strong> Setelah Anda merasa cukup berdiskusi dan mengambil kesimpulan bersama chatbot, klik tombol <strong>&quot;Selesai Diskusi & Lanjut ke Keputusan Akhir&quot;</strong> di halaman chat untuk kembali ke kuesioner akhir.
+            </div>
+
+            <a
+              href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md transition"
+            >
+              Buka Chatbot Finansial
+              <ExternalLink className="w-4 h-4" />
+            </a>
+
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <button
+                onClick={() => setStep(6)}
+                className="text-xs text-slate-500 hover:text-slate-800 underline font-medium"
+              >
+                Sudah selesai berdiskusi di tab chatbot? Lanjut ke Keputusan Akhir &rarr;
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 6: KEPUTUSAN AKHIR (INDEPENDENT, BEDA SLIDE) */}
+        {/* ============================================================== */}
+        {step === 6 && scenario && (
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-6">
+              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+                Tahap 6
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mt-1">
+                Pertanyaan Keputusan Akhir
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                Setelah berdiskusi dengan chatbot, mohon tetapkan keputusan akhir Anda mengenai tindakan pada skenario.
+              </p>
+            </div>
+
+            <form onSubmit={handleFinalDecisionSubmit} className="space-y-6 text-xs sm:text-sm">
+              {/* 1. Keputusan Akhir */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-2">
+                  1. Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan {scenario.actionType === "spending" ? "pembelian laptop tersebut?" : "penambahan Dana Darurat dari pendapatan bulan ini?"} *
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {["Ya", "Tidak"].map((opt) => (
+                    <label
+                      key={opt}
+                      className={`p-3 rounded-xl border text-center cursor-pointer font-bold text-sm transition ${
+                        finalDecision.q1 === opt
+                          ? "bg-blue-50 border-blue-600 text-blue-700 shadow-sm"
+                          : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="final_q1"
+                        value={opt}
+                        checked={finalDecision.q1 === opt}
+                        onChange={(e) => setFinalDecision({ ...finalDecision, q1: e.target.value })}
+                        className="sr-only"
+                        required
+                      />
+                      {opt}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. Metode Pembayaran / Jumlah Tambahan */}
+              {finalDecision.q1 === "Ya" && (
+                <div>
+                  <label className="block font-semibold text-slate-800 mb-2">
+                    2. {scenario.actionType === "spending"
+                      ? "Jika Ya, metode pembayaran apa yang Anda gunakan? mengapa?"
+                      : "Jika Ya, berapa jumlah yang akan Anda tambahkan?"} *
+                  </label>
+                  <div className="space-y-2">
+                    {(scenario.actionType === "spending"
+                      ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
+                      : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
+                    ).map((opt) => (
+                      <label
+                        key={opt}
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                          finalDecision.q2 === opt
+                            ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                            : "border-slate-200 hover:bg-slate-50 text-slate-700"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="final_q2"
+                          value={opt}
+                          checked={finalDecision.q2 === opt}
+                          onChange={(e) => setFinalDecision({ ...finalDecision, q2: e.target.value })}
+                          className="w-4 h-4 text-blue-600"
+                          required={finalDecision.q1 === "Ya"}
+                        />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Alasan Keputusan Akhir */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  3. Jelaskan alasan keputusan akhir Anda! *
+                </label>
+                <textarea
+                  rows={4}
+                  value={finalDecision.q3}
+                  onChange={(e) => setFinalDecision({ ...finalDecision, q3: e.target.value })}
+                  placeholder="Jelaskan secara lengkap pertimbangan dan alasan di balik keputusan akhir Anda setelah berdiskusi dengan chatbot..."
+                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-2"
+              >
+                {submitting ? "Menyimpan..." : "Lanjut ke Kuesioner Akhir (Alat Ukur)"}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 7: KUESIONER AKHIR / INTI (ALAT UKUR PASCAINTERAKSI)     */}
+        {/* ============================================================== */}
+        {step === 7 && (
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-6">
+              <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                Bagian A.4
+              </span>
+              <h2 className="text-lg font-bold text-slate-900 mt-1">
+                Alat Ukur Pascainteraksi
+              </h2>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Pilihlah tingkat persetujuan Anda terhadap setiap pernyataan di bawah ini berdasarkan pengalaman Anda berdiskusi dengan chatbot dan mengambil keputusan keuangan.
+                <br />
+                Skala: <strong>1 = Sangat Tidak Setuju (STS)</strong> hingga <strong>5 = Sangat Setuju (SS)</strong>.
+              </p>
+            </div>
+
+            <form onSubmit={handlePostQuestionnaireSubmit} className="space-y-8">
+              {/* Group items by category */}
+              {Array.from(new Set(POST_QUESTIONNAIRE_ITEMS.map((item) => item.category))).map(
+                (category) => {
+                  const categoryItems = POST_QUESTIONNAIRE_ITEMS.filter(
+                    (it) => it.category === category
+                  );
+
+                  return (
+                    <div key={category} className="space-y-4">
+                      <h3 className="font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200 flex items-center gap-2">
+                        <Award className="w-4 h-4 text-blue-600" />
+                        {category}
+                      </h3>
+
+                      <div className="space-y-4">
+                        {categoryItems.map((item, idx) => (
+                          <div
+                            key={item.code}
+                            className="p-4 rounded-xl bg-slate-50 border border-slate-200"
+                          >
+                            <p className="text-xs sm:text-sm font-medium text-slate-800 mb-3">
+                              <span className="font-bold font-mono text-blue-700 mr-2">
+                                {item.code}
+                              </span>
+                              {item.statement}
+                            </p>
+
+                            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                              {LIKERT_OPTIONS.map((opt) => (
+                                <label
+                                  key={opt.value}
+                                  className={`p-2 sm:p-2.5 rounded-lg border text-center cursor-pointer transition flex flex-col items-center justify-center ${
+                                    postAnswers[item.code] === opt.value
+                                      ? "bg-blue-600 border-blue-600 text-white font-bold"
+                                      : "bg-white border-slate-200 hover:bg-slate-100 text-slate-700"
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={item.code}
+                                    value={opt.value}
+                                    checked={postAnswers[item.code] === opt.value}
+                                    onChange={() =>
+                                      setPostAnswers({ ...postAnswers, [item.code]: opt.value })
+                                    }
+                                    className="sr-only"
+                                    required
+                                  />
+                                  <span className="text-xs sm:text-sm font-bold">{opt.value}</span>
+                                  <span className="text-[10px] sm:text-[11px] leading-tight mt-0.5 truncate max-w-full">
+                                    {opt.label}
+                                  </span>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2"
+              >
+                {submitting ? "Menyimpan Jawaban..." : "Selesaikan Penelitian & Lihat Penutup"}
+                <CheckCircle className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 8: PENUTUP (DEBRIEFING) - PDF PAGE 10                     */}
+        {/* ============================================================== */}
+        {step === 8 && participant && (
+          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="w-9 h-9" />
+            </div>
+
+            <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+              Bagian A.5
+            </span>
+            <h2 className="text-xl font-bold text-slate-900 mt-1 mb-4">
+              Penutup
+            </h2>
+
+            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed mb-6 text-left">
+              <p>Anda telah menyelesaikan seluruh rangkaian penelitian.</p>
+              <p>
+                Terima kasih telah meluangkan waktu untuk berpartisipasi dalam penelitian ini.
+              </p>
+              <p>
+                Jawaban dan pengalaman yang Anda berikan sangat berarti bagi pelaksanaan penelitian kami. Seluruh data yang dikumpulkan akan digunakan untuk kepentingan akademis dan dijaga kerahasiaannya.
+              </p>
+              <p>
+                Kami sangat menghargai kesediaan dan kontribusi Anda dalam mendukung penelitian ini. Semoga Anda senantiasa diberikan kesehatan dan kesuksesan dalam menjalani kehidupan.
+              </p>
+              <p>
+                Apabila Anda memiliki pertanyaan, kritik, atau saran, silakan menghubungi kami melalui email:{" "}
+                <a
+                  href="mailto:alfian.firja@gmail.com"
+                  className="text-blue-600 font-semibold underline"
+                >
+                  alfian.firja@gmail.com
+                </a>
+                .
+              </p>
+              <div className="pt-2 text-xs text-slate-500 font-medium">
+                Hormat kami,
+                <br />
+                <strong>Alfian & Regina</strong>
+              </div>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left mb-6">
+              <div className="text-xs text-slate-500">Kode Bukti Partisipan Anda:</div>
+              <div className="font-mono font-bold text-slate-800 text-base">
+                {participant.participantCode}
+              </div>
+            </div>
+
+            <button
+              onClick={() => router.push("/")}
+              className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold transition"
+            >
+              Kembali ke Beranda
+            </button>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default function ExperimentPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <ExperimentContent />
+    </Suspense>
+  );
+}

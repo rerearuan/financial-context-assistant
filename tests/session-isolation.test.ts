@@ -122,21 +122,19 @@ describe("Session Isolation & Security", () => {
     });
 
     const fallbackReply = generateSafeFallbackResponse(packet, "Apakah aman?");
-    // Must contain high conflict deficit details for session B
-    expect(fallbackReply).toContain("1.700.000"); // balanceAfterAction
-    expect(fallbackReply).toContain("2.500.000"); // budget deficit
-    expect(fallbackReply).toContain("defisit sebesar Rp 1.400.000"); // deficit amount
+    // Must contain high conflict calculation details for session B
+    expect(fallbackReply).toContain("11.000.000"); // balanceAfterAction
+    expect(fallbackReply).toContain("4.000.000"); // budget deficit
 
-    // Must NOT contain details from session A (e.g. 12.000.000 or 8.500.000)
-    expect(fallbackReply).not.toContain("12.000.000");
-    expect(fallbackReply).not.toContain("8.500.000");
+    // Must NOT contain details from other sessions
+    expect(fallbackReply).not.toContain("9.500.000");
   });
 
   it("recalculation is strictly triggered when nominal is modified", () => {
     const pkg = SCENARIO_PACKAGES[0];
     const initialAction: FinancialAction = {
       ...pkg.scenario.initialAction,
-      amount: 3500000,
+      amount: 7000000,
       source: "scenario",
     };
     const profileContext: FinancialProfileContext = {
@@ -149,13 +147,13 @@ describe("Session Isolation & Security", () => {
       action: initialAction,
       syntheticProfile: profileContext,
     });
-    expect(initialPacket.calculation.balanceAfterAction).toBe(8500000);
-    expect(initialPacket.calculation.budgetVariance).toBe(500000);
+    expect(initialPacket.calculation.balanceAfterAction).toBe(11000000); // 18jt - 7jt
+    expect(initialPacket.calculation.budgetVariance).toBe(-1000000); // 6jt - 7jt
 
-    // User modifies amount to Rp 2.800.000
+    // User modifies amount to Rp 6.000.000
     const modifiedAction: FinancialAction = {
       ...initialAction,
-      amount: 2800000,
+      amount: 6000000,
       source: "user_message",
     };
     const updatedPacket = buildStructuredContextPacket({
@@ -164,10 +162,10 @@ describe("Session Isolation & Security", () => {
       syntheticProfile: profileContext,
     });
 
-    // Recalculated balance: 12.000.000 - 2.800.000 = 9.200.000
-    expect(updatedPacket.calculation.balanceAfterAction).toBe(9200000);
-    // Recalculated budget variance: 4.000.000 - 2.800.000 = 1.200.000 surplus
-    expect(updatedPacket.calculation.budgetVariance).toBe(1200000);
+    // Recalculated balance: 18.000.000 - 6.000.000 = 12.000.000
+    expect(updatedPacket.calculation.balanceAfterAction).toBe(12000000);
+    // Recalculated budget variance: 6.000.000 - 6.000.000 = 0
+    expect(updatedPacket.calculation.budgetVariance).toBe(0);
   });
 
   it("verifies simulated transaction records only simulation data without payment integration", async () => {

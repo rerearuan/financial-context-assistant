@@ -17,12 +17,24 @@ export async function runMigration() {
         title TEXT NOT NULL,
         action_type VARCHAR(32) NOT NULL,
         conflict_level VARCHAR(32) NOT NULL,
+        situasi_text TEXT,
+        kondisi_keuangan_text TEXT,
+        tugas_text TEXT,
         description_text TEXT NOT NULL,
         initial_action JSONB NOT NULL,
         initial_assistant_message TEXT NOT NULL,
         quick_replies JSONB NOT NULL,
+        tugas_questions JSONB,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       );
+    `);
+
+    // Add optional columns if upgrading existing table
+    await client.query(`
+      ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS situasi_text TEXT;
+      ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS kondisi_keuangan_text TEXT;
+      ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS tugas_text TEXT;
+      ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS tugas_questions JSONB;
     `);
 
     // 2. Synthetic Profiles table
@@ -84,6 +96,29 @@ export async function runMigration() {
         user_notes TEXT,
         snapshot_data JSONB NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+      );
+    `);
+
+    // 6. Participants table (for full experiment web questionnaire flow)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS participants (
+        id VARCHAR(64) PRIMARY KEY,
+        participant_code VARCHAR(64) NOT NULL UNIQUE,
+        consent BOOLEAN DEFAULT FALSE NOT NULL,
+        cell_number INTEGER,
+        scenario_id VARCHAR(64),
+        condition VARCHAR(32),
+        session_id VARCHAR(64),
+        demographics JSONB,
+        early_decision JSONB,
+        final_decision JSONB,
+        post_questionnaire JSONB,
+        current_step INTEGER DEFAULT 1 NOT NULL,
+        is_completed BOOLEAN DEFAULT FALSE NOT NULL,
+        disqualified BOOLEAN DEFAULT FALSE NOT NULL,
+        disqualified_reason TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       );
     `);
 

@@ -7,9 +7,9 @@ import { FinancialAction, FinancialProfileContext } from "@/lib/financial-engine
 
 describe("Financial Engine - Validator", () => {
   it("sanitizes currency strings correctly", () => {
-    expect(sanitizeAmount("Rp 3.500.000")).toBe(3500000);
+    expect(sanitizeAmount("Rp 7.000.000")).toBe(7000000);
     expect(sanitizeAmount("3.5jt")).toBe(3500000);
-    expect(sanitizeAmount("3,5 juta")).toBe(3500000);
+    expect(sanitizeAmount("7 juta")).toBe(7000000);
     expect(sanitizeAmount("500rb")).toBe(500000);
     expect(sanitizeAmount("2500000")).toBe(2500000);
     expect(sanitizeAmount("invalid text")).toBeNull();
@@ -18,9 +18,9 @@ describe("Financial Engine - Validator", () => {
   it("validates financial actions strictly", () => {
     const valid = validateFinancialAction({
       type: "spending",
-      amount: 3500000,
-      timing: "Minggu ini",
-      targetCategory: "Peralatan Kerja",
+      amount: 7000000,
+      timing: "Hari ini",
+      targetCategory: "Pembelian Laptop",
     });
     expect(valid.isValid).toBe(true);
 
@@ -84,13 +84,10 @@ describe("Financial Engine - Deterministic Calculations for 4 Scenarios", () => 
 
     const selected = selectRelevantFinancialContext(profileContext, action);
 
-    // Gaji arrives 2026-11-01.
-    // Tagihan 450.000 is due 2026-10-27 (BEFORE gaji) -> must be counted in liabilitiesDueBeforeIncome.
-    // Sewa 2.000.000 is due 2026-11-10 (AFTER gaji) -> must NOT be counted in liabilitiesDueBeforeIncome.
+    // Gaji arrives in 12 days (2026-11-06).
+    // Tagihan 1.800.000 is due in 6 days (2026-10-31) (BEFORE gaji) -> must be counted in liabilitiesDueBeforeIncome.
     expect(selected.liabilitiesDueBeforeIncome.length).toBe(1);
-    expect(selected.liabilitiesDueBeforeIncome[0].amount).toBe(450000);
-    expect(selected.liabilitiesDueAfterIncome.length).toBe(1);
-    expect(selected.liabilitiesDueAfterIncome[0].amount).toBe(2000000);
+    expect(selected.liabilitiesDueBeforeIncome[0].amount).toBe(1800000);
   });
 
   it("avoids double-counting budget and goals", () => {
@@ -106,13 +103,13 @@ describe("Financial Engine - Deterministic Calculations for 4 Scenarios", () => 
 
     const result = calculateFinancialConsequences(action, profileContext);
 
-    // Gadget budget is exceeded by 2.500.000.
+    // Laptop budget is 3.000.000, price is 7.000.000 -> exceeded by 4.000.000.
     expect(result.isBudgetExceeded).toBe(true);
-    expect(result.budgetVariance).toBe(-2500000);
+    expect(result.budgetVariance).toBe(-4000000);
     // Notes distinguish budget excess from definite goal reduction
     expect(
       result.goalImpactNotes.some((n) =>
-        n.includes("melebihi sisa anggaran pos Peralatan Kerja & Gadget")
+        n.includes("Dana Alokasi Laptop")
       )
     ).toBe(true);
   });

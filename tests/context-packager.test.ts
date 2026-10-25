@@ -50,10 +50,10 @@ describe("Context Packager & Experimental Conditions", () => {
     expect(packet.dataSources).not.toContain("synthetic_profile");
     expect(packet.calculation.status).toBe("valid");
     expect(packet.calculation.initialBalance).toBe(10000000);
-    expect(packet.calculation.balanceAfterAction).toBe(6500000); // 10jt - 3.5jt
-    expect(packet.calculation.budgetVariance).toBe(500000); // 4jt - 3.5jt
+    expect(packet.calculation.balanceAfterAction).toBe(3000000); // 10jt - 7jt
+    expect(packet.calculation.budgetVariance).toBe(-3000000); // 4jt - 7jt
     expect(packet.calculation.totalLiabilitiesBeforeIncome).toBe(500000);
-    expect(packet.calculation.remainingCashAfterImmediateObligations).toBe(6000000); // 6.5jt - 500k
+    expect(packet.calculation.remainingCashAfterImmediateObligations).toBe(2500000); // 3jt - 500k
   });
 
   it("Context-Aware condition includes the synthetic profile and calculated ground truth", () => {
@@ -65,10 +65,10 @@ describe("Context Packager & Experimental Conditions", () => {
 
     expect(packet.condition).toBe("context_aware");
     expect(packet.availableProfile).not.toBeNull();
-    expect(packet.availableProfile?.totalCashBalance).toBe(12000000);
+    expect(packet.availableProfile?.totalCashBalance).toBe(18000000);
     expect(packet.dataSources).toContain("synthetic_profile");
     expect(packet.dataSources).toContain("scenario");
     expect(packet.calculation.status).toBe("valid");
-    expect(packet.calculation.balanceAfterAction).toBe(8500000);
+    expect(packet.calculation.balanceAfterAction).toBe(11000000); // 18jt - 7jt
   });
 });

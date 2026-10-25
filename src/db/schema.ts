@@ -1,4 +1,4 @@
-import { pgTable, text, varchar, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
 import type { ExtractedIntent } from "@/lib/prompts/intent-schema";
 
 export const scenarios = pgTable("scenarios", {
@@ -7,6 +7,9 @@ export const scenarios = pgTable("scenarios", {
   title: text("title").notNull(),
   actionType: varchar("action_type", { length: 32 }).notNull(), // 'spending' | 'saving'
   conflictLevel: varchar("conflict_level", { length: 32 }).notNull(), // 'low' | 'high' - internal research classification
+  situasiText: text("situasi_text"),
+  kondisiKeuanganText: text("kondisi_keuangan_text"),
+  tugasText: text("tugas_text"),
   descriptionText: text("description_text").notNull(),
   initialAction: jsonb("initial_action").notNull().$type<{
     type: "spending" | "saving";
@@ -17,6 +20,12 @@ export const scenarios = pgTable("scenarios", {
   }>(),
   initialAssistantMessage: text("initial_assistant_message").notNull(),
   quickReplies: jsonb("quick_replies").notNull().$type<string[]>(),
+  tugasQuestions: jsonb("tugas_questions").$type<Array<{
+    id: string;
+    question: string;
+    options?: string[];
+    type: "radio" | "text";
+  }>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -115,4 +124,40 @@ export const simulatedTransactions = pgTable("simulated_transactions", {
   userNotes: text("user_notes"),
   snapshotData: jsonb("snapshot_data").notNull().$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const participants = pgTable("participants", {
+  id: varchar("id", { length: 64 }).primaryKey(),
+  participantCode: varchar("participant_code", { length: 64 }).notNull().unique(),
+  consent: boolean("consent").default(false).notNull(),
+  cellNumber: integer("cell_number"), // 1 to 8 (25 respondents each)
+  scenarioId: varchar("scenario_id", { length: 64 }),
+  condition: varchar("condition", { length: 32 }), // 'basic' | 'context_aware'
+  sessionId: varchar("session_id", { length: 64 }),
+  demographics: jsonb("demographics").$type<{
+    age: number;
+    gender: string;
+    education: string;
+    occupation: string;
+    monthlyIncome: string;
+    chatbotExperience: string;
+    financialKnowledge: string;
+  } | null>(),
+  earlyDecision: jsonb("early_decision").$type<{
+    q1: string;
+    q2?: string;
+    q3: string;
+  } | null>(),
+  finalDecision: jsonb("final_decision").$type<{
+    q1: string;
+    q2?: string;
+    q3: string;
+  } | null>(),
+  postQuestionnaire: jsonb("post_questionnaire").$type<Record<string, number> | null>(),
+  currentStep: integer("current_step").default(1).notNull(),
+  isCompleted: boolean("is_completed").default(false).notNull(),
+  disqualified: boolean("disqualified").default(false).notNull(),
+  disqualifiedReason: text("disqualified_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

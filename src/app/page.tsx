@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldAlert, ArrowRight, Bot, BookOpen, KeyRound } from "lucide-react";
+import { ShieldAlert, ArrowRight, Bot, BookOpen, KeyRound, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -36,7 +36,7 @@ export default function HomePage() {
       {/* Simulation Banner */}
       <div className="bg-amber-500 text-white text-xs font-semibold py-2 px-4 rounded-xl flex items-center justify-center gap-2 text-center shadow-sm">
         <ShieldAlert className="w-4 h-4 shrink-0" />
-        <span>Simulasi Penelitian Finansial – Tidak Terhubung ke Rekening Riil</span>
+        <span>Simulasi Penelitian Finansial – Universitas Indonesia</span>
       </div>
 
       {/* Main Card */}
@@ -46,50 +46,61 @@ export default function HomePage() {
             <Bot className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Asisten Finansial Percakapan
+            Penelitian Chatbot AI Keputusan Keuangan
           </h1>
-          <p className="text-sm text-slate-600 mt-2 max-w-sm mx-auto">
-            Platform simulasi percakapan interaktif untuk evaluasi keputusan pengeluaran dan tabungan.
+          <p className="text-sm text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
+            Eksperimen pengaruh asisten percakapan berbasis kecerdasan buatan dalam pertimbangan keputusan pengeluaran dan tabungan.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-          <form onSubmit={handleEnterSession} className="space-y-4">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+          {/* Main CTA: Mulai Kuesioner & Eksperimen */}
+          <div>
+            <Link
+              href="/experiment"
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-md shadow-blue-600/20 transition flex items-center justify-center gap-2 text-center"
+            >
+              <Sparkles className="w-4 h-4" />
+              Mulai Partisipasi Penelitian
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <p className="text-[11px] text-slate-500 text-center mt-2">
+              Alur: Informed Consent &rarr; Karakteristik &rarr; Skenario &rarr; Chatbot &rarr; Kuesioner Akhir
+            </p>
+          </div>
+
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-3 text-xs text-slate-400 font-medium">atau masuk dengan kode sesi</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          {/* Secondary: Resume Existing Chatbot Session */}
+          <form onSubmit={handleEnterSession} className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
-                Masukkan Kode Sesi Partisipan
-              </label>
               <div className="relative">
                 <input
                   type="text"
                   value={sessionIdInput}
                   onChange={(e) => setSessionIdInput(e.target.value)}
-                  placeholder="Contoh: dev_spending_low_basic"
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-mono"
-                  required
+                  placeholder="Masukkan Kode Sesi (misal: dev_spending_low_basic)"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm font-mono"
                 />
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               </div>
               {errorMessage && (
-                <p className="text-xs text-rose-600 mt-2 font-medium">{errorMessage}</p>
+                <p className="text-xs text-rose-600 mt-1.5 font-medium">{errorMessage}</p>
               )}
             </div>
 
             <button
               type="submit"
               disabled={loading || !sessionIdInput.trim()}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white rounded-xl text-sm font-bold transition shadow-sm flex items-center justify-center gap-2"
+              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 rounded-xl text-xs font-semibold transition"
             >
-              {loading ? "Memeriksa Sesi..." : "Mulai Percakapan"}
-              <ArrowRight className="w-4 h-4" />
+              {loading ? "Memeriksa Sesi..." : "Buka Sesi Chat"}
             </button>
           </form>
-
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center">
-            <p className="text-xs text-slate-500 leading-relaxed">
-              Kode sesi diberikan oleh peneliti pada lembar petunjuk eksperimen.
-            </p>
-          </div>
         </div>
       </div>
 

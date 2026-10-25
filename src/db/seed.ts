@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { getGeminiModel } from "../lib/gemini";
 
 export async function runSeed() {
-  console.log("Seeding database scenarios and synthetic profiles...");
+  console.log("Seeding database scenarios and synthetic profiles from research instrument PDF...");
   const modelId = getGeminiModel();
 
   for (const pkg of SCENARIO_PACKAGES) {
@@ -25,21 +25,32 @@ export async function runSeed() {
         title: pkg.scenario.title,
         actionType: pkg.scenario.actionType,
         conflictLevel: pkg.scenario.conflictLevel,
+        situasiText: pkg.scenario.situasiText,
+        kondisiKeuanganText: pkg.scenario.kondisiKeuanganText,
+        tugasText: pkg.scenario.tugasText,
         descriptionText: pkg.scenario.descriptionText,
         initialAction: pkg.scenario.initialAction,
         initialAssistantMessage: pkg.scenario.initialAssistantMessage,
         quickReplies: pkg.scenario.quickReplies,
+        tugasQuestions: pkg.scenario.tugasQuestions,
       });
       console.log(`- Inserted scenario: ${pkg.scenario.id}`);
     } else {
       await db
         .update(scenarios)
         .set({
+          code: pkg.scenario.code,
           title: pkg.scenario.title,
+          actionType: pkg.scenario.actionType,
+          conflictLevel: pkg.scenario.conflictLevel,
+          situasiText: pkg.scenario.situasiText,
+          kondisiKeuanganText: pkg.scenario.kondisiKeuanganText,
+          tugasText: pkg.scenario.tugasText,
           descriptionText: pkg.scenario.descriptionText,
           initialAction: pkg.scenario.initialAction,
           initialAssistantMessage: pkg.scenario.initialAssistantMessage,
           quickReplies: pkg.scenario.quickReplies,
+          tugasQuestions: pkg.scenario.tugasQuestions,
         })
         .where(eq(scenarios.id, pkg.scenario.id));
       console.log(`- Updated scenario: ${pkg.scenario.id}`);
@@ -122,6 +133,22 @@ export async function runSeed() {
         });
 
         console.log(`- Seeded dev session: ${sessionId} (${cond})`);
+      } else {
+        // Update current action and message in existing dev session
+        await db
+          .update(sessions)
+          .set({
+            currentAction: pkg.scenario.initialAction,
+          })
+          .where(eq(sessions.id, sessionId));
+
+        const initialMsgId = `msg_init_${sessionId}`;
+        await db
+          .update(messages)
+          .set({
+            content: pkg.scenario.initialAssistantMessage,
+          })
+          .where(eq(messages.id, initialMsgId));
       }
     }
   }

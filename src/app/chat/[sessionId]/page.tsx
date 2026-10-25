@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "next/navigation";
+import React, { useEffect, useState, useRef, Suspense } from "react";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import {
   ShieldAlert,
   Send,
@@ -14,6 +14,7 @@ import {
   Bot,
   User,
   Info,
+  ArrowRight,
 } from "lucide-react";
 
 interface ActionData {
@@ -52,9 +53,12 @@ interface SessionData {
   messages: MessageItem[];
 }
 
-export default function ChatPage() {
+function ChatPageContent() {
   const params = useParams();
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const sessionId = params.sessionId as string;
+  const participantId = searchParams.get("participantId");
 
   const [session, setSession] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -311,6 +315,16 @@ export default function ChatPage() {
               <XCircle className="w-3 h-3" /> Tindakan Dibatalkan
             </span>
           )}
+
+          {participantId && (
+            <button
+              onClick={() => router.push(`/experiment?participantId=${participantId}&step=6`)}
+              className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-sm ml-2"
+            >
+              <span>Selesai Diskusi & Lanjut ke Keputusan Akhir</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </header>
 
@@ -471,8 +485,17 @@ export default function ChatPage() {
       {/* 7. Chat Input Footer */}
       <footer className="p-3 bg-white border-t border-slate-200">
         {isCompleted ? (
-          <div className="text-center py-2 text-sm text-slate-500 font-medium bg-slate-50 rounded-lg border border-slate-200">
-            Sesi simulasi ini telah selesai. Keputusan akhir telah dicatat.
+          <div className="text-center py-3 text-sm text-slate-600 font-medium bg-slate-50 rounded-xl border border-slate-200 p-4">
+            <p>Sesi percakapan simulasi ini telah selesai.</p>
+            {participantId && (
+              <button
+                onClick={() => router.push(`/experiment?participantId=${participantId}&step=6`)}
+                className="mt-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition inline-flex items-center gap-2 shadow-sm"
+              >
+                <span>Lanjut ke Kuesioner Penelitian (Tahap 6: Keputusan Akhir)</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         ) : (
           <form
@@ -601,5 +624,20 @@ export default function ChatPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex-1 flex flex-col items-center justify-center p-6 space-y-4">
+          <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+          <p className="text-slate-600 font-medium">Memuat sesi percakapan simulasi...</p>
+        </div>
+      }
+    >
+      <ChatPageContent />
+    </Suspense>
   );
 }
