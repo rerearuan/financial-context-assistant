@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { participants, scenarios, sessions } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { demoParticipants, demoSessions } from "@/lib/demo-store";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 
 export const dynamic = "force-dynamic";
 
@@ -9,43 +11,61 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ participantId: string }> }
 ) {
-  try {
-    const { participantId } = await params;
+  const { participantId } = await params;
 
+  try {
     const [part] = await db
       .select()
       .from(participants)
       .where(eq(participants.id, participantId));
 
-    if (!part) {
-      return NextResponse.json({ error: "Partisipan tidak ditemukan" }, { status: 404 });
-    }
+    if (part) {
+      let scenarioData = null;
+      if (part.scenarioId) {
+        const [sc] = await db
+          .select()
+          .from(scenarios)
+          .where(eq(scenarios.id, part.scenarioId));
+        scenarioData = sc;
+      }
 
+      let sessionData = null;
+      if (part.sessionId) {
+        const [sess] = await db
+          .select()
+          .from(sessions)
+          .where(eq(sessions.id, part.sessionId));
+        sessionData = sess;
+      }
+
+      return NextResponse.json({
+        participant: part,
+        scenario: scenarioData,
+        session: sessionData,
+      });
+    }
+  } catch (err) {
+    console.warn("DB not reachable in /api/experiment/[participantId], trying demo memory:", err);
+  }
+
+  // Fallback to demo memory
+  const demoPart = demoParticipants.get(participantId);
+  if (demoPart) {
     let scenarioData = null;
-    if (part.scenarioId) {
-      const [sc] = await db
-        .select()
-        .from(scenarios)
-        .where(eq(scenarios.id, part.scenarioId));
-      scenarioData = sc;
+    if (demoPart.scenarioId) {
+      const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === demoPart.scenarioId);
+      scenarioData = pkg?.scenario || null;
     }
 
-    let sessionData = null;
-    if (part.sessionId) {
-      const [sess] = await db
-        .select()
-        .from(sessions)
-        .where(eq(sessions.id, part.sessionId));
-      sessionData = sess;
-    }
+    const sessionData = demoPart.sessionId ? demoSessions.get(demoPart.sessionId) || null : null;
 
     return NextResponse.json({
-      participant: part,
+      participant: demoPart,
       scenario: scenarioData,
       session: sessionData,
+      isDemoMode: true,
     });
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: msg }, { status: 500 });
   }
+
+  return NextResponse.json({ error: "Partisipan tidak ditemukan" }, { status: 404 });
 }

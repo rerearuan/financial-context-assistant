@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { sessions, scenarios, messages, syntheticProfiles } from "@/db/schema";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { eq, asc } from "drizzle-orm";
+import { demoSessions, demoMessages } from "@/lib/demo-store";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,41 @@ function getDevFallbackSession(sessionId: string) {
   };
 }
 
+function getDemoSessionResponse(sessionId: string) {
+  const demoSess = demoSessions.get(sessionId);
+  if (!demoSess) return null;
+
+  const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === demoSess.scenarioId);
+  const msgs = demoMessages.get(sessionId) || [];
+
+  return {
+    sessionId: demoSess.id,
+    participantCode: demoSess.participantCode,
+    scenarioId: demoSess.scenarioId,
+    condition: demoSess.condition,
+    status: demoSess.status,
+    currentAction: demoSess.currentAction,
+    followupCount: demoSess.followupCount,
+    maxFollowupAllowed: demoSess.maxFollowupAllowed,
+    scenario: {
+      id: pkg?.scenario.id,
+      title: pkg?.scenario.title,
+      actionType: pkg?.scenario.actionType,
+      descriptionText: pkg?.scenario.descriptionText,
+      quickReplies: pkg?.scenario.quickReplies || [],
+    },
+    messages: msgs.map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      createdAt: m.createdAt,
+      calculationSnapshot: m.calculationSnapshot,
+      sourcesUsed: m.sourcesUsed,
+    })),
+    devProfile: demoSess.condition === "context_aware" ? pkg?.syntheticProfile : undefined,
+  };
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
@@ -57,10 +93,12 @@ export async function GET(
       .where(eq(sessions.id, sessionId));
 
     if (!session) {
+      const demoResponse = getDemoSessionResponse(sessionId);
+      if (demoResponse) return NextResponse.json(demoResponse);
+
       const fallback = getDevFallbackSession(sessionId);
-      if (fallback) {
-        return NextResponse.json(fallback);
-      }
+      if (fallback) return NextResponse.json(fallback);
+
       return NextResponse.json(
         { error: "Sesi tidak ditemukan." },
         { status: 404 }
@@ -78,7 +116,6 @@ export async function GET(
       .where(eq(messages.sessionId, sessionId))
       .orderBy(asc(messages.createdAt));
 
-    // For dev inspection only (if requested via query ?dev=true)
     const isDev = req.nextUrl.searchParams.get("dev") === "true";
     let devProfile = null;
     if (isDev && session.condition === "context_aware") {
@@ -116,11 +153,12 @@ export async function GET(
       devProfile: isDev ? devProfile : undefined,
     });
   } catch (err: unknown) {
-    // If DB fails, try fallback for dev session
+    const demoResponse = getDemoSessionResponse(sessionId);
+    if (demoResponse) return NextResponse.json(demoResponse);
+
     const fallback = getDevFallbackSession(sessionId);
-    if (fallback) {
-      return NextResponse.json(fallback);
-    }
+    if (fallback) return NextResponse.json(fallback);
+
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }

@@ -6,6 +6,14 @@ import crypto from "crypto";
 import { assignBalancedCell } from "@/lib/randomizer";
 import { getGeminiModel } from "@/lib/gemini";
 import { PROMPT_VERSION } from "@/lib/prompts/templates";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
+import {
+  demoParticipants,
+  demoSessions,
+  demoMessages,
+  DemoParticipant,
+  DemoSession,
+} from "@/lib/demo-store";
 
 export const dynamic = "force-dynamic";
 
@@ -19,21 +27,37 @@ export async function POST(req: NextRequest) {
       const participantId = `part_${crypto.randomBytes(12).toString("hex")}`;
       const code = `RESP-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
 
-      await db.insert(participants).values({
-        id: participantId,
-        participantCode: code,
-        consent: false,
-        currentStep: 1,
-        isCompleted: false,
-        disqualified: false,
-      });
+      try {
+        await db.insert(participants).values({
+          id: participantId,
+          participantCode: code,
+          consent: false,
+          currentStep: 1,
+          isCompleted: false,
+          disqualified: false,
+        });
 
-      const [newParticipant] = await db
-        .select()
-        .from(participants)
-        .where(eq(participants.id, participantId));
+        const [newParticipant] = await db
+          .select()
+          .from(participants)
+          .where(eq(participants.id, participantId));
 
-      return NextResponse.json({ participant: newParticipant });
+        return NextResponse.json({ participant: newParticipant });
+      } catch (dbErr) {
+        console.warn("DB not reachable in /api/experiment (start), using demo memory:", dbErr);
+        const demoPart: DemoParticipant = {
+          id: participantId,
+          participantCode: code,
+          consent: false,
+          currentStep: 1,
+          isCompleted: false,
+          disqualified: false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        demoParticipants.set(participantId, demoPart);
+        return NextResponse.json({ participant: demoPart, isDemoMode: true });
+      }
     }
 
     // 2. CONSENT
@@ -44,15 +68,24 @@ export async function POST(req: NextRequest) {
       }
 
       if (!consent) {
-        await db
-          .update(participants)
-          .set({
-            consent: false,
-            disqualified: true,
-            disqualifiedReason: "Responden tidak bersedia memberikan persetujuan penelitian.",
-            updatedAt: new Date(),
-          })
-          .where(eq(participants.id, participantId));
+        try {
+          await db
+            .update(participants)
+            .set({
+              consent: false,
+              disqualified: true,
+              disqualifiedReason: "Responden tidak bersedia memberikan persetujuan penelitian.",
+              updatedAt: new Date(),
+            })
+            .where(eq(participants.id, participantId));
+        } catch {
+          const part = demoParticipants.get(participantId);
+          if (part) {
+            part.consent = false;
+            part.disqualified = true;
+            part.disqualifiedReason = "Responden tidak bersedia memberikan persetujuan penelitian.";
+          }
+        }
 
         return NextResponse.json({
           disqualified: true,
@@ -60,14 +93,22 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      await db
-        .update(participants)
-        .set({
-          consent: true,
-          currentStep: 2,
-          updatedAt: new Date(),
-        })
-        .where(eq(participants.id, participantId));
+      try {
+        await db
+          .update(participants)
+          .set({
+            consent: true,
+            currentStep: 2,
+            updatedAt: new Date(),
+          })
+          .where(eq(participants.id, participantId));
+      } catch {
+        const part = demoParticipants.get(participantId);
+        if (part) {
+          part.consent = true;
+          part.currentStep = 2;
+        }
+      }
 
       return NextResponse.json({ success: true, currentStep: 2 });
     }
@@ -81,15 +122,24 @@ export async function POST(req: NextRequest) {
 
       // Screening rule from PDF: harus memiliki pendapatan pribadi
       if (demographics.monthlyIncome === "Tidak memiliki pendapatan") {
-        await db
-          .update(participants)
-          .set({
-            demographics,
-            disqualified: true,
-            disqualifiedReason: "Responden tidak memenuhi kriteria pendapatan pribadi (Screening Out).",
-            updatedAt: new Date(),
-          })
-          .where(eq(participants.id, participantId));
+        try {
+          await db
+            .update(participants)
+            .set({
+              demographics,
+              disqualified: true,
+              disqualifiedReason: "Responden tidak memenuhi kriteria pendapatan pribadi (Screening Out).",
+              updatedAt: new Date(),
+            })
+            .where(eq(participants.id, participantId));
+        } catch {
+          const part = demoParticipants.get(participantId);
+          if (part) {
+            part.demographics = demographics;
+            part.disqualified = true;
+            part.disqualifiedReason = "Responden tidak memenuhi kriteria pendapatan pribadi (Screening Out).";
+          }
+        }
 
         return NextResponse.json({
           disqualified: true,
@@ -102,86 +152,163 @@ export async function POST(req: NextRequest) {
       const assignment = await assignBalancedCell();
       const { cellNumber, scenarioId, condition } = assignment;
 
-      // Fetch scenario
-      const [scenario] = await db
-        .select()
-        .from(scenarios)
-        .where(eq(scenarios.id, scenarioId));
+      // Find scenario definition
+      const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === scenarioId);
+      const scenarioFallback = pkg?.scenario;
 
-      if (!scenario) {
-        return NextResponse.json({ error: "Skenario tidak ditemukan" }, { status: 500 });
-      }
-
-      // Generate a dedicated session for this participant
       const sessionId = `ses_${crypto.randomBytes(16).toString("hex")}`;
-      const [part] = await db
-        .select()
-        .from(participants)
-        .where(eq(participants.id, participantId));
-
       const modelId = getGeminiModel();
       const maxFollowup = parseInt(process.env.MAX_FOLLOWUP_QUESTIONS || "2", 10);
 
-      // Create session in database
-      await db.insert(sessions).values({
-        id: sessionId,
-        participantCode: part.participantCode,
-        scenarioId,
-        condition,
-        currentAction: scenario.initialAction,
-        status: "in_progress",
-        followupCount: 0,
-        maxFollowupAllowed: maxFollowup,
-        promptVersion: PROMPT_VERSION,
-        modelId,
-      });
+      try {
+        let [scenario] = await db
+          .select()
+          .from(scenarios)
+          .where(eq(scenarios.id, scenarioId));
 
-      // Insert initial assistant message
-      const initialMsgId = `msg_${crypto.randomBytes(12).toString("hex")}`;
-      await db.insert(messages).values({
-        id: initialMsgId,
-        sessionId,
-        role: "assistant",
-        content: scenario.initialAssistantMessage,
-        sourcesUsed:
-          condition === "context_aware"
-            ? ["scenario", "synthetic_profile"]
-            : ["scenario"],
-      });
+        if (!scenario && scenarioFallback) {
+          scenario = scenarioFallback as any;
+        }
 
-      // Update participant with cell assignment & session link
-      await db
-        .update(participants)
-        .set({
-          demographics,
+        const [part] = await db
+          .select()
+          .from(participants)
+          .where(eq(participants.id, participantId));
+
+        const partCode = part?.participantCode || `RESP-${participantId.slice(-4).toUpperCase()}`;
+
+        // Create session in database
+        await db.insert(sessions).values({
+          id: sessionId,
+          participantCode: partCode,
+          scenarioId,
+          condition,
+          currentAction: scenario.initialAction,
+          status: "in_progress",
+          followupCount: 0,
+          maxFollowupAllowed: maxFollowup,
+          promptVersion: PROMPT_VERSION,
+          modelId,
+        });
+
+        // Insert initial assistant message
+        const initialMsgId = `msg_${crypto.randomBytes(12).toString("hex")}`;
+        await db.insert(messages).values({
+          id: initialMsgId,
+          sessionId,
+          role: "assistant",
+          content: scenario.initialAssistantMessage,
+          sourcesUsed:
+            condition === "context_aware"
+              ? ["scenario", "synthetic_profile"]
+              : ["scenario"],
+        });
+
+        // Update participant with cell assignment & session link
+        await db
+          .update(participants)
+          .set({
+            demographics,
+            cellNumber,
+            scenarioId,
+            condition,
+            sessionId,
+            currentStep: 3,
+            updatedAt: new Date(),
+          })
+          .where(eq(participants.id, participantId));
+
+        return NextResponse.json({
+          success: true,
+          currentStep: 3,
           cellNumber,
           scenarioId,
           condition,
           sessionId,
-          currentStep: 3, // Advances to Step 3 (Skenario & Profile)
-          updatedAt: new Date(),
-        })
-        .where(eq(participants.id, participantId));
+          scenario: {
+            id: scenario.id,
+            code: scenario.code,
+            title: scenario.title,
+            actionType: scenario.actionType,
+            situasiText: scenario.situasiText,
+            kondisiKeuanganText: scenario.kondisiKeuanganText,
+            tugasText: scenario.tugasText,
+            descriptionText: scenario.descriptionText,
+            tugasQuestions: scenario.tugasQuestions,
+          },
+        });
+      } catch (dbErr) {
+        console.warn("DB not reachable in demographics, using demo memory:", dbErr);
+        if (!scenarioFallback) {
+          return NextResponse.json({ error: "Skenario tidak ditemukan" }, { status: 500 });
+        }
 
-      return NextResponse.json({
-        success: true,
-        currentStep: 3,
-        cellNumber,
-        scenarioId,
-        condition,
-        sessionId,
-        scenario: {
-          id: scenario.id,
-          code: scenario.code,
-          title: scenario.title,
-          actionType: scenario.actionType,
-          situasiText: scenario.situasiText,
-          kondisiKeuanganText: scenario.kondisiKeuanganText,
-          tugasText: scenario.tugasText,
-          descriptionText: scenario.descriptionText,
-          tugasQuestions: scenario.tugasQuestions,
-        },
-      });
+        const part = demoParticipants.get(participantId);
+        const partCode = part?.participantCode || `RESP-${participantId.slice(-4).toUpperCase()}`;
+
+        // Save session in demoSessions
+        const demoSess: DemoSession = {
+          id: sessionId,
+          participantCode: partCode,
+          scenarioId,
+          condition,
+          currentAction: scenarioFallback.initialAction as Record<string, unknown>,
+          status: "in_progress",
+          followupCount: 0,
+          maxFollowupAllowed: maxFollowup,
+          promptVersion: PROMPT_VERSION,
+          modelId,
+        };
+        demoSessions.set(sessionId, demoSess);
+
+        // Save initial message in demoMessages
+        demoMessages.set(sessionId, [
+          {
+            id: `msg_init_${sessionId}`,
+            sessionId,
+            role: "assistant",
+            content: scenarioFallback.initialAssistantMessage,
+            createdAt: new Date(),
+            sourcesUsed:
+              condition === "context_aware"
+                ? ["scenario", "synthetic_profile"]
+                : ["scenario"],
+            calculationSnapshot:
+              condition === "context_aware" ? (pkg?.expectedCalculations as Record<string, unknown>) : null,
+          },
+        ]);
+
+        // Update demo participant
+        if (part) {
+          part.demographics = demographics;
+          part.cellNumber = cellNumber;
+          part.scenarioId = scenarioId;
+          part.condition = condition;
+          part.sessionId = sessionId;
+          part.currentStep = 3;
+        }
+
+        return NextResponse.json({
+          success: true,
+          isDemoMode: true,
+          currentStep: 3,
+          cellNumber,
+          scenarioId,
+          condition,
+          sessionId,
+          scenario: {
+            id: scenarioFallback.id,
+            code: scenarioFallback.code,
+            title: scenarioFallback.title,
+            actionType: scenarioFallback.actionType,
+            situasiText: scenarioFallback.situasiText,
+            kondisiKeuanganText: scenarioFallback.kondisiKeuanganText,
+            tugasText: scenarioFallback.tugasText,
+            descriptionText: scenarioFallback.descriptionText,
+            tugasQuestions: scenarioFallback.tugasQuestions,
+          },
+        });
+      }
     }
 
     // 4. EARLY DECISION (Step 4 Comprehension Check / Early Decision)
@@ -191,25 +318,39 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Data keputusan awal diperlukan" }, { status: 400 });
       }
 
-      await db
-        .update(participants)
-        .set({
-          earlyDecision,
-          currentStep: 5, // Advances to Step 5 (Chatbot)
-          updatedAt: new Date(),
-        })
-        .where(eq(participants.id, participantId));
+      try {
+        await db
+          .update(participants)
+          .set({
+            earlyDecision,
+            currentStep: 5,
+            updatedAt: new Date(),
+          })
+          .where(eq(participants.id, participantId));
 
-      const [part] = await db
-        .select()
-        .from(participants)
-        .where(eq(participants.id, participantId));
+        const [part] = await db
+          .select()
+          .from(participants)
+          .where(eq(participants.id, participantId));
 
-      return NextResponse.json({
-        success: true,
-        currentStep: 5,
-        sessionId: part.sessionId,
-      });
+        return NextResponse.json({
+          success: true,
+          currentStep: 5,
+          sessionId: part?.sessionId,
+        });
+      } catch {
+        const part = demoParticipants.get(participantId);
+        if (part) {
+          part.earlyDecision = earlyDecision;
+          part.currentStep = 5;
+        }
+
+        return NextResponse.json({
+          success: true,
+          currentStep: 5,
+          sessionId: part?.sessionId,
+        });
+      }
     }
 
     // 5. FINAL DECISION (Step 6 after Chatbot)
@@ -219,14 +360,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Data keputusan akhir diperlukan" }, { status: 400 });
       }
 
-      await db
-        .update(participants)
-        .set({
-          finalDecision,
-          currentStep: 7, // Advances to Step 7 (Post-Questionnaire)
-          updatedAt: new Date(),
-        })
-        .where(eq(participants.id, participantId));
+      try {
+        await db
+          .update(participants)
+          .set({
+            finalDecision,
+            currentStep: 7,
+            updatedAt: new Date(),
+          })
+          .where(eq(participants.id, participantId));
+      } catch {
+        const part = demoParticipants.get(participantId);
+        if (part) {
+          part.finalDecision = finalDecision;
+          part.currentStep = 7;
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -241,15 +390,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Data kuesioner akhir diperlukan" }, { status: 400 });
       }
 
-      await db
-        .update(participants)
-        .set({
-          postQuestionnaire,
-          currentStep: 8, // Advances to Step 8 (Debriefing / Penutup)
-          isCompleted: true,
-          updatedAt: new Date(),
-        })
-        .where(eq(participants.id, participantId));
+      try {
+        await db
+          .update(participants)
+          .set({
+            postQuestionnaire,
+            currentStep: 8,
+            isCompleted: true,
+            updatedAt: new Date(),
+          })
+          .where(eq(participants.id, participantId));
+      } catch {
+        const part = demoParticipants.get(participantId);
+        if (part) {
+          part.postQuestionnaire = postQuestionnaire;
+          part.currentStep = 8;
+          part.isCompleted = true;
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -260,6 +418,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Action tidak dikenal" }, { status: 400 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
+    console.error("Experiment API error:", err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

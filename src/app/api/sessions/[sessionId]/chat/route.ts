@@ -3,15 +3,126 @@ import { db } from "@/db";
 import { sessions, messages, syntheticProfiles } from "@/db/schema";
 import { eq, asc } from "drizzle-orm";
 import crypto from "crypto";
-import { extractIntent, generateAssistantResponse } from "@/lib/gemini";
+import { extractIntent, generateAssistantResponse, getGeminiModel } from "@/lib/gemini";
 import { buildStructuredContextPacket } from "@/lib/financial-engine/context-packager";
 import {
   FinancialAction,
   FinancialProfileContext,
   UserProvidedFinances,
 } from "@/lib/financial-engine/types";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
+import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
 
 export const dynamic = "force-dynamic";
+
+async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageText: string) {
+  const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === demoSess.scenarioId);
+  const userMsgId = `msg_u_${crypto.randomBytes(8).toString("hex")}`;
+  const actionBefore: FinancialAction = {
+    type: (demoSess.currentAction.type as "spending" | "saving") || "spending",
+    amount: (demoSess.currentAction.amount as number) || 0,
+    timing: (demoSess.currentAction.timing as string) || "",
+    targetCategory: (demoSess.currentAction.targetCategory as string) || "",
+    description: (demoSess.currentAction.description as string) || "",
+    source: "scenario",
+  };
+
+  const intent = await extractIntent(messageText, actionBefore);
+
+  const updatedAction = { ...demoSess.currentAction };
+  if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== actionBefore.amount) {
+    updatedAction.amount = intent.newAmount;
+    updatedAction.modifiedByUser = true;
+  }
+  demoSess.currentAction = updatedAction;
+
+  let userProvidedFinances: UserProvidedFinances | null = null;
+  if (intent.userProvidedFinances) {
+    userProvidedFinances = {
+      ...intent.userProvidedFinances,
+      source: "user_message",
+    };
+  }
+
+  let syntheticProfileContext: FinancialProfileContext | null = null;
+  if (demoSess.condition === "context_aware" && pkg?.syntheticProfile) {
+    syntheticProfileContext = {
+      totalCashBalance: pkg.syntheticProfile.totalCashBalance,
+      liquidBalance: pkg.syntheticProfile.liquidBalance,
+      budgets: pkg.syntheticProfile.budgets as any,
+      liabilities: pkg.syntheticProfile.liabilities as any,
+      goals: pkg.syntheticProfile.goals as any,
+      buffer: pkg.syntheticProfile.buffer as any,
+      incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
+      source: "synthetic_profile",
+    };
+  }
+
+  const contextPacket = buildStructuredContextPacket({
+    condition: demoSess.condition,
+    action: {
+      type: updatedAction.type as "spending" | "saving",
+      amount: updatedAction.amount as number,
+      timing: updatedAction.timing as string,
+      targetCategory: updatedAction.targetCategory as string,
+      description: updatedAction.description as string,
+      source: updatedAction.modifiedByUser ? "user_message" : "scenario",
+    },
+    syntheticProfile: syntheticProfileContext,
+    userProvidedFinances,
+  });
+
+  const existingMsgs = demoMessages.get(sessionId) || [];
+  existingMsgs.push({
+    id: userMsgId,
+    sessionId,
+    role: "user",
+    content: messageText,
+    createdAt: new Date(),
+    sourcesUsed: ["user_message"],
+    extractedIntent: intent as any,
+  });
+
+  const chatHistory = existingMsgs.map((m) => ({
+    role: m.role,
+    content: m.content,
+  }));
+
+  const assistantResult = await generateAssistantResponse(
+    contextPacket,
+    messageText,
+    chatHistory
+  );
+
+  const assistantMsgId = `msg_a_${crypto.randomBytes(8).toString("hex")}`;
+  const assistantMsg: DemoMessage = {
+    id: assistantMsgId,
+    sessionId,
+    role: "assistant",
+    content: assistantResult.content,
+    createdAt: new Date(),
+    calculationSnapshot:
+      demoSess.condition === "context_aware" ? (contextPacket.calculation as any) : null,
+    sourcesUsed:
+      demoSess.condition === "context_aware"
+        ? ["synthetic_profile", "deterministic_engine"]
+        : ["user_query", "deterministic_engine"],
+  };
+  existingMsgs.push(assistantMsg);
+  demoMessages.set(sessionId, existingMsgs);
+  demoSess.followupCount += 1;
+
+  return NextResponse.json({
+    reply: assistantResult.content,
+    messageId: assistantMsgId,
+    calculationSnapshot: assistantMsg.calculationSnapshot,
+    currentAction: updatedAction,
+    followupCount: demoSess.followupCount,
+    maxFollowupAllowed: demoSess.maxFollowupAllowed,
+    isFallback: assistantResult.isFallback,
+    modelUsed: assistantResult.modelUsed,
+  });
+}
 
 export async function POST(
   req: NextRequest,
@@ -36,13 +147,44 @@ export async function POST(
       );
     }
 
-    // 1. Fetch official session from database (never trust client)
-    const [session] = await db
-      .select()
-      .from(sessions)
-      .where(eq(sessions.id, sessionId));
+    // 1. Fetch official session from database
+    let session = null;
+    try {
+      const [dbSession] = await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId));
+      session = dbSession;
+    } catch (err) {
+      console.warn("DB not reachable in chat route, falling back to demo store:", err);
+    }
 
     if (!session) {
+      const demoSess = demoSessions.get(sessionId);
+      if (demoSess) {
+        return handleDemoChat(demoSess, sessionId, message.trim());
+      }
+
+      const devMatch = sessionId.match(/^dev_(.+?)_(basic|context_aware)$/);
+      if (devMatch) {
+        const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === devMatch[1]);
+        if (pkg) {
+          const fakeDevSess: DemoSession = {
+            id: sessionId,
+            participantCode: `DEV-${devMatch[1].toUpperCase()}`,
+            scenarioId: pkg.scenario.id,
+            condition: devMatch[2] as "basic" | "context_aware",
+            currentAction: pkg.scenario.initialAction as Record<string, unknown>,
+            status: "in_progress",
+            followupCount: 0,
+            maxFollowupAllowed: 5,
+            promptVersion: "v1.0.0",
+            modelId: getGeminiModel(),
+          };
+          return handleDemoChat(fakeDevSess, sessionId, message.trim());
+        }
+      }
+
       return NextResponse.json(
         { error: "Sesi tidak valid atau tidak ditemukan." },
         { status: 404 }
@@ -88,7 +230,7 @@ export async function POST(
       .where(eq(messages.id, userMsgId));
 
     // Handle nominal modification if user specified a new amount
-    let updatedAction = { ...session.currentAction };
+    const updatedAction = { ...session.currentAction };
     if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== actionBefore.amount) {
       updatedAction.amount = intent.newAmount;
       updatedAction.modifiedByUser = true;
@@ -126,7 +268,6 @@ export async function POST(
     let syntheticProfileContext: FinancialProfileContext | null = null;
 
     if (session.condition === "context_aware") {
-      // Context-Aware: retrieve official synthetic profile
       const [profile] = await db
         .select()
         .from(syntheticProfiles)
@@ -145,7 +286,6 @@ export async function POST(
         };
       }
     }
-    // NOTICE: For Basic condition, syntheticProfileContext remains strictly null!
 
     // 5. Package Context & Compute Deterministic Financial Consequences
     const contextPacket = buildStructuredContextPacket({
@@ -181,20 +321,25 @@ export async function POST(
       chatHistory
     );
 
-    // 8. Save Assistant Message & Calculation Snapshot
+    // 8. Record Assistant Message in Database
     const assistantMsgId = `msg_a_${crypto.randomBytes(8).toString("hex")}`;
-    const newFollowupCount = session.followupCount + 1;
-
     await db.insert(messages).values({
       id: assistantMsgId,
       sessionId,
       role: "assistant",
       content: assistantResult.content,
-      calculationSnapshot: contextPacket.calculation as unknown as Record<string, unknown>,
-      sourcesUsed: contextPacket.dataSources,
+      calculationSnapshot:
+        session.condition === "context_aware"
+          ? (contextPacket.calculation as unknown as Record<string, unknown>)
+          : null,
+      sourcesUsed:
+        session.condition === "context_aware"
+          ? ["synthetic_profile", "deterministic_engine"]
+          : ["user_query", "deterministic_engine"],
     });
 
     // 9. Update Session state
+    const newFollowupCount = (session.followupCount || 0) + 1;
     await db
       .update(sessions)
       .set({
@@ -205,20 +350,21 @@ export async function POST(
       .where(eq(sessions.id, sessionId));
 
     return NextResponse.json({
-      assistantMessage: {
-        id: assistantMsgId,
-        role: "assistant",
-        content: assistantResult.content,
-        createdAt: new Date().toISOString(),
-      },
-      calculationSnapshot: contextPacket.calculation,
-      updatedAction,
+      reply: assistantResult.content,
+      messageId: assistantMsgId,
+      calculationSnapshot:
+        session.condition === "context_aware"
+          ? (contextPacket.calculation as unknown as Record<string, unknown>)
+          : null,
+      currentAction: updatedAction,
       followupCount: newFollowupCount,
       maxFollowupAllowed: session.maxFollowupAllowed,
       isFallback: assistantResult.isFallback,
+      modelUsed: assistantResult.modelUsed,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
+    console.error("Chat API error:", err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

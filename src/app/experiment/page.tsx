@@ -133,9 +133,13 @@ function ExperimentContent() {
           body: JSON.stringify({ action: "start" }),
         });
         const data = await res.json();
-        setParticipant(data.participant);
-        localStorage.setItem("exp_participant_id", data.participant.id);
-        setStep(1);
+        if (data.participant) {
+          setParticipant(data.participant);
+          localStorage.setItem("exp_participant_id", data.participant.id);
+          setStep(1);
+        } else {
+          setErrorMessage(data.error || "Gagal menginisialisasi sesi penelitian.");
+        }
       } catch (err) {
         setErrorMessage("Gagal menginisialisasi sesi penelitian.");
       } finally {
