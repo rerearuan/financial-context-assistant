@@ -1,36 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import { ShieldAlert, ArrowRight, Bot, BookOpen, KeyRound, Sparkles } from "lucide-react";
+import React from "react";
+import { ShieldAlert, ArrowRight, Bot, BookOpen, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
-  const router = useRouter();
-  const [sessionIdInput, setSessionIdInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const handleEnterSession = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = sessionIdInput.trim();
-    if (!trimmed) return;
-
-    setLoading(true);
-    setErrorMessage("");
-
-    try {
-      const res = await fetch(`/api/sessions/${trimmed}`);
-      if (!res.ok) {
-        throw new Error("Kode sesi tidak ditemukan atau tidak valid.");
-      }
-      router.push(`/chat/${trimmed}`);
-    } catch (err: unknown) {
-      setErrorMessage(err instanceof Error ? err.message : "Sesi tidak ditemukan.");
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex-1 flex flex-col justify-between max-w-xl mx-auto w-full px-4 py-8">
       {/* Simulation Banner */}
@@ -53,7 +27,7 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           {/* Main CTA: Mulai Kuesioner & Eksperimen */}
           <div>
             <Link
@@ -64,43 +38,10 @@ export default function HomePage() {
               Mulai Partisipasi Penelitian
               <ArrowRight className="w-4 h-4" />
             </Link>
-            <p className="text-[11px] text-slate-500 text-center mt-2">
+            <p className="text-[11px] text-slate-500 text-center mt-3 leading-relaxed">
               Alur: Informed Consent &rarr; Karakteristik &rarr; Skenario &rarr; Chatbot &rarr; Kuesioner Akhir
             </p>
           </div>
-
-          <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-3 text-xs text-slate-400 font-medium">atau masuk dengan kode sesi</span>
-            <div className="flex-grow border-t border-slate-200"></div>
-          </div>
-
-          {/* Secondary: Resume Existing Chatbot Session */}
-          <form onSubmit={handleEnterSession} className="space-y-3">
-            <div>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={sessionIdInput}
-                  onChange={(e) => setSessionIdInput(e.target.value)}
-                  placeholder="Masukkan Kode Sesi (misal: dev_spending_low_basic)"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm font-mono"
-                />
-                <KeyRound className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              </div>
-              {errorMessage && (
-                <p className="text-xs text-rose-600 mt-1.5 font-medium">{errorMessage}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || !sessionIdInput.trim()}
-              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 rounded-xl text-xs font-semibold transition"
-            >
-              {loading ? "Memeriksa Sesi..." : "Buka Sesi Chat"}
-            </button>
-          </form>
         </div>
       </div>
 
