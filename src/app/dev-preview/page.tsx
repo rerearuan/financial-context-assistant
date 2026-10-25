@@ -13,6 +13,7 @@ import {
   Database,
   Sparkles,
   RefreshCw,
+  ServerCrash,
 } from "lucide-react";
 
 interface FixtureItem {
@@ -45,17 +46,24 @@ interface ScenarioData {
   };
 }
 
+interface PreviewApiResponse {
+  dbConnected: boolean;
+  dbError?: string;
+  scenarios: ScenarioData[];
+  fixtures: FixtureItem[];
+  devSessions: Array<{ id: string; scenarioId: string; condition: string }>;
+}
+
 export default function DevPreviewPage() {
-  const [data, setData] = useState<{
-    scenarios: ScenarioData[];
-    fixtures: FixtureItem[];
-    devSessions: Array<{ id: string; scenarioId: string; condition: string }>;
-  } | null>(null);
+  const [data, setData] = useState<PreviewApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedScenarioId, setSelectedScenarioId] = useState<string>("spending_low");
   const [creatingCondition, setCreatingCondition] = useState<string | null>(null);
+  const [dbSetupLoading, setDbSetupLoading] = useState(false);
+  const [dbSetupMsg, setDbSetupMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  useEffect(() => {
+  const fetchFixtures = () => {
+    setLoading(true);
     fetch("/api/dev/fixtures")
       .then((res) => res.json())
       .then((resData) => {
@@ -63,10 +71,33 @@ export default function DevPreviewPage() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Fetch fixtures failed:", err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchFixtures();
   }, []);
+
+  const handleRunDbSetup = async () => {
+    setDbSetupLoading(true);
+    setDbSetupMsg(null);
+    try {
+      const res = await fetch("/api/dev/setup-db", { method: "POST" });
+      const resJson = await res.json();
+      if (resJson.success) {
+        setDbSetupMsg({ type: "success", text: "Database berhasil diinisialisasi & di-seed!" });
+        fetchFixtures();
+      } else {
+        setDbSetupMsg({ type: "error", text: resJson.error || "Gagal inisialisasi database." });
+      }
+    } catch (e) {
+      setDbSetupMsg({ type: "error", text: "Koneksi ke endpoint setup gagal." });
+    } finally {
+      setDbSetupLoading(false);
+    }
+  };
 
   const handleCreateFreshSession = async (
     scenarioId: string,
@@ -86,9 +117,11 @@ export default function DevPreviewPage() {
       const newSession = await res.json();
       if (newSession.sessionId) {
         window.location.href = `/chat/${newSession.sessionId}`;
+      } else {
+        alert("Gagal membuat sesi: " + (newSession.error || "Unknown error"));
       }
     } catch (e) {
-      alert("Gagal membuat sesi baru.");
+      alert("Gagal membuat sesi baru. Pastikan database cloud aktif.");
     } finally {
       setCreatingCondition(null);
     }
@@ -96,15 +129,17 @@ export default function DevPreviewPage() {
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-8">
         <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mb-3" />
         <p className="text-slate-600 font-medium">Memuat fixtures dan skenario preview...</p>
       </div>
     );
   }
 
-  const currentFixture = data?.fixtures.find((f) => f.id === selectedScenarioId);
-  const currentScenario = data?.scenarios.find((s) => s.id === selectedScenarioId);
+  const scenariosList = data?.scenarios ?? [];
+  const fixturesList = data?.fixtures ?? [];
+  const currentFixture = fixturesList.find((f) => f.id === selectedScenarioId);
+  const currentScenario = scenariosList.find((s) => s.id === selectedScenarioId);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-12">
@@ -127,6 +162,49 @@ export default function DevPreviewPage() {
       </div>
 
       <div className="max-w-6xl mx-auto px-6 mt-6">
+        {/* DB Connection Alert if DB is not reachable */}
+        {data && data.dbConnected === false && (
+          <div className="bg-rose-50 border border-rose-200 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <ServerCrash className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div className="text-xs text-rose-900 flex-1">
+                <p className="font-bold text-sm mb-1 text-rose-950">
+                  Database Cloud Belum Terhubung di Vercel
+                </p>
+                <p className="mb-2 leading-relaxed">
+                  Aplikasi sedang menampilkan skenario dan fixture menggunakan memori statis (fallback).
+                  Untuk menjalankan chat interaktif dan menyimpan partisipan di Vercel, tambahkan variabel <strong>DATABASE_URL</strong> (misalnya dari Neon / Supabase) dan <strong>GEMINI_API_KEY</strong> pada <em>Vercel Dashboard → Settings → Environment Variables</em>.
+                </p>
+                <div className="flex flex-wrap items-center gap-3 mt-3">
+                  <button
+                    onClick={handleRunDbSetup}
+                    disabled={dbSetupLoading}
+                    className="px-3 py-1.5 bg-rose-700 hover:bg-rose-800 text-white rounded text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    {dbSetupLoading ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Database className="w-3.5 h-3.5" />
+                    )}
+                    Jalankan Migrasi & Seed Database
+                  </button>
+                  <button
+                    onClick={fetchFixtures}
+                    className="px-3 py-1.5 border border-rose-300 hover:bg-rose-100 text-rose-800 rounded text-xs font-medium transition"
+                  >
+                    Cek Ulang Koneksi
+                  </button>
+                </div>
+                {dbSetupMsg && (
+                  <p className={`mt-2 font-mono text-[11px] ${dbSetupMsg.type === "success" ? "text-emerald-700 font-bold" : "text-rose-700"}`}>
+                    {dbSetupMsg.text}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
           <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
           <div className="text-xs text-amber-900">
@@ -136,8 +214,8 @@ export default function DevPreviewPage() {
 
         {/* 4 Scenarios Tabs */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          {data?.scenarios.map((sc) => {
-            const fixture = data.fixtures.find((f) => f.id === sc.id);
+          {scenariosList.map((sc) => {
+            const fixture = fixturesList.find((f) => f.id === sc.id);
             const isSelected = selectedScenarioId === sc.id;
             return (
               <button
@@ -162,12 +240,12 @@ export default function DevPreviewPage() {
                         : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
-                    {fixture?.conflictLevel.toUpperCase()} CONFLICT
+                    {fixture?.conflictLevel?.toUpperCase() || sc.code} CONFLICT
                   </span>
                 </div>
                 <div className="font-bold text-sm truncate">{sc.title}</div>
                 <div className={`text-xs mt-1 truncate ${isSelected ? "text-blue-200" : "text-slate-500"}`}>
-                  Rp {sc.initialAction.amount.toLocaleString("id-ID")}
+                  Rp {sc.initialAction?.amount?.toLocaleString("id-ID") ?? "0"}
                 </div>
               </button>
             );
@@ -175,7 +253,7 @@ export default function DevPreviewPage() {
         </div>
 
         {/* Selected Scenario Details & Live Launchers */}
-        {currentScenario && (
+        {currentScenario ? (
           <div className="space-y-6">
             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
@@ -184,7 +262,7 @@ export default function DevPreviewPage() {
                   {currentScenario.title} ({currentScenario.code})
                 </h2>
                 <span className="text-xs px-2.5 py-1 rounded bg-slate-100 font-mono text-slate-600 font-semibold">
-                  Tipe Tindakan: {currentScenario.actionType.toUpperCase()}
+                  Tipe Tindakan: {currentScenario.actionType?.toUpperCase()}
                 </span>
               </div>
 
@@ -349,6 +427,10 @@ export default function DevPreviewPage() {
                 </div>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="p-8 text-center text-slate-500">
+            Pilih skenario untuk melihat preview detail.
           </div>
         )}
       </div>

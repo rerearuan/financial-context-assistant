@@ -1,23 +1,66 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { sessions, scenarios, messages, syntheticProfiles } from "@/db/schema";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { eq, asc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
+
+function getDevFallbackSession(sessionId: string) {
+  const match = sessionId.match(/^dev_(.+?)_(basic|context_aware)$/);
+  if (!match) return null;
+  const scenarioId = match[1];
+  const condition = match[2] as "basic" | "context_aware";
+  const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === scenarioId);
+  if (!pkg) return null;
+
+  return {
+    sessionId,
+    participantCode: `DEV-${scenarioId.toUpperCase()}`,
+    scenarioId: pkg.scenario.id,
+    condition,
+    status: "in_progress",
+    currentAction: pkg.scenario.initialAction,
+    followupCount: 0,
+    maxFollowupAllowed: 5,
+    scenario: {
+      id: pkg.scenario.id,
+      title: pkg.scenario.title,
+      actionType: pkg.scenario.actionType,
+      descriptionText: pkg.scenario.descriptionText,
+      quickReplies: pkg.scenario.quickReplies || [],
+    },
+    messages: [
+      {
+        id: `initial_${sessionId}`,
+        role: "assistant",
+        content: pkg.scenario.initialAssistantMessage,
+        createdAt: new Date().toISOString(),
+        calculationSnapshot: condition === "context_aware" ? pkg.expectedCalculations : null,
+        sourcesUsed: condition === "context_aware" ? ["synthetic_profile", "deterministic_calc"] : ["user_query"],
+      },
+    ],
+    devProfile: condition === "context_aware" ? pkg.syntheticProfile : null,
+  };
+}
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
-  try {
-    const { sessionId } = await params;
+  const { sessionId } = await params;
 
+  try {
     const [session] = await db
       .select()
       .from(sessions)
       .where(eq(sessions.id, sessionId));
 
     if (!session) {
+      const fallback = getDevFallbackSession(sessionId);
+      if (fallback) {
+        return NextResponse.json(fallback);
+      }
       return NextResponse.json(
         { error: "Sesi tidak ditemukan." },
         { status: 404 }
@@ -73,6 +116,11 @@ export async function GET(
       devProfile: isDev ? devProfile : undefined,
     });
   } catch (err: unknown) {
+    // If DB fails, try fallback for dev session
+    const fallback = getDevFallbackSession(sessionId);
+    if (fallback) {
+      return NextResponse.json(fallback);
+    }
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: msg }, { status: 500 });
   }
