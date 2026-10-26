@@ -75,6 +75,7 @@ export function buildStructuredContextPacket(
           liabilities: syntheticProfile.liabilities,
           goals: syntheticProfile.goals,
           buffer: syntheticProfile.buffer,
+          routineExpenses: syntheticProfile.routineExpenses,
           incomeSchedule: syntheticProfile.incomeSchedule,
           userProvidedFinances: userProvidedFinances || undefined,
         }

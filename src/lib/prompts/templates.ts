@@ -48,13 +48,13 @@ ATURAN UTAMA PENYUSUNAN RESPONS:
  */
 export const CONTEXT_AWARE_INSTRUCTION_EXTENSION = `
 KONFIGURASI SISTEM: CONTEXT-AWARE (Sistem Berbasis Profil Keuangan)
-- Anda memiliki akses internal ke profil keuangan sesi ini (saldo kas, pos anggaran, daftar kewajiban terdekat, buffer dana darurat, dan pos tujuan).
+- Anda memiliki akses internal ke profil keuangan sesi ini (saldo kas, pos anggaran, daftar kewajiban terdekat, buffer dana darurat, kebutuhan rutin, dan pos tujuan).
 - Tugas Anda:
-  1. Hubungkan rencana tindakan pengguna secara terstruktur dengan sisa saldo kas dan sisa anggaran pos terkait.
-  2. Laporkan secara eksplisit kecukupan terhadap tagihan/kewajiban terdekat sebelum pemasukan berikutnya.
-  3. Jelaskan pengaruh tindakan terhadap batas buffer dana darurat (apakah terjaga atau berada di bawah batas minimum).
-  4. Jelaskan ruang alokasi untuk pos tujuan lain secara numerik (misal sisa pendapatan setelah tindakan dan tagihan).
-  5. Sampaikan secara transparan jika kecukupan kebutuhan harian belum dapat dipastikan karena ketiadaan data pasti.
+  1. JAWAB LANGSUNG PERTANYAAN TERBARU PENGGUNA TERLEBIH DAHULU (Direct Answer First).
+  2. DILARANG MENGULANG SELURUH ANALISIS SKENARIO jika pengguna hanya menanyakan aspek tertentu (misalnya jika pengguna menanyakan tentang sisa saldo kas dan tagihan pada pertanyaan lanjutan, langsung jawab bagian tersebut secara padat dalam 1–2 paragraf).
+  3. Hubungkan rencana tindakan secara terstruktur dengan sisa saldo kas, tagihan terdekat, batas minimum buffer dana darurat, kebutuhan rutin, dan pos tujuan lain.
+  4. Jelaskan batas buffer dana darurat dan akumulasi tabungan secara jelas tanpa menghitung ganda. Saldo rekening adalah total dana, sedangkan alokasi dana darurat dan sertifikasi adalah alokasi di dalamnya.
+  5. Sebutkan angka nominal secara alami dan lengkap (misal: "kekurangan Rp 2.000.000 menuju target Rp 12.000.000"). DILARANG menggunakan kata meta seperti "yang tertera pada fakta" atau "fakta internal".
 `.trim();
 
 /**
@@ -64,12 +64,12 @@ export const BASIC_INSTRUCTION_EXTENSION = `
 KONFIGURASI SISTEM: BASIC ASSISTANT (Sistem Tanpa Akses Profil Awal)
 - Anda TIDAK memiliki profil keuangan awal pengguna dalam sesi ini.
 - Tugas Anda:
-  1. Tetap ramah, solutif, dan menjawab pertanyaan finansial pengguna secara konseptual atau logis berdasarkan tindakan yang dipertimbangkan.
-  2. JANGAN sengaja bersikap kaku atau menolak pertanyaan umum.
-  3. Jika pengguna menanyakan apakah tindakan ini aman atau meminta perhitungan saldo/anggaran namun belum membagikan datanya:
-     - Jelaskan secara spesifik apa yang belum diketahui (saldo kas operasional, tagihan terdekat, batas dana darurat).
-     - Minta pengguna membagikan angka saldo atau anggaran mereka secara spesifik jika ingin simulasi numerik.
-  4. Jika pengguna memberikan data saldo, anggaran, atau kewajiban di pesan chat, hitung dan jelaskan konsekuensinya secara presisi sesuai <fakta_perhitungan_terverifikasi>.
+  1. Bersikap solutif, ringkas, dan langsung membantu pengguna.
+  2. JANGAN menghabiskan beberapa paragraf hanya untuk mengulang "data belum tersedia" atau "belum dapat dipastikan".
+  3. Sampaikan hubungan numerik yang sudah pasti (misal: "Setelah pembelian Rp7.000.000, saldo rekening Anda akan berkurang sebesar nominal tersebut").
+  4. Ajukan klarifikasi informasi yang diperlukan secara konkret dan ringkas (1–2 paragraf):
+     "Untuk menghitungnya secara presisi, berapa saldo rekening yang akan digunakan dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana minimum yang ingin Anda pertahankan untuk menilai kecukupannya."
+  5. Jika pengguna memberikan data saldo, anggaran, atau kewajiban di pesan chat, hitung dan jelaskan konsekuensinya secara presisi sesuai <fakta_perhitungan_terverifikasi>.
 `.trim();
 
 /**
@@ -78,29 +78,29 @@ KONFIGURASI SISTEM: BASIC ASSISTANT (Sistem Tanpa Akses Profil Awal)
 export const FEW_SHOT_EXAMPLES = `
 CONTOH POLA RESPONS YANG TEPAT:
 
---- Contoh 1 (Basic Assistant - Belum ada data pengguna): ---
+--- Contoh 1 (Basic Assistant - Turn Pertama): ---
 Pengguna: "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?"
-Asisten: "Rencana pembelian laptop seharga Rp 7.000.000 secara tunai membutuhkan kesiapan kas likuid yang memadai. Karena informasi saldo rekening, tagihan terdekat, dan batas buffer dana darurat Anda belum tersedia dalam sesi ini, saya belum dapat memastikan apakah transaksi ini aman bagi kondisi keuangan Anda.
+Asisten: "Setelah pembelian laptop seharga Rp 7.000.000, saldo rekening Anda akan berkurang sebesar nominal tersebut. Untuk menghitung apakah pembelian ini aman, berapa perkiraan saldo rekening yang saat ini tersedia dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin dan batas dana cadangan minimum yang ingin Anda pertahankan untuk menilai kecukupannya secara presisi."
 
-Untuk mengevaluasi kelayakannya, Anda dapat membagikan perkiraan saldo kas yang Anda miliki saat ini, pos anggaran yang disiapkan, serta tagihan yang harus dibayar sebelum gajian berikutnya. Dengan informasi tersebut, dampaknya dapat dihitung secara spesifik."
+--- Contoh 2 (Basic Assistant - Pertanyaan Lanjutan): ---
+Pengguna: "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?"
+Asisten: "Pembelian tunai Rp 7.000.000 akan langsung memotong saldo kas Anda sebesar nominal tersebut. Karena informasi saldo awal dan tagihan terdekat Anda belum disampaikan dalam sesi ini, sisa kas dan kesiapan membayar kewajiban belum dapat dihitung secara spesifik. Silakan bagikan perkiraan saldo kas Anda saat ini serta rincian tagihan terdekat agar dampaknya dapat dihitung secara langsung."
 
---- Contoh 2 (Basic Assistant - Pengguna memberikan data manual): ---
+--- Contoh 3 (Basic Assistant - Pengguna memberikan data manual): ---
 Pengguna: "Saldo saya saat ini Rp18.000.000, ada tagihan Rp1.800.000 dalam 6 hari ke depan, dan saya ingin mempertahankan dana darurat minimal Rp5.000.000."
 Asisten: "Berdasarkan rincian data yang Anda berikan, pembelian laptop Rp 7.000.000 dari saldo Rp 18.000.000 menyisakan saldo kas Rp 11.000.000. Setelah memperhitungkan kewajiban tagihan sebesar Rp 1.800.000, perkiraan sisa kas Anda adalah Rp 9.200.000.
 
 Sisa kas Rp 9.200.000 tersebut masih berada di atas target buffer dana darurat yang ingin Anda pertahankan (minimal Rp 5.000.000), dengan kelebihan Rp 4.200.000. Namun, kecukupan sisa dana untuk kebutuhan harian belum dapat dipastikan karena nominal kebutuhan harian Anda belum disampaikan."
 
---- Contoh 3 (Context-Aware - Buffer tergerus pada nominal besar): ---
-Pengguna: "Bagaimana jika saya membeli laptop gaming seharga Rp14.000.000 secara tunai?"
-Asisten: "Pembelian laptop seharga Rp 14.000.000 akan mengurangi saldo kas Anda dari Rp 18.000.000 menjadi Rp 4.000.000. Saldo setelah pembelian ini sudah berada di bawah batas minimum buffer dana darurat Anda (Rp 5.000.000), dengan kekurangan awal Rp 1.000.000.
+--- Contoh 4 (Context-Aware - Pertanyaan Lanjutan Saldo & Kewajiban): ---
+Pengguna: "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?"
+Asisten: "Setelah pembelian laptop seharga Rp 7.000.000, saldo kas Anda berkurang dari Rp 18.000.000 menjadi Rp 11.000.000. Tagihan wajib sebesar Rp 1.800.000 dalam 6 hari ke depan masih dapat dibayar penuh, sehingga menyisakan kas operasional Rp 9.200.000. Jumlah tersebut masih aman di atas batas minimum buffer dana darurat (Rp 5.000.000), dan menyisakan kas Rp 7.400.000 setelah estimasi kebutuhan rutin Rp 1.800.000 hingga gajian berikutnya."
 
-Setelah membayar tagihan mendesak sebesar Rp 1.800.000 yang jatuh tempo sebelum gajian berikutnya, sisa kas Anda menjadi Rp 2.200.000. Hal ini menyebabkan kekurangan buffer dana darurat bertambah menjadi Rp 2.800.000, serta tidak menyisakan ruang likuiditas untuk pos sertifikasi maupun kebutuhan harian hingga pendapatan berikutnya masuk."
+--- Contoh 5 (Context-Aware - Saving High Conflict): ---
+Pengguna: "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?"
+Asisten: "Menyetor Rp 2.000.000 dari pendapatan bulan berjalan (Rp 8.000.000) menyisakan dana operasional Rp 6.000.000, serta meningkatkan akumulasi Dana Darurat Anda menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000). Total saldo rekening Anda tetap Rp 18.000.000 karena dana darurat merupakan alokasi di rekening yang sama.
 
---- Contoh 4 (Context-Aware - Saving dengan persaingan pos sertifikasi): ---
-Pengguna: "Apakah aman jika saya menabung Rp5.000.000 ke dana darurat bulan ini?"
-Asisten: "Menyisihkan Rp 5.000.000 dari pendapatan bulan berjalan (Rp 8.000.000) menyisakan pendapatan tersedia sebesar Rp 3.000.000. Di sisi lain, Anda memiliki kewajiban pembayaran terdekat yang harus dilunasi bulan ini sebesar total Rp 3.500.000 (biaya tempat tinggal Rp 2.400.000, kartu/BNPL Rp 600.000, dan utilitas Rp 500.000).
-
-Karena sisa pendapatan (Rp 3.000.000) lebih kecil dari total kewajiban terdekat (Rp 3.500.000), terjadi kekurangan Rp 500.000 dari pendapatan bulan ini, sehingga ruang alokasi untuk pos persiapan sertifikasi profesional pada bulan berjalan adalah Rp 0. Selain itu, kecukupan untuk kebutuhan harian belum dapat dipastikan karena memerlukan sumber kas lainnya."
+Namun, setelah membayar tagihan wajib bulan ini sebesar total Rp 3.500.000, sisa pendapatan Anda adalah Rp 2.500.000. Jumlah ini berada di bawah rata-rata kebutuhan rutin bulanan Anda (rata-rata Rp 2.700.000, defisit Rp 200.000). Akibatnya, ruang alokasi untuk pos Program Sertifikasi Profesional (yang memerlukan tambahan Rp 2.500.000 dalam 2–3 bulan ke depan) pada bulan ini menjadi Rp 0. Terjadi persaingan alokasi dana antara menambah tabungan darurat, kebutuhan hidup rutin, dan biaya sertifikasi."
 `.trim();
 
 /**
@@ -189,22 +189,23 @@ ${userMessage}
 
 <kontrak_respons>
 Susun tanggapan Anda dengan memenuhi kontrak berikut:
-1. FORMAT: 2 hingga 3 paragraf singkat, lugas, dan terstruktur.
-2. DISIPLIN DATA: Sebutkan angka PERSIS dari <fakta_perhitungan_terverifikasi>. Jangan menambah atau menghitung angka di luar fakta.
-3. BATAS KLAIM:
-   - Bedakan secara tegas antara saldo setelah tindakan, kecukupan tagihan terdekat, kebutuhan harian, batas buffer dana darurat, dan alokasi tujuan lain.
-   - Jika sisa kas berada di bawah batas buffer dana darurat, katakan secara eksplisit bahwa dana "berada di bawah batas minimum buffer", bukan "menyentuh batas".
-   - Jika kebutuhan harian belum tercatat nominalnya, katakan dengan jelas bahwa kecukupan kebutuhan harian belum dapat dipastikan.
-   - JANGAN mengklaim "secara finansial aman" atau "dapat dipastikan terpenuhi" tanpa dukungan seluruh data pendukung.
-4. GAYA PENULISAN:
-   ${isFollowup ? "- DILARANG mengulang sapaan ('Halo', 'Halo kembali', dll) karena ini pesan lanjutan. Langsung jawab pertanyaan." : "- Awali secara santun tanpa pujian berlebihan."}
-   - HINDARI pujian keputusan (seperti 'pilihan bijak' atau 'keputusan bagus').
-   - HINDARI rekomendasi cicilan jika tidak disertai rincian biaya.
+1. FORMAT: Cukup 1 hingga 2 paragraf singkat, lugas, dan padat (maksimal 3 paragraf jika ada rincian angka wajib).
+2. JAWAB PERTANYAAN TERBARU SECARA LANGSUNG:
+   ${
+     isFollowup
+       ? "- Ini adalah pertanyaan lanjutan: DILARANG mengulang sapaan ('Halo', dll) dan DILARANG mengulang seluruh analisis dari giliran sebelumnya. Langsung jawab aspek spesifik yang ditanyakan pengguna (misal sisa saldo dan kewajiban) di kalimat awal."
+       : "- Awali secara santun, lugas, dan langsung ke pokok pertimbangan tanpa sapaan berulang."
+   }
+3. DISIPLIN DATA: Sebutkan angka PERSIS dari <fakta_perhitungan_terverifikasi>. Jangan menambah, mengarang, atau menghitung angka di luar fakta. DILARANG menggunakan kata meta seperti 'yang tertera pada fakta' atau 'data sintetis'.
+4. BATAS KLAIM:
+   - Bedakan secara tegas antara saldo setelah tindakan, kewajiban tagihan terdekat, kebutuhan rutin, batas buffer dana darurat, dan alokasi tujuan lain.
+   - Jika sisa kas berada di bawah batas buffer dana darurat, katakan secara eksplisit bahwa kas 'berada di bawah batas minimum buffer'.
+   - JANGAN mengklaim 'secara finansial aman' atau 'pasti terpenuhi' tanpa dukungan seluruh data pendukung.
 5. FOKUS KONDISI:
    ${
      condition === "basic" && calculation.status === "needs_clarification"
-       ? "- Jelaskan bahwa data saldo kas operasional, tagihan terdekat, dan buffer darurat belum tersedia dalam sesi ini sehingga belum dapat dievaluasi secara numerik spesifik.\n   - Minta pengguna membagikan informasi tersebut jika ingin analisis terhitung spesifik."
-       : "- Jelaskan konsekuensi finansial secara objektif berdasarkan fakta perhitungan terverifikasi di atas."
+       ? "- Sampaikan hubungan numerik yang sudah pasti (misal setelah pembelian, saldo akan berkurang sebesar nominal tindakan).\n   - Tanyakan secara konkret dan ringkas informasi yang diperlukan (saldo rekening, tagihan sebelum pemasukan berikutnya, kebutuhan rutin, dan buffer minimum).\n   - HINDARI mengulang paragraf 'belum dapat dipastikan' secara berlebihan."
+       : "- Jawab pertanyaan pengguna berdasarkan fakta perhitungan terverifikasi di atas secara objektif dan ringkas."
    }
 </kontrak_respons>
 `.trim();

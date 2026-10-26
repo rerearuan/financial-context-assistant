@@ -59,6 +59,13 @@ export interface ScenarioPackage {
       currentAmount: number;
       source: "synthetic_profile";
     };
+    routineExpenses?: {
+      monthlyEstimate: number;
+      spentSoFar?: number;
+      remainingEstimate: number;
+      range?: { min: number; max: number };
+      source: "synthetic_profile";
+    };
     incomeSchedule: {
       sourceName: string;
       amount: number;
@@ -186,9 +193,16 @@ Tersedia dua metode pembayaran:
         },
       ],
       buffer: {
-        name: "Dana Darurat",
+        name: "Batas Minimum Dana Darurat",
         minAmount: 5000000,
         currentAmount: 5000000,
+        source: "synthetic_profile",
+      },
+      routineExpenses: {
+        monthlyEstimate: 4200000,
+        spentSoFar: 2400000,
+        remainingEstimate: 1800000,
+        range: { min: 1400000, max: 2200000 },
         source: "synthetic_profile",
       },
       incomeSchedule: {
@@ -333,9 +347,16 @@ Tersedia dua metode pembayaran:
         },
       ],
       buffer: {
-        name: "Dana Darurat",
+        name: "Batas Minimum Dana Darurat",
         minAmount: 5000000,
         currentAmount: 5000000,
+        source: "synthetic_profile",
+      },
+      routineExpenses: {
+        monthlyEstimate: 4200000,
+        spentSoFar: 2400000,
+        remainingEstimate: 1800000,
+        range: { min: 1400000, max: 2200000 },
         source: "synthetic_profile",
       },
       incomeSchedule: {
@@ -467,9 +488,16 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
         },
       ],
       buffer: {
-        name: "Dana Darurat Terkumpul",
-        minAmount: 8000000,
+        name: "Cadangan Kas Operasional",
+        minAmount: 0,
         currentAmount: 8000000,
+        source: "synthetic_profile",
+      },
+      routineExpenses: {
+        monthlyEstimate: 2700000,
+        spentSoFar: 0,
+        remainingEstimate: 2700000,
+        range: { min: 2400000, max: 3000000 },
         source: "synthetic_profile",
       },
       incomeSchedule: {
@@ -615,9 +643,16 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
         },
       ],
       buffer: {
-        name: "Dana Darurat Terkumpul",
-        minAmount: 8000000,
+        name: "Cadangan Kas Operasional",
+        minAmount: 0,
         currentAmount: 8000000,
+        source: "synthetic_profile",
+      },
+      routineExpenses: {
+        monthlyEstimate: 2700000,
+        spentSoFar: 0,
+        remainingEstimate: 2700000,
+        range: { min: 2400000, max: 3000000 },
         source: "synthetic_profile",
       },
       incomeSchedule: {

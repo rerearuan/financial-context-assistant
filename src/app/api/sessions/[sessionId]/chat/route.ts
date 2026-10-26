@@ -125,6 +125,7 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     calculationSnapshot: {
       ...contextPacket.calculation,
       isFallback: assistantResult.isFallback,
+      responseSource: assistantResult.responseSource,
       retryCount: assistantResult.retryCount,
       promptVersion: assistantResult.promptVersion,
       modelUsed: assistantResult.modelUsed,
@@ -150,6 +151,7 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     followupCount: demoSess.followupCount,
     maxFollowupAllowed: demoSess.maxFollowupAllowed,
     isFallback: assistantResult.isFallback,
+    responseSource: assistantResult.responseSource,
     retryCount: assistantResult.retryCount,
   });
 }
@@ -396,6 +398,7 @@ export async function POST(
       followupCount: newFollowupCount,
       maxFollowupAllowed: session.maxFollowupAllowed,
       isFallback: assistantResult.isFallback,
+      responseSource: assistantResult.responseSource,
       retryCount: assistantResult.retryCount,
     });
   } catch (err: unknown) {

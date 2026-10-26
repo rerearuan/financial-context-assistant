@@ -47,15 +47,29 @@ export function calculateFinancialConsequences(
     const minBuffer = profile.buffer?.minAmount || 0;
     const projectedBufferRemaining = Math.max(0, remainingCashAfterImmediateObligations);
     const isBufferMaintained: AssessmentStatus =
-      remainingCashAfterImmediateObligations >= minBuffer;
+      minBuffer > 0 ? remainingCashAfterImmediateObligations >= minBuffer : true;
     const bufferShortfall = isBufferMaintained
       ? 0
       : Math.max(0, minBuffer - remainingCashAfterImmediateObligations);
 
-    // Essential daily expenses check:
-    // In scenarios, daily routine needs are based on historical estimates and not fixed contracted obligations.
-    // Therefore, exact coverage cannot be definitively certified without explicit real-time expense data.
-    const canCoverEssentialExpenses: AssessmentStatus = "unknown";
+    // Essential daily/routine expenses evaluation
+    let routineResult: FinancialCalculationResult["routineExpenses"] = null;
+    let canCoverEssentialExpenses: AssessmentStatus = "unknown";
+
+    if (profile.routineExpenses) {
+      const routineRemaining = profile.routineExpenses.remainingEstimate;
+      const baseForRoutine = remainingCashAfterImmediateObligations;
+      const remainingCashAfterRoutine = baseForRoutine - routineRemaining;
+      canCoverEssentialExpenses = remainingCashAfterRoutine >= 0;
+
+      routineResult = {
+        estimatedRemaining: routineRemaining,
+        rangeMin: profile.routineExpenses.range?.min,
+        rangeMax: profile.routineExpenses.range?.max,
+        isCovered: canCoverEssentialExpenses,
+        remainingCashAfterRoutine,
+      };
+    }
 
     // Goals & Protected Allocations Evaluation
     const goalsEvaluation: GoalAllocationCalculation[] = [];
@@ -83,15 +97,16 @@ export function calculateFinancialConsequences(
           });
         } else {
           // Other protected goals (e.g. Program Sertifikasi)
-          // Liquid surplus above buffer after action & immediate obligations:
-          const surplusAboveBuffer = remainingCashAfterImmediateObligations - minBuffer;
+          // Liquid surplus above buffer and routine expenses:
+          const routineDeduction = routineResult ? routineResult.estimatedRemaining : 0;
+          const surplusAboveBuffer = remainingCashAfterImmediateObligations - minBuffer - routineDeduction;
           const isGoalFundIntact = surplusAboveBuffer >= g.currentAllocated;
 
           if (!isGoalFundIntact) {
             areProtectedAllocationsMaintained = false;
           }
 
-          const deficitGoalFund = Math.max(0, g.currentAllocated - surplusAboveBuffer);
+          const deficitGoalFund = Math.max(0, g.currentAllocated - Math.max(0, surplusAboveBuffer));
 
           goalsEvaluation.push({
             title: g.title,
@@ -104,7 +119,7 @@ export function calculateFinancialConsequences(
               ? `Dana yang telah disisihkan untuk ${g.title} (Rp ${g.currentAllocated.toLocaleString(
                   "id-ID"
                 )}) tetap terlindungi tanpa terpakai.`
-              : `Sisa dana likuid setelah buffer darurat (Rp ${Math.max(
+              : `Sisa dana likuid setelah buffer darurat dan kebutuhan rutin (Rp ${Math.max(
                   0,
                   surplusAboveBuffer
                 ).toLocaleString("id-ID")}) berada di bawah alokasi ${
@@ -120,17 +135,19 @@ export function calculateFinancialConsequences(
                 "id-ID"
               )}) berpotensi tergerus sebesar Rp ${deficitGoalFund.toLocaleString(
                 "id-ID"
-              )} karena sisa dana likuid di atas batas buffer tidak mencukupi.`
+              )} karena sisa dana likuid setelah kewajiban, buffer, dan kebutuhan rutin tidak mencukupi.`
             );
           }
         }
       } else {
         // In saving scenarios:
         // Monthly income available for allocation = relevantBudget (e.g. Rp 8.000.000)
-        // After this saving action (e.g. Rp 2.000.000 or Rp 5.000.000):
+        // After this saving action (e.g. Rp 2.000.000):
         const monthlyAvailable = selected.relevantBudget?.remaining ?? profile.incomeSchedule.amount;
         const remainingMonthlyAfterAction = monthlyAvailable - action.amount;
         const remainingMonthlyAfterBills = remainingMonthlyAfterAction - totalLiabilitiesBeforeIncome;
+        const routineEstimate = routineResult ? routineResult.estimatedRemaining : 2700000;
+        const netAfterRoutine = remainingMonthlyAfterBills - routineEstimate;
 
         if (g.title.toLowerCase().includes("darurat")) {
           // Emergency fund goal
@@ -145,17 +162,18 @@ export function calculateFinancialConsequences(
             canMeetGoal: true,
             explanation: `Penambahan Rp ${action.amount.toLocaleString(
               "id-ID"
-            )} meningkatkan akumulasi Dana Darurat menjadi Rp ${newAllocated.toLocaleString(
+            )} meningkatkan akumulasi Dana Darurat dari Rp ${g.currentAllocated.toLocaleString(
               "id-ID"
-            )} (kekurangan menuju target tersisa Rp ${newShortfall.toLocaleString("id-ID")}).`,
+            )} menjadi Rp ${newAllocated.toLocaleString(
+              "id-ID"
+            )} (kekurangan Rp ${newShortfall.toLocaleString("id-ID")} menuju target Rp ${g.targetAmount.toLocaleString("id-ID")}).`,
           });
         } else {
           // Competing goal (e.g. Program Sertifikasi)
-          // Check explicit numerical room left from monthly income after saving action and bills
-          const roomForGoalFromMonthly = Math.max(0, remainingMonthlyAfterBills);
-          const canFundGoal = remainingMonthlyAfterBills >= remainingShortfall;
+          const roomForGoalFromMonthly = Math.max(0, netAfterRoutine);
+          const canFundGoal = netAfterRoutine >= remainingShortfall;
 
-          if (remainingMonthlyAfterBills <= 0) {
+          if (netAfterRoutine <= 0) {
             areProtectedAllocationsMaintained = false;
           }
 
@@ -164,41 +182,41 @@ export function calculateFinancialConsequences(
             targetAmount: g.targetAmount,
             currentAllocated: g.currentAllocated,
             remainingShortfall,
-            availableSurplusAfterObligations: remainingMonthlyAfterBills,
+            availableSurplusAfterObligations: netAfterRoutine,
             canMeetGoal: canFundGoal,
             explanation:
-              remainingMonthlyAfterBills <= 0
+              netAfterRoutine <= 0
                 ? `Setelah setoran Rp ${action.amount.toLocaleString(
                     "id-ID"
-                  )} dan kewajiban terdekat Rp ${totalLiabilitiesBeforeIncome.toLocaleString(
+                  )}, kewajiban terdekat Rp ${totalLiabilitiesBeforeIncome.toLocaleString(
                     "id-ID"
-                  )}, sisa pendapatan bulan ini adalah Rp ${remainingMonthlyAfterBills.toLocaleString(
+                  )}, dan estimasi kebutuhan rutin Rp ${routineEstimate.toLocaleString(
                     "id-ID"
-                  )} (defisit Rp ${Math.abs(
-                    remainingMonthlyAfterBills
-                  ).toLocaleString("id-ID")}), sehingga ruang alokasi untuk pos ${
+                  )}, sisa pendapatan bulan ini adalah defisit Rp ${Math.abs(
+                    netAfterRoutine
+                  ).toLocaleString("id-ID")}, sehingga ruang alokasi untuk pos ${
                     g.title
                   } pada bulan ini adalah Rp 0.`
-                : `Sisa pendapatan setelah setoran dan kewajiban terdekat adalah Rp ${remainingMonthlyAfterBills.toLocaleString(
+                : `Sisa pendapatan setelah setoran, kewajiban, dan kebutuhan rutin adalah Rp ${netAfterRoutine.toLocaleString(
                     "id-ID"
                   )}. Ruang alokasi untuk pos ${g.title} (butuh Rp ${remainingShortfall.toLocaleString(
                     "id-ID"
                   )}) ${
                     canFundGoal
-                      ? "tersedia secara proporsional"
+                      ? "tersedia secara penuh"
                       : `hanya dapat dialokasikan sebagian (maksimal Rp ${roomForGoalFromMonthly.toLocaleString(
                           "id-ID"
                         )})`
-                  }, belum memperhitungkan kebutuhan harian.`,
+                  }.`,
           });
 
-          if (remainingMonthlyAfterBills <= 0) {
+          if (netAfterRoutine <= 0) {
             goalImpactNotes.push(
-              `Pendapatan bulan berjalan tidak menyisakan ruang alokasi (Rp 0) untuk pos ${g.title} karena sisa pendapatan setelah setoran (Rp ${remainingMonthlyAfterAction.toLocaleString(
+              `Pendapatan bulan berjalan tidak menyisakan ruang alokasi (Rp 0) untuk pos ${g.title} karena sisa pendapatan setelah setoran tabungan (Rp ${remainingMonthlyAfterAction.toLocaleString(
                 "id-ID"
-              )}) lebih kecil dari total kewajiban terdekat (Rp ${totalLiabilitiesBeforeIncome.toLocaleString(
+              )}) habis terserap oleh kewajiban terdekat (Rp ${totalLiabilitiesBeforeIncome.toLocaleString(
                 "id-ID"
-              )}).`
+              )}) dan estimasi kebutuhan rutin (Rp ${routineEstimate.toLocaleString("id-ID")}).`
             );
           }
         }
@@ -291,10 +309,40 @@ export function calculateFinancialConsequences(
       }
     }
 
-    // Essential daily expenses caveat
-    deterministicFacts.push(
-      `Cakupan kebutuhan harian: Kecukupan sisa dana untuk kebutuhan harian belum dapat dipastikan secara definitif karena nominal pasti kebutuhan harian hingga gajian berikutnya belum tercatat.`
-    );
+    // Routine expenses reporting
+    if (routineResult) {
+      if (action.type === "saving") {
+        deterministicFacts.push(
+          `Kebutuhan rutin bulanan: Diestimasikan rata-rata Rp ${routineResult.estimatedRemaining.toLocaleString(
+            "id-ID"
+          )} (rentang Rp ${(routineResult.rangeMin || 2400000).toLocaleString(
+            "id-ID"
+          )}–Rp ${(routineResult.rangeMax || 3000000).toLocaleString(
+            "id-ID"
+          )}). Sisa pendapatan setelah setoran tabungan dan kewajiban tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString(
+            "id-ID"
+          )}, sehingga terjadi defisit Rp ${Math.abs(
+            routineResult.remainingCashAfterRoutine || 0
+          ).toLocaleString(
+            "id-ID"
+          )} terhadap kebutuhan rutin rata-rata (hanya cukup jika pengeluaran rutin ditekan ke batas minimum Rp 2.400.000).`
+        );
+      } else {
+        deterministicFacts.push(
+          `Kebutuhan rutin hingga pemasukan berikutnya (12 hari): Diestimasikan sekitar Rp ${routineResult.estimatedRemaining.toLocaleString(
+            "id-ID"
+          )} (sisa dari pagu bulanan setelah terpakai Rp 2.400.000). Sisa kas setelah tagihan (Rp ${remainingCashAfterImmediateObligations.toLocaleString(
+            "id-ID"
+          )}) mencukupi kebutuhan rutin ini dengan sisa kas Rp ${(
+            routineResult.remainingCashAfterRoutine || 0
+          ).toLocaleString("id-ID")}.`
+        );
+      }
+    } else {
+      deterministicFacts.push(
+        `Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.`
+      );
+    }
 
     // Goals facts
     for (const ge of goalsEvaluation) {
@@ -316,6 +364,7 @@ export function calculateFinancialConsequences(
       liabilitiesDueAfterIncome: selected.liabilitiesDueAfterIncome,
       totalLiabilitiesAfterIncome: selected.totalLiabilitiesAfterIncome,
       remainingCashAfterImmediateObligations,
+      routineExpenses: routineResult,
       isLiquidityThreatened,
       deficitAmount,
       canPayAction,
@@ -479,6 +528,7 @@ export function calculateFinancialConsequences(
       liabilitiesDueAfterIncome: [],
       totalLiabilitiesAfterIncome: 0,
       remainingCashAfterImmediateObligations,
+      routineExpenses: null,
       isLiquidityThreatened,
       deficitAmount,
       canPayAction,
@@ -524,6 +574,7 @@ export function calculateFinancialConsequences(
     liabilitiesDueAfterIncome: [],
     totalLiabilitiesAfterIncome: 0,
     remainingCashAfterImmediateObligations: null,
+    routineExpenses: null,
     isLiquidityThreatened: false,
     deficitAmount: 0,
     canPayAction: "unknown",
@@ -544,8 +595,12 @@ export function calculateFinancialConsequences(
       `Jenis tindakan: ${action.type === "spending" ? "Pengeluaran" : "Penyisihan Tabungan"}.`,
       `Target pos/kategori: ${action.targetCategory}.`,
       `Waktu pelaksanaan: ${action.timing}.`,
-      `Status data finansial pengguna: Belum tersedia. Saldo kas, tagihan terdekat, dan batas buffer belum diberikan.`,
-      `Status kecukupan finansial: Tidak diketahui (unknown) sebelum pengguna memberikan angka saldo/anggaran.`,
+      `Hubungan numerik: ${
+        action.type === "spending"
+          ? `Setelah pembelian Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening akan berkurang sebesar nominal tersebut.`
+          : `Penyisihan Rp ${action.amount.toLocaleString("id-ID")} akan mengalihkan dana dari pendapatan/kas operasional ke tabungan.`
+      }`,
+      `Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan.`,
     ],
   };
 }

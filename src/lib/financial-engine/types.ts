@@ -53,6 +53,14 @@ export interface IncomeScheduleItem {
   source: "synthetic_profile" | "user_message";
 }
 
+export interface RoutineExpensesContext {
+  monthlyEstimate: number;
+  spentSoFar?: number;
+  remainingEstimate: number;
+  range?: { min: number; max: number };
+  source: "synthetic_profile" | "user_message";
+}
+
 export interface FinancialProfileContext {
   totalCashBalance: number;
   liquidBalance: number;
@@ -60,6 +68,7 @@ export interface FinancialProfileContext {
   liabilities: LiabilityItem[];
   goals: GoalItem[];
   buffer: BufferItem;
+  routineExpenses?: RoutineExpensesContext;
   incomeSchedule: IncomeScheduleItem;
   source: "synthetic_profile";
 }
@@ -111,6 +120,23 @@ export interface FinancialCalculationResult {
   isLiquidityThreatened: boolean;
   deficitAmount: number;
   
+  // Essential Routine Expenses
+  routineExpenses: {
+    estimatedRemaining: number;
+    rangeMin?: number;
+    rangeMax?: number;
+    isCovered: AssessmentStatus;
+    remainingCashAfterRoutine: number | null;
+  } | null;
+
+  // Emergency Fund details
+  emergencyFundEvaluation?: {
+    currentAccumulated: number;
+    targetAmount: number;
+    newAccumulated: number;
+    remainingShortfall: number;
+  } | null;
+
   // Separated Evaluation Statuses (Granular Financial Dimensions)
   canPayAction: AssessmentStatus;
   canCoverObligations: AssessmentStatus;
@@ -145,6 +171,7 @@ export interface StructuredContextPacket {
     liabilities?: LiabilityItem[];
     goals?: GoalItem[];
     buffer?: BufferItem;
+    routineExpenses?: RoutineExpensesContext;
     incomeSchedule?: IncomeScheduleItem;
     userProvidedFinances?: UserProvidedFinances;
   } | null;

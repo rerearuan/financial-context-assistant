@@ -1,0 +1,1274 @@
+[
+  {
+    "cellNumber": 1,
+    "cellCode": "CELL_1_SPENDING_LOW_BASIC",
+    "scenarioId": "spending_low",
+    "scenarioTitle": "Pertimbangan Pembelian Laptop",
+    "actionType": "spending",
+    "conflictLevel": "low",
+    "condition": "basic",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+        "timestamp": "2026-10-26T07:53:21.317Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000 secara tunai, saldo rekening Anda akan langsung berkurang sebesar nominal tersebut. \n\nUntuk menghitung apakah pembelian ini aman terhadap kewajiban dan kebutuhan Anda, berapa saldo rekening yang saat ini tersedia dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana cadangan minimum yang ingin Anda pertahankan untuk menilai kecukupannya secara presisi.",
+        "timestamp": "2026-10-26T07:53:24.545Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 7.000.000.",
+            "Jenis tindakan: Pengeluaran.",
+            "Target pos/kategori: Pembelian Laptop.",
+            "Waktu pelaksanaan: Hari ini (Promo terbatas).",
+            "Hubungan numerik: Setelah pembelian Rp 7.000.000, saldo rekening akan berkurang sebesar nominal tersebut.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:53:31.047Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000, saldo rekening Anda akan langsung berkurang sebesar nominal tersebut. Dampak spesifik terhadap sisa saldo kas dan kesiapan membayar kewajiban terdekat belum dapat dihitung secara pasti karena rincian saldo awal dan daftar tagihan belum Anda sampaikan dalam sesi ini.\n\nUntuk menghitung sisa kas dan memastikan kecukupannya terhadap kewajiban serta batas buffer dana darurat, silakan bagikan informasi mengenai saldo rekening saat ini, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, serta batas minimum dana cadangan yang ingin Anda pertahankan.",
+        "timestamp": "2026-10-26T07:53:34.051Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 7.000.000.",
+            "Jenis tindakan: Pengeluaran.",
+            "Target pos/kategori: Pembelian Laptop.",
+            "Waktu pelaksanaan: Hari ini (Promo terbatas).",
+            "Hubungan numerik: Setelah pembelian Rp 7.000.000, saldo rekening akan berkurang sebesar nominal tersebut.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 2,
+    "cellCode": "CELL_2_SPENDING_LOW_CONTEXT_AWARE",
+    "scenarioId": "spending_low",
+    "scenarioTitle": "Pertimbangan Pembelian Laptop",
+    "actionType": "spending",
+    "conflictLevel": "low",
+    "condition": "context_aware",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+        "timestamp": "2026-10-26T07:53:40.553Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000 secara tunai, saldo rekening kas Anda akan berkurang dari Rp 18.000.000 menjadi Rp 11.000.000. Pengeluaran ini melebihi alokasi anggaran pos Dana Alokasi Laptop yang tersisa sebesar Rp 6.000.000 dengan selisih kekurangan Rp 1.000.000. \n\nMeskipun demikian, sisa kas tersebut masih mencukupi untuk melunasi kewajiban tagihan terdekat sebesar Rp 1.800.000 yang jatuh tempo pada 2026-10-31, sehingga menyisakan kas operasional sebesar Rp 9.200.000. Batas minimum buffer dana darurat sebesar Rp 5.000.000 tetap terlindungi, namun kecukupan dana untuk kebutuhan rutin belum dapat dipastikan karena nominal kebutuhan harian belum disampaikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:53:48.643Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 11000000,
+          "relevantBudget": {
+            "category": "Dana Alokasi Laptop",
+            "allocated": 6000000,
+            "spentSoFar": 0,
+            "remaining": 6000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": -1000000,
+          "isBudgetExceeded": true,
+          "nextIncomeDate": "2026-11-06",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Khusus 6 Hari Ke Depan",
+              "amount": 1800000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 1800000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 9200000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 5000000,
+            "projectedBufferRemaining": 9200000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Pembelian Laptop",
+              "targetAmount": 7000000,
+              "currentAllocated": 6000000,
+              "remainingShortfall": 1000000,
+              "availableSurplusAfterObligations": 9200000,
+              "canMeetGoal": true,
+              "explanation": "Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pengeluaran melebihi sisa anggaran pos Dana Alokasi Laptop sebesar Rp 1.000.000."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 7.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 11.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Dana Alokasi Laptop: tersisa Rp 6.000.000 (Melebihi alokasi pos sebesar Rp 1.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-06): total Rp 1.800.000 [Tagihan Khusus 6 Hari Ke Depan (Rp 1.800.000, jatuh tempo 2026-10-31)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 9.200.000 (Kewajiban terdekat tercukupi).",
+            "Evaluasi buffer: Batas buffer dana darurat (minimal Rp 5.000.000) tetap terlindungi dengan kelebihan kas Rp 4.200.000.",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Pembelian Laptop: Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:53:55.144Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000, saldo kas Anda berkurang dari Rp 18.000.000 menjadi Rp 11.000.000. Pengeluaran ini melebihi sisa alokasi pos Dana Alokasi Laptop sebesar Rp 6.000.000 dengan selisih kekurangan Rp 1.000.000.\n\nKewajiban tagihan terdekat sebesar Rp 1.800.000 yang jatuh tempo pada 2026-10-31 masih dapat dibayar penuh, menyisakan kas operasional sebesar Rp 9.200.000. Sisa kas tersebut tetap berada di atas batas minimum buffer dana darurat sebesar Rp 5.000.000, namun kecukupan dana untuk kebutuhan rutin belum dapat dipastikan karena nominal kebutuhan harian belum disampaikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:53:59.883Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 11000000,
+          "relevantBudget": {
+            "category": "Dana Alokasi Laptop",
+            "allocated": 6000000,
+            "spentSoFar": 0,
+            "remaining": 6000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": -1000000,
+          "isBudgetExceeded": true,
+          "nextIncomeDate": "2026-11-06",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Khusus 6 Hari Ke Depan",
+              "amount": 1800000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 1800000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 9200000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 5000000,
+            "projectedBufferRemaining": 9200000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Pembelian Laptop",
+              "targetAmount": 7000000,
+              "currentAllocated": 6000000,
+              "remainingShortfall": 1000000,
+              "availableSurplusAfterObligations": 9200000,
+              "canMeetGoal": true,
+              "explanation": "Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pengeluaran melebihi sisa anggaran pos Dana Alokasi Laptop sebesar Rp 1.000.000."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 7.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 11.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Dana Alokasi Laptop: tersisa Rp 6.000.000 (Melebihi alokasi pos sebesar Rp 1.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-06): total Rp 1.800.000 [Tagihan Khusus 6 Hari Ke Depan (Rp 1.800.000, jatuh tempo 2026-10-31)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 9.200.000 (Kewajiban terdekat tercukupi).",
+            "Evaluasi buffer: Batas buffer dana darurat (minimal Rp 5.000.000) tetap terlindungi dengan kelebihan kas Rp 4.200.000.",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Pembelian Laptop: Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 3,
+    "cellCode": "CELL_3_SPENDING_HIGH_BASIC",
+    "scenarioId": "spending_high",
+    "scenarioTitle": "Pertimbangan Pembelian Laptop",
+    "actionType": "spending",
+    "conflictLevel": "high",
+    "condition": "basic",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+        "timestamp": "2026-10-26T07:54:06.385Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000, saldo rekening Anda akan berkurang secara langsung sebesar nominal tersebut. \n\nUntuk menghitung secara presisi apakah pembelian ini aman, berapa perkiraan saldo rekening yang saat ini tersedia dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana cadangan minimum yang ingin Anda pertahankan guna menilai kecukupannya.",
+        "timestamp": "2026-10-26T07:54:09.661Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 7.000.000.",
+            "Jenis tindakan: Pengeluaran.",
+            "Target pos/kategori: Pembelian Laptop.",
+            "Waktu pelaksanaan: Hari ini (Promo terbatas).",
+            "Hubungan numerik: Setelah pembelian Rp 7.000.000, saldo rekening akan berkurang sebesar nominal tersebut.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:54:16.163Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Pembelian laptop senilai Rp 7.000.000 akan langsung mengurangi saldo kas Anda sebesar nominal tersebut. Namun, karena informasi mengenai saldo awal dan rincian kewajiban pembayaran terdekat belum tersedia dalam sesi ini, sisa saldo kas setelah pembelian serta kesiapan untuk membayar tagihan belum dapat dihitung secara spesifik.\n\nUntuk mengevaluasi dampaknya secara presisi, silakan bagikan informasi mengenai perkiraan saldo rekening saat ini, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, serta batas dana cadangan minimum yang ingin Anda pertahankan.",
+        "timestamp": "2026-10-26T07:54:18.873Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 7.000.000.",
+            "Jenis tindakan: Pengeluaran.",
+            "Target pos/kategori: Pembelian Laptop.",
+            "Waktu pelaksanaan: Hari ini (Promo terbatas).",
+            "Hubungan numerik: Setelah pembelian Rp 7.000.000, saldo rekening akan berkurang sebesar nominal tersebut.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 4,
+    "cellCode": "CELL_4_SPENDING_HIGH_CONTEXT_AWARE",
+    "scenarioId": "spending_high",
+    "scenarioTitle": "Pertimbangan Pembelian Laptop",
+    "actionType": "spending",
+    "conflictLevel": "high",
+    "condition": "context_aware",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+        "timestamp": "2026-10-26T07:54:25.375Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop secara tunai seharga Rp 7.000.000, saldo rekening kas Anda yang saat ini sebesar Rp 18.000.000 akan menyisakan Rp 11.000.000. Pengeluaran ini melebihi sisa anggaran pos Dana Alokasi Laptop yang tersisa sebesar Rp 3.000.000, dengan selisih kekurangan Rp 4.000.000 yang diambil dari kas umum. \n\nSisa kas tersebut masih mencukupi untuk membayar kewajiban terdekat sebesar Rp 1.800.000 yang jatuh tempo pada 2026-10-31, menyisakan kas operasional Rp 9.200.000. Jumlah ini masih berada di atas batas minimum buffer dana darurat (minimal Rp 5.000.000) dengan kelebihan Rp 4.200.000, serta tidak mengganggu dana Program Sertifikasi Profesional yang tersimpan Rp 3.000.000. Namun, kecukupan sisa dana untuk kebutuhan harian belum dapat dipastikan karena nominal kebutuhan rutin Anda belum dibagikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:54:28.466Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 11000000,
+          "relevantBudget": {
+            "category": "Dana Alokasi Laptop",
+            "allocated": 3000000,
+            "spentSoFar": 0,
+            "remaining": 3000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": -4000000,
+          "isBudgetExceeded": true,
+          "nextIncomeDate": "2026-11-06",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Khusus 6 Hari Ke Depan",
+              "amount": 1800000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 1800000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 9200000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 5000000,
+            "projectedBufferRemaining": 9200000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Program Sertifikasi Profesional",
+              "targetAmount": 4500000,
+              "currentAllocated": 3000000,
+              "remainingShortfall": 1500000,
+              "availableSurplusAfterObligations": 4200000,
+              "canMeetGoal": true,
+              "explanation": "Dana yang telah disisihkan untuk Program Sertifikasi Profesional (Rp 3.000.000) tetap terlindungi tanpa terpakai."
+            },
+            {
+              "title": "Pembelian Laptop",
+              "targetAmount": 7000000,
+              "currentAllocated": 3000000,
+              "remainingShortfall": 4000000,
+              "availableSurplusAfterObligations": 9200000,
+              "canMeetGoal": true,
+              "explanation": "Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pengeluaran melebihi sisa anggaran pos Dana Alokasi Laptop sebesar Rp 4.000.000."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 7.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 11.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Dana Alokasi Laptop: tersisa Rp 3.000.000 (Melebihi alokasi pos sebesar Rp 4.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-06): total Rp 1.800.000 [Tagihan Khusus 6 Hari Ke Depan (Rp 1.800.000, jatuh tempo 2026-10-31)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 9.200.000 (Kewajiban terdekat tercukupi).",
+            "Evaluasi buffer: Batas buffer dana darurat (minimal Rp 5.000.000) tetap terlindungi dengan kelebihan kas Rp 4.200.000.",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Program Sertifikasi Profesional: Dana yang telah disisihkan untuk Program Sertifikasi Profesional (Rp 3.000.000) tetap terlindungi tanpa terpakai.",
+            "Pos tujuan Pembelian Laptop: Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:54:34.969Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Setelah pembelian laptop seharga Rp 7.000.000 secara tunai, saldo kas Anda yang saat ini sebesar Rp 18.000.000 akan berkurang menjadi Rp 11.000.000. Sisa saldo kas tersebut masih mencukupi untuk membayar kewajiban terdekat sebesar Rp 1.800.000 yang jatuh tempo pada 2026-10-31 sebelum pemasukan berikutnya pada 2026-11-06.\n\nSetelah dikurangi dengan kewajiban tagihan tersebut, perkiraan sisa kas operasional Anda adalah Rp 9.200.000. Jumlah ini masih berada di atas batas minimum buffer dana darurat sebesar Rp 5.000.000 dengan kelebihan kas Rp 4.200.000, serta tidak mengganggu dana Program Sertifikasi Profesional yang tersimpan sebesar Rp 3.000.000. Namun, kecukupan sisa dana untuk kebutuhan rutin atau harian belum dapat dipastikan karena nominal kebutuhan rutin Anda belum dibagikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:54:37.666Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 7000000,
+          "actionType": "spending",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 11000000,
+          "relevantBudget": {
+            "category": "Dana Alokasi Laptop",
+            "allocated": 3000000,
+            "spentSoFar": 0,
+            "remaining": 3000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": -4000000,
+          "isBudgetExceeded": true,
+          "nextIncomeDate": "2026-11-06",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Khusus 6 Hari Ke Depan",
+              "amount": 1800000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 1800000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 9200000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 5000000,
+            "projectedBufferRemaining": 9200000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Program Sertifikasi Profesional",
+              "targetAmount": 4500000,
+              "currentAllocated": 3000000,
+              "remainingShortfall": 1500000,
+              "availableSurplusAfterObligations": 4200000,
+              "canMeetGoal": true,
+              "explanation": "Dana yang telah disisihkan untuk Program Sertifikasi Profesional (Rp 3.000.000) tetap terlindungi tanpa terpakai."
+            },
+            {
+              "title": "Pembelian Laptop",
+              "targetAmount": 7000000,
+              "currentAllocated": 3000000,
+              "remainingShortfall": 4000000,
+              "availableSurplusAfterObligations": 9200000,
+              "canMeetGoal": true,
+              "explanation": "Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pengeluaran melebihi sisa anggaran pos Dana Alokasi Laptop sebesar Rp 4.000.000."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 7.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 11.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Dana Alokasi Laptop: tersisa Rp 3.000.000 (Melebihi alokasi pos sebesar Rp 4.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-06): total Rp 1.800.000 [Tagihan Khusus 6 Hari Ke Depan (Rp 1.800.000, jatuh tempo 2026-10-31)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 9.200.000 (Kewajiban terdekat tercukupi).",
+            "Evaluasi buffer: Batas buffer dana darurat (minimal Rp 5.000.000) tetap terlindungi dengan kelebihan kas Rp 4.200.000.",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Program Sertifikasi Profesional: Dana yang telah disisihkan untuk Program Sertifikasi Profesional (Rp 3.000.000) tetap terlindungi tanpa terpakai.",
+            "Pos tujuan Pembelian Laptop: Pembelian dapat dieksekusi dengan saldo kas yang tersedia."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 5,
+    "cellCode": "CELL_5_SAVING_LOW_BASIC",
+    "scenarioId": "saving_low",
+    "scenarioTitle": "Pertimbangan Alokasi Tabungan",
+    "actionType": "saving",
+    "conflictLevel": "low",
+    "condition": "basic",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+        "timestamp": "2026-10-26T07:54:44.167Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Penyisihan dana sebesar Rp 2.000.000 untuk tabungan darurat bulan ini akan mengalihkan dana Anda dari kas operasional ke pos tabungan. Untuk menghitung apakah tindakan ini aman bagi keuangan Anda, berapa perkiraan saldo rekening yang saat ini tersedia dan total tagihan wajib sebelum pemasukan berikutnya? \n\nSaya juga memerlukan informasi mengenai estimasi kebutuhan rutin serta batas dana cadangan minimum yang ingin Anda pertahankan agar kecukupan kas, kewajiban, dan buffer dapat dievaluasi secara presisi.",
+        "timestamp": "2026-10-26T07:54:47.495Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 2.000.000.",
+            "Jenis tindakan: Penyisihan Tabungan.",
+            "Target pos/kategori: Penambahan Tabungan.",
+            "Waktu pelaksanaan: Bulan ini.",
+            "Hubungan numerik: Penyisihan Rp 2.000.000 akan mengalihkan dana dari pendapatan/kas operasional ke tabungan.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:54:53.998Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Penyisihan dana sebesar Rp 2.000.000 untuk tabungan akan mengalihkan dana dari kas operasional ke pos tabungan pada bulan ini. Namun, karena rincian saldo rekening saat ini, total tagihan terdekat, estimasi kebutuhan rutin, serta batas minimum dana darurat belum dibagikan, sisa saldo kas dan kesiapan membayar kewajiban pembayaran terdekat belum dapat dihitung secara spesifik.\n\nUntuk menghitung dampak persisnya, berapa perkiraan saldo rekening yang saat ini tersedia dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana cadangan minimum yang ingin Anda pertahankan untuk menilai kecukupannya.",
+        "timestamp": "2026-10-26T07:54:56.297Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 2.000.000.",
+            "Jenis tindakan: Penyisihan Tabungan.",
+            "Target pos/kategori: Penambahan Tabungan.",
+            "Waktu pelaksanaan: Bulan ini.",
+            "Hubungan numerik: Penyisihan Rp 2.000.000 akan mengalihkan dana dari pendapatan/kas operasional ke tabungan.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 6,
+    "cellCode": "CELL_6_SAVING_LOW_CONTEXT_AWARE",
+    "scenarioId": "saving_low",
+    "scenarioTitle": "Pertimbangan Alokasi Tabungan",
+    "actionType": "saving",
+    "conflictLevel": "low",
+    "condition": "context_aware",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+        "timestamp": "2026-10-26T07:55:02.799Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Menyisihkan Rp 2.000.000 ke dana darurat dari pendapatan bulan berjalan sebesar Rp 8.000.000 menyisakan sisa alokasi pos pendapatan Rp 6.000.000. Total saldo rekening kas Anda saat ini adalah Rp 16.000.000, dan setelah memperhitungkan tindakan tersebut, sisa saldo kas Anda menjadi Rp 14.000.000. Penambahan ini meningkatkan akumulasi dana darurat Anda dari Rp 8.000.000 menjadi Rp 10.000.000, sehingga masih terdapat kekurangan Rp 2.000.000 menuju target Rp 12.000.000. Perlu dicatat, dana darurat merupakan alokasi di dalam total saldo rekening yang sama.\n\nKewajiban tagihan terdekat yang jatuh tempo sebelum pemasukan berikutnya sebesar total Rp 3.500.000 (mencakup Tagihan Kartu/BNPL Rp 600.000, Biaya Tempat Tinggal Rp 2.400.000, dan Tagihan Utilitas Bulan Ini Rp 500.000) dapat dibayar sepenuhnya, menghasilkan sisa kas operasional setelah tindakan dan kewajiban sebesar Rp 10.500.000. Namun, kecukupan sisa dana tersebut untuk kebutuhan harian belum dapat dipastikan karena rincian kebutuhan rutin belum disampaikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:55:05.409Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": 16000000,
+          "balanceAfterAction": 14000000,
+          "relevantBudget": {
+            "category": "Pendapatan Tersedia Bulan Berjalan",
+            "allocated": 8000000,
+            "spentSoFar": 0,
+            "remaining": 8000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": 6000000,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": "2026-11-24",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Kartu/BNPL (6 hari)",
+              "amount": 600000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Biaya Tempat Tinggal (9 hari)",
+              "amount": 2400000,
+              "dueDate": "2026-11-03",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Tagihan Utilitas Bulan Ini",
+              "amount": 500000,
+              "dueDate": "2026-11-10",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 3500000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 10500000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 0,
+            "projectedBufferRemaining": 10500000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Target Dana Darurat",
+              "targetAmount": 12000000,
+              "currentAllocated": 10000000,
+              "remainingShortfall": 2000000,
+              "availableSurplusAfterObligations": 2500000,
+              "canMeetGoal": true,
+              "explanation": "Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+            }
+          ],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 16.000.000.",
+            "Rencana nominal tindakan: Rp 2.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 14.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Pendapatan Tersedia Bulan Berjalan: tersisa Rp 8.000.000 (Sisa alokasi pos mencukupi dengan sisa Rp 6.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-24): total Rp 3.500.000 [Tagihan Kartu/BNPL (6 hari) (Rp 600.000, jatuh tempo 2026-10-31), Biaya Tempat Tinggal (9 hari) (Rp 2.400.000, jatuh tempo 2026-11-03), Tagihan Utilitas Bulan Ini (Rp 500.000, jatuh tempo 2026-11-10)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 10.500.000 (Kewajiban terdekat tercukupi).",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Target Dana Darurat: Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:55:11.910Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Setelah penyisihan tabungan sebesar Rp 2.000.000, sisa saldo kas Anda menjadi Rp 14.000.000 dari total awal Rp 16.000.000. Seluruh kewajiban tagihan terdekat dengan total Rp 3.500.000 (mencakup Tagihan Kartu/BNPL Rp 600.000, Biaya Tempat Tinggal Rp 2.400.000, dan Tagihan Utilitas Bulan Ini Rp 500.000) dapat dibayar sepenuhnya.\n\nSisa kas operasional setelah dikurangi tindakan dan kewajiban tagihan tersebut adalah Rp 10.500.000. Tindakan ini juga meningkatkan akumulasi Dana Darurat Anda dari Rp 8.000.000 menjadi Rp 10.000.000 (menyisakan kekurangan Rp 2.000.000 menuju target Rp 12.000.000), di mana dana darurat ini merupakan bagian di dalam total saldo rekening. Namun, kecukupan sisa dana tersebut untuk kebutuhan harian rutin belum dapat dipastikan karena rincian kebutuhan rutin belum disampaikan.",
+        "timestamp": "2026-10-26T07:55:15.226Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": 16000000,
+          "balanceAfterAction": 14000000,
+          "relevantBudget": {
+            "category": "Pendapatan Tersedia Bulan Berjalan",
+            "allocated": 8000000,
+            "spentSoFar": 0,
+            "remaining": 8000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": 6000000,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": "2026-11-24",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Kartu/BNPL (6 hari)",
+              "amount": 600000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Biaya Tempat Tinggal (9 hari)",
+              "amount": 2400000,
+              "dueDate": "2026-11-03",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Tagihan Utilitas Bulan Ini",
+              "amount": 500000,
+              "dueDate": "2026-11-10",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 3500000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 10500000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": true,
+          "bufferImpact": {
+            "minBuffer": 0,
+            "projectedBufferRemaining": 10500000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Target Dana Darurat",
+              "targetAmount": 12000000,
+              "currentAllocated": 10000000,
+              "remainingShortfall": 2000000,
+              "availableSurplusAfterObligations": 2500000,
+              "canMeetGoal": true,
+              "explanation": "Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+            }
+          ],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 16.000.000.",
+            "Rencana nominal tindakan: Rp 2.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 14.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Pendapatan Tersedia Bulan Berjalan: tersisa Rp 8.000.000 (Sisa alokasi pos mencukupi dengan sisa Rp 6.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-24): total Rp 3.500.000 [Tagihan Kartu/BNPL (6 hari) (Rp 600.000, jatuh tempo 2026-10-31), Biaya Tempat Tinggal (9 hari) (Rp 2.400.000, jatuh tempo 2026-11-03), Tagihan Utilitas Bulan Ini (Rp 500.000, jatuh tempo 2026-11-10)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 10.500.000 (Kewajiban terdekat tercukupi).",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Target Dana Darurat: Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 7,
+    "cellCode": "CELL_7_SAVING_HIGH_BASIC",
+    "scenarioId": "saving_high",
+    "scenarioTitle": "Pertimbangan Alokasi Tabungan",
+    "actionType": "saving",
+    "conflictLevel": "high",
+    "condition": "basic",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+        "timestamp": "2026-10-26T07:55:21.727Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Penyisihan dana sebesar Rp 2.000.000 untuk tabungan darurat akan mengalihkan kas operasional Anda sebesar nominal tersebut. Untuk menghitung apakah penyisihan ini aman, berapa perkiraan saldo rekening yang saat ini tersedia dan total tagihan wajib sebelum pemasukan berikutnya? \n\nSaya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana cadangan minimum yang ingin Anda pertahankan agar kecukupan kas, kewajiban, dan ruang alokasi pos lainnya dapat dievaluasi secara presisi.",
+        "timestamp": "2026-10-26T07:55:25.323Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 2.000.000.",
+            "Jenis tindakan: Penyisihan Tabungan.",
+            "Target pos/kategori: Penambahan Tabungan.",
+            "Waktu pelaksanaan: Bulan ini.",
+            "Hubungan numerik: Penyisihan Rp 2.000.000 akan mengalihkan dana dari pendapatan/kas operasional ke tabungan.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:55:31.824Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Penyisihan tabungan sebesar Rp 2.000.000 akan mengalihkan dana dari pendapatan atau kas operasional Anda sebesar nominal tersebut. Namun, karena informasi mengenai saldo rekening saat ini, total tagihan terdekat, estimasi kebutuhan rutin, serta batas buffer minimum belum Anda sampaikan, dampak spesifik terhadap sisa dana dan kesiapan membayar kewajiban belum dapat dihitung secara presisi.\n\nSilakan bagikan perkiraan saldo rekening Anda saat ini, total tagihan sebelum pemasukan berikutnya, serta estimasi kebutuhan rutin dan batas minimum dana darurat yang ingin dipertahankan agar sisa kas dan keamanan kewajiban dapat dihitung secara langsung.",
+        "timestamp": "2026-10-26T07:55:35.652Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "needs_clarification",
+          "clarificationReason": "Data saldo kas, sisa anggaran, dan kewajiban belum dibagikan oleh pengguna dalam sesi ini.",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": null,
+          "balanceAfterAction": null,
+          "relevantBudget": null,
+          "budgetVariance": null,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": null,
+          "liabilitiesDueBeforeIncome": [],
+          "totalLiabilitiesBeforeIncome": 0,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": null,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": "unknown",
+          "canCoverObligations": "unknown",
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": "unknown",
+          "areProtectedAllocationsMaintained": "unknown",
+          "bufferImpact": {
+            "minBuffer": null,
+            "projectedBufferRemaining": null,
+            "bufferShortfall": 0,
+            "isBufferIntact": "unknown"
+          },
+          "goalsEvaluation": [],
+          "goalImpactNotes": [],
+          "deterministicFacts": [
+            "Nominal rencana tindakan: Rp 2.000.000.",
+            "Jenis tindakan: Penyisihan Tabungan.",
+            "Target pos/kategori: Penambahan Tabungan.",
+            "Waktu pelaksanaan: Bulan ini.",
+            "Hubungan numerik: Penyisihan Rp 2.000.000 akan mengalihkan dana dari pendapatan/kas operasional ke tabungan.",
+            "Kebutuhan informasi: Untuk menghitung kelayakan secara presisi, diperlukan saldo rekening yang digunakan, total tagihan sebelum pemasukan berikutnya, estimasi kebutuhan rutin, dan batas dana cadangan minimum yang ingin dipertahankan."
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "cellNumber": 8,
+    "cellCode": "CELL_8_SAVING_HIGH_CONTEXT_AWARE",
+    "scenarioId": "saving_high",
+    "scenarioTitle": "Pertimbangan Alokasi Tabungan",
+    "actionType": "saving",
+    "conflictLevel": "high",
+    "condition": "context_aware",
+    "modelUsed": "gemini-3.5-flash-lite",
+    "dialogueHistory": [
+      {
+        "turn": 1,
+        "role": "respondent",
+        "content": "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+        "timestamp": "2026-10-26T07:55:42.154Z"
+      },
+      {
+        "turn": 2,
+        "role": "assistant",
+        "content": "Menyetor Rp 2.000.000 ke dana darurat dari pendapatan bulan berjalan (Rp 8.000.000) menyisakan dana operasional Rp 6.000.000, serta meningkatkan akumulasi Dana Darurat Anda menjadi Rp 10.000.000 dengan kekurangan Rp 2.000.000 menuju target Rp 12.000.000. Total saldo rekening Anda tetap Rp 18.000.000 karena dana darurat merupakan alokasi di dalam rekening yang sama.\n\nSetelah membayar kewajiban terdekat sebesar total Rp 3.500.000 (terdiri dari Tagihan Kartu/BNPL Rp 600.000, Biaya Tempat Tinggal Rp 2.400.000, dan Tagihan Utilitas Bulan Ini Rp 500.000), sisa kas operasional Anda adalah Rp 12.500.000. Namun, setelah memperhitungkan setoran tabungan dan kewajiban terdekat, sisa pendapatan bulan ini menjadi defisit Rp 200.000 terhadap estimasi kebutuhan rutin, sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini menjadi Rp 0.",
+        "timestamp": "2026-10-26T07:55:50.837Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 16000000,
+          "relevantBudget": {
+            "category": "Pendapatan Tersedia Bulan Berjalan",
+            "allocated": 8000000,
+            "spentSoFar": 0,
+            "remaining": 8000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": 6000000,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": "2026-11-24",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Kartu/BNPL (6 hari)",
+              "amount": 600000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Biaya Tempat Tinggal (9 hari)",
+              "amount": 2400000,
+              "dueDate": "2026-11-03",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Tagihan Utilitas Bulan Ini",
+              "amount": 500000,
+              "dueDate": "2026-11-10",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 3500000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 12500000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": false,
+          "bufferImpact": {
+            "minBuffer": 0,
+            "projectedBufferRemaining": 12500000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Program Sertifikasi Profesional",
+              "targetAmount": 4500000,
+              "currentAllocated": 2000000,
+              "remainingShortfall": 2500000,
+              "availableSurplusAfterObligations": -200000,
+              "canMeetGoal": false,
+              "explanation": "Setelah setoran Rp 2.000.000, kewajiban terdekat Rp 3.500.000, dan estimasi kebutuhan rutin Rp 2.700.000, sisa pendapatan bulan ini adalah defisit Rp 200.000, sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini adalah Rp 0."
+            },
+            {
+              "title": "Target Dana Darurat",
+              "targetAmount": 12000000,
+              "currentAllocated": 10000000,
+              "remainingShortfall": 2000000,
+              "availableSurplusAfterObligations": 2500000,
+              "canMeetGoal": true,
+              "explanation": "Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pendapatan bulan berjalan tidak menyisakan ruang alokasi (Rp 0) untuk pos Program Sertifikasi Profesional karena sisa pendapatan setelah setoran tabungan (Rp 6.000.000) habis terserap oleh kewajiban terdekat (Rp 3.500.000) dan estimasi kebutuhan rutin (Rp 2.700.000)."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 2.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 16.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Pendapatan Tersedia Bulan Berjalan: tersisa Rp 8.000.000 (Sisa alokasi pos mencukupi dengan sisa Rp 6.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-24): total Rp 3.500.000 [Tagihan Kartu/BNPL (6 hari) (Rp 600.000, jatuh tempo 2026-10-31), Biaya Tempat Tinggal (9 hari) (Rp 2.400.000, jatuh tempo 2026-11-03), Tagihan Utilitas Bulan Ini (Rp 500.000, jatuh tempo 2026-11-10)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 12.500.000 (Kewajiban terdekat tercukupi).",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Program Sertifikasi Profesional: Setelah setoran Rp 2.000.000, kewajiban terdekat Rp 3.500.000, dan estimasi kebutuhan rutin Rp 2.700.000, sisa pendapatan bulan ini adalah defisit Rp 200.000, sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini adalah Rp 0.",
+            "Pos tujuan Target Dana Darurat: Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+          ]
+        }
+      },
+      {
+        "turn": 3,
+        "role": "respondent",
+        "content": "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
+        "timestamp": "2026-10-26T07:55:57.339Z"
+      },
+      {
+        "turn": 4,
+        "role": "assistant",
+        "content": "Setelah menyisihkan Rp 2.000.000 untuk penambahan tabungan, sisa saldo kas rekening Anda adalah Rp 16.000.000 dari total saldo awal Rp 18.000.000. Seluruh kewajiban pembayaran terdekat dengan total Rp 3.500.000 (terdiri dari Tagihan Kartu/BNPL Rp 600.000, Biaya Tempat Tinggal Rp 2.400.000, dan Tagihan Utilitas Bulan Ini Rp 500.000) dapat dibayar penuh, sehingga menyisakan sisa kas operasional sebesar Rp 12.500.000.\n\nPenambahan Rp 2.000.000 tersebut meningkatkan akumulasi Dana Darurat Anda menjadi Rp 10.000.000, dengan kekurangan Rp 2.000.000 menuju target Rp 12.000.000. Namun, setelah memperhitungkan setoran tabungan dan kewajiban terdekat, sisa pendapatan bulan berjalan tidak menyisakan ruang alokasi (Rp 0) untuk pos Program Sertifikasi Profesional, sementara cakupan kebutuhan harian belum dapat dihitung secara spesifik karena belum dibagikan dalam sesi ini.",
+        "timestamp": "2026-10-26T07:56:10.437Z",
+        "responseSource": "gemini",
+        "calculationSnapshot": {
+          "status": "valid",
+          "actionAmount": 2000000,
+          "actionType": "saving",
+          "initialBalance": 18000000,
+          "balanceAfterAction": 16000000,
+          "relevantBudget": {
+            "category": "Pendapatan Tersedia Bulan Berjalan",
+            "allocated": 8000000,
+            "spentSoFar": 0,
+            "remaining": 8000000,
+            "source": "synthetic_profile"
+          },
+          "budgetVariance": 6000000,
+          "isBudgetExceeded": false,
+          "nextIncomeDate": "2026-11-24",
+          "liabilitiesDueBeforeIncome": [
+            {
+              "title": "Tagihan Kartu/BNPL (6 hari)",
+              "amount": 600000,
+              "dueDate": "2026-10-31",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Biaya Tempat Tinggal (9 hari)",
+              "amount": 2400000,
+              "dueDate": "2026-11-03",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            },
+            {
+              "title": "Tagihan Utilitas Bulan Ini",
+              "amount": 500000,
+              "dueDate": "2026-11-10",
+              "isPriority": true,
+              "source": "synthetic_profile"
+            }
+          ],
+          "totalLiabilitiesBeforeIncome": 3500000,
+          "liabilitiesDueAfterIncome": [],
+          "totalLiabilitiesAfterIncome": 0,
+          "remainingCashAfterImmediateObligations": 12500000,
+          "routineExpenses": null,
+          "isLiquidityThreatened": false,
+          "deficitAmount": 0,
+          "canPayAction": true,
+          "canCoverObligations": true,
+          "canCoverEssentialExpenses": "unknown",
+          "isBufferMaintained": true,
+          "areProtectedAllocationsMaintained": false,
+          "bufferImpact": {
+            "minBuffer": 0,
+            "projectedBufferRemaining": 12500000,
+            "bufferShortfall": 0,
+            "isBufferIntact": true
+          },
+          "goalsEvaluation": [
+            {
+              "title": "Program Sertifikasi Profesional",
+              "targetAmount": 4500000,
+              "currentAllocated": 2000000,
+              "remainingShortfall": 2500000,
+              "availableSurplusAfterObligations": -200000,
+              "canMeetGoal": false,
+              "explanation": "Setelah setoran Rp 2.000.000, kewajiban terdekat Rp 3.500.000, dan estimasi kebutuhan rutin Rp 2.700.000, sisa pendapatan bulan ini adalah defisit Rp 200.000, sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini adalah Rp 0."
+            },
+            {
+              "title": "Target Dana Darurat",
+              "targetAmount": 12000000,
+              "currentAllocated": 10000000,
+              "remainingShortfall": 2000000,
+              "availableSurplusAfterObligations": 2500000,
+              "canMeetGoal": true,
+              "explanation": "Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+            }
+          ],
+          "goalImpactNotes": [
+            "Pendapatan bulan berjalan tidak menyisakan ruang alokasi (Rp 0) untuk pos Program Sertifikasi Profesional karena sisa pendapatan setelah setoran tabungan (Rp 6.000.000) habis terserap oleh kewajiban terdekat (Rp 3.500.000) dan estimasi kebutuhan rutin (Rp 2.700.000)."
+          ],
+          "deterministicFacts": [
+            "Saldo rekening kas saat ini: Rp 18.000.000.",
+            "Rencana nominal tindakan: Rp 2.000.000.",
+            "Sisa saldo kas setelah tindakan: Rp 16.000.000 (Saldo mencukupi pembayaran).",
+            "Alokasi anggaran pos Pendapatan Tersedia Bulan Berjalan: tersisa Rp 8.000.000 (Sisa alokasi pos mencukupi dengan sisa Rp 6.000.000).",
+            "Kewajiban terdekat yang jatuh tempo sebelum pemasukan berikutnya (2026-11-24): total Rp 3.500.000 [Tagihan Kartu/BNPL (6 hari) (Rp 600.000, jatuh tempo 2026-10-31), Biaya Tempat Tinggal (9 hari) (Rp 2.400.000, jatuh tempo 2026-11-03), Tagihan Utilitas Bulan Ini (Rp 500.000, jatuh tempo 2026-11-10)].",
+            "Sisa kas operasional setelah tindakan dan kewajiban terdekat: Rp 12.500.000 (Kewajiban terdekat tercukupi).",
+            "Cakupan kebutuhan harian: Kebutuhan rutin belum dibagikan dalam sesi ini sehingga kecukupannya belum dapat dihitung secara spesifik.",
+            "Pos tujuan Program Sertifikasi Profesional: Setelah setoran Rp 2.000.000, kewajiban terdekat Rp 3.500.000, dan estimasi kebutuhan rutin Rp 2.700.000, sisa pendapatan bulan ini adalah defisit Rp 200.000, sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini adalah Rp 0.",
+            "Pos tujuan Target Dana Darurat: Penambahan Rp 2.000.000 meningkatkan akumulasi Dana Darurat dari Rp 8.000.000 menjadi Rp 10.000.000 (kekurangan Rp 2.000.000 menuju target Rp 12.000.000)."
+          ]
+        }
+      }
+    ]
+  }
+]

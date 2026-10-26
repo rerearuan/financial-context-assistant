@@ -93,6 +93,26 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     allowed.add(calculation.bufferImpact.projectedBufferRemaining);
   }
 
+  // Goals and shortfalls
+  for (const ge of calculation.goalsEvaluation) {
+    allowed.add(ge.targetAmount);
+    allowed.add(ge.currentAllocated);
+    allowed.add(ge.remainingShortfall);
+    if (ge.availableSurplusAfterObligations !== null) {
+      allowed.add(Math.abs(ge.availableSurplusAfterObligations));
+    }
+  }
+
+  // Routine expenses
+  if (calculation.routineExpenses) {
+    allowed.add(calculation.routineExpenses.estimatedRemaining);
+    if (calculation.routineExpenses.rangeMin) allowed.add(calculation.routineExpenses.rangeMin);
+    if (calculation.routineExpenses.rangeMax) allowed.add(calculation.routineExpenses.rangeMax);
+    if (calculation.routineExpenses.remainingCashAfterRoutine !== null) {
+      allowed.add(Math.abs(calculation.routineExpenses.remainingCashAfterRoutine));
+    }
+  }
+
   // Profile if present
   if (availableProfile?.totalCashBalance) allowed.add(availableProfile.totalCashBalance);
   if (availableProfile?.liquidBalance) allowed.add(availableProfile.liquidBalance);
@@ -106,6 +126,8 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     for (const g of availableProfile.goals) {
       allowed.add(g.targetAmount);
       allowed.add(g.currentAllocated);
+      const diff = Math.abs(g.targetAmount - g.currentAllocated);
+      if (diff > 0) allowed.add(diff);
     }
   }
 

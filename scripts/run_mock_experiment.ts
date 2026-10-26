@@ -18,7 +18,8 @@ interface MockTurn {
   role: "assistant" | "respondent";
   content: string;
   timestamp: string;
-  calculationSnapshot?: any;
+  responseSource?: "gemini" | "safe_fallback";
+  calculationSnapshot?: Record<string, unknown> | null;
 }
 
 interface MockCellResult {
@@ -33,20 +34,21 @@ interface MockCellResult {
   dialogueHistory: MockTurn[];
 }
 
-// 8 Cells with realistic respondent queries aligned with research instrument
-const MOCK_CONFIGS: Array<{
+// 8 Cells with RIGOROUS IDENTICAL CONTROLLED QUESTIONS per scenario pair
+const MOCK_CONFIGS_8_CELLS: Array<{
   cellNumber: number;
   scenarioId: string;
   condition: "basic" | "context_aware";
   respondentQuestions: string[];
 }> = [
+  // Pair 1: Spending Low (Cell 1 & Cell 2 receive IDENTICAL questions)
   {
     cellNumber: 1,
     scenarioId: "spending_low",
     condition: "basic",
     respondentQuestions: [
       "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
-      "Kira-kira apa saja hal yang perlu saya pertimbangkan sebelum memutuskan membeli laptop ini?",
+      "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
     ],
   },
   {
@@ -54,17 +56,19 @@ const MOCK_CONFIGS: Array<{
     scenarioId: "spending_low",
     condition: "context_aware",
     respondentQuestions: [
-      "Apakah kondisi keuangan dan sisa anggaran saya aman kalau saya beli laptop Rp7.000.000 ini sekarang?",
-      "Bagaimana dengan sisa uang kas saya untuk memenuhi kewajiban pembayaran terdekat sebelum gajian?",
+      "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+      "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
     ],
   },
+
+  // Pair 2: Spending High (Cell 3 & Cell 4 receive IDENTICAL questions)
   {
     cellNumber: 3,
     scenarioId: "spending_high",
     condition: "basic",
     respondentQuestions: [
-      "Saya berencana membeli laptop gaming Rp14.000.000 secara tunai, apakah ini keputusan yang bijak?",
-      "Bagaimana jika uang tabungan saya terpakai banyak, apa risikonya untuk kebutuhan bulanan?",
+      "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+      "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
     ],
   },
   {
@@ -72,17 +76,19 @@ const MOCK_CONFIGS: Array<{
     scenarioId: "spending_high",
     condition: "context_aware",
     respondentQuestions: [
-      "Apakah saya bisa membeli laptop gaming seharga Rp14.000.000 ini secara tunai sekarang?",
-      "Berapa defisit anggaran saya dan apakah kewajiban pembayaran kos serta cicilan saya akan terganggu?",
+      "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+      "Bagaimana dampaknya terhadap sisa saldo kas dan kewajiban pembayaran terdekat saya?",
     ],
   },
+
+  // Pair 3: Saving Low (Cell 5 & Cell 6 receive IDENTICAL questions)
   {
     cellNumber: 5,
     scenarioId: "saving_low",
     condition: "basic",
     respondentQuestions: [
-      "Saya berencana menyisihkan Rp2.000.000 ke dana darurat bulan ini, apakah nominal ini sudah tepat?",
-      "Apakah ada saran bagaimana cara mengalokasikan sisa uang bulanan setelah menabung?",
+      "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+      "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
     ],
   },
   {
@@ -90,17 +96,19 @@ const MOCK_CONFIGS: Array<{
     scenarioId: "saving_low",
     condition: "context_aware",
     respondentQuestions: [
-      "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk likuiditas keuangan saya bulan ini?",
-      "Apakah target tujuan keuangan dan kewajiban rutin saya sebelum tanggal gajian berikutnya tetap terpenuhi?",
+      "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+      "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
     ],
   },
+
+  // Pair 4: Saving High (Cell 7 & Cell 8 receive IDENTICAL questions)
   {
     cellNumber: 7,
     scenarioId: "saving_high",
     condition: "basic",
     respondentQuestions: [
-      "Saya ingin langsung menyisihkan Rp5.000.000 ke dana darurat sekaligus bulan ini, apakah itu keputusan bagus?",
-      "Bagaimana cara memastikan apakah nominal Rp5.000.000 ini terlalu membebani kebutuhan kas harian saya?",
+      "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+      "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
     ],
   },
   {
@@ -108,122 +116,149 @@ const MOCK_CONFIGS: Array<{
     scenarioId: "saving_high",
     condition: "context_aware",
     respondentQuestions: [
-      "Apakah aman jika saya menabung Rp5.000.000 ke dana darurat bulan ini?",
-      "Apakah sisa uang kas likuid saya masih cukup untuk membayar sewa kos dan tagihan sebelum gaji berikutnya masuk?",
+      "Apakah menyisihkan Rp2.000.000 ke dana darurat aman untuk kondisi keuangan saya bulan ini?",
+      "Bagaimana dampaknya terhadap sisa dana dan kewajiban pembayaran terdekat saya?",
     ],
   },
 ];
 
-async function runMockSimulation() {
-  console.log("=== MEMULAI SIMULASI MOCK 8 SEL EKSPERIMEN ===");
-  const model = getGeminiModel();
-  console.log(`Model AI: ${model}`);
+async function runDialogue(
+  scenarioId: string,
+  condition: "basic" | "context_aware",
+  questions: string[]
+): Promise<{ dialogueHistory: MockTurn[]; finalAction: FinancialAction }> {
+  const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === scenarioId);
+  if (!pkg) {
+    throw new Error(`Package ${scenarioId} tidak ditemukan.`);
+  }
 
-  const results: MockCellResult[] = [];
+  const dialogueHistory: MockTurn[] = [];
+  let turnCount = 1;
 
-  for (const config of MOCK_CONFIGS) {
-    console.log(`\n[Cell ${config.cellNumber}] Skenario: ${config.scenarioId} | Kondisi: ${config.condition}`);
-    const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === config.scenarioId);
-    if (!pkg) {
-      throw new Error(`Package ${config.scenarioId} tidak ditemukan.`);
-    }
+  const currentAction: FinancialAction = {
+    type: pkg.scenario.initialAction.type as "spending" | "saving",
+    amount: pkg.scenario.initialAction.amount,
+    timing: pkg.scenario.initialAction.timing,
+    targetCategory: pkg.scenario.initialAction.targetCategory,
+    description: pkg.scenario.initialAction.description,
+    source: "scenario",
+  };
 
-    const dialogueHistory: MockTurn[] = [];
+  let syntheticProfileContext: FinancialProfileContext | null = null;
+  if (condition === "context_aware") {
+    syntheticProfileContext = {
+      totalCashBalance: pkg.syntheticProfile.totalCashBalance,
+      liquidBalance: pkg.syntheticProfile.liquidBalance,
+      budgets: pkg.syntheticProfile.budgets as any,
+      liabilities: pkg.syntheticProfile.liabilities as any,
+      goals: pkg.syntheticProfile.goals as any,
+      buffer: pkg.syntheticProfile.buffer as any,
+      incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
+      source: "synthetic_profile",
+    };
+  }
 
-    // Turn 0: Initial Assistant Greeting
-    let turnCount = 1;
+  let userProvidedFinances: UserProvidedFinances | null = null;
+  const chatHistorySummary: Array<{ role: "user" | "assistant"; content: string }> = [];
+
+  for (const userQuestion of questions) {
+    // Respect rate limits with polite delay
+    await new Promise((resolve) => setTimeout(resolve, 6500));
+
+    console.log(`  > Responden: "${userQuestion}"`);
     dialogueHistory.push({
       turn: turnCount++,
-      role: "assistant",
-      content: pkg.scenario.initialAssistantMessage,
+      role: "respondent",
+      content: userQuestion,
       timestamp: new Date().toISOString(),
-      calculationSnapshot:
-        config.condition === "context_aware" ? pkg.expectedCalculations : null,
     });
+    chatHistorySummary.push({ role: "user", content: userQuestion });
 
-    const currentAction: FinancialAction = {
-      type: pkg.scenario.initialAction.type as "spending" | "saving",
-      amount: pkg.scenario.initialAction.amount,
-      timing: pkg.scenario.initialAction.timing,
-      targetCategory: pkg.scenario.initialAction.targetCategory,
-      description: pkg.scenario.initialAction.description,
-      source: "scenario",
-    };
-
-    let syntheticProfileContext: FinancialProfileContext | null = null;
-    if (config.condition === "context_aware") {
-      syntheticProfileContext = {
-        totalCashBalance: pkg.syntheticProfile.totalCashBalance,
-        liquidBalance: pkg.syntheticProfile.liquidBalance,
-        budgets: pkg.syntheticProfile.budgets as any,
-        liabilities: pkg.syntheticProfile.liabilities as any,
-        goals: pkg.syntheticProfile.goals as any,
-        buffer: pkg.syntheticProfile.buffer as any,
-        incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
-        source: "synthetic_profile",
+    // 1. Intent Extraction
+    const intent = await extractIntent(userQuestion, currentAction);
+    if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== currentAction.amount) {
+      currentAction.amount = intent.newAmount;
+      currentAction.modifiedByUser = true;
+    }
+    if (intent.userProvidedFinances) {
+      userProvidedFinances = {
+        ...(userProvidedFinances || {}),
+        ...intent.userProvidedFinances,
+        source: "user_message",
       };
     }
 
-    let userProvidedFinances: UserProvidedFinances | null = null;
+    // 2. Build Structured Context Packet
+    const contextPacket = buildStructuredContextPacket({
+      condition,
+      action: currentAction,
+      syntheticProfile: syntheticProfileContext,
+      userProvidedFinances,
+    });
 
-    // Chat History representation for Gemini prompt
-    const chatHistorySummary: Array<{ role: "user" | "assistant"; content: string }> = [
-      { role: "assistant", content: pkg.scenario.initialAssistantMessage },
-    ];
+    // 3. Generate Assistant Response
+    const assistantResponse = await generateAssistantResponse(
+      contextPacket,
+      userQuestion,
+      chatHistorySummary
+    );
 
-    // Run Respondent Questions
-    for (const userQuestion of config.respondentQuestions) {
-      console.log(`  > Respondent: "${userQuestion}"`);
-      dialogueHistory.push({
-        turn: turnCount++,
-        role: "respondent",
-        content: userQuestion,
-        timestamp: new Date().toISOString(),
-      });
-      chatHistorySummary.push({ role: "user", content: userQuestion });
+    console.log(
+      `  < Asisten (${assistantResponse.responseSource.toUpperCase()}): "${assistantResponse.content.slice(
+        0,
+        90
+      )}..."`
+    );
 
-      // 1. Extract Intent
-      const intent = await extractIntent(userQuestion, currentAction);
-      if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== currentAction.amount) {
-        currentAction.amount = intent.newAmount;
-        currentAction.modifiedByUser = true;
-      }
-      if (intent.userProvidedFinances) {
-        userProvidedFinances = {
-          ...intent.userProvidedFinances,
-          source: "user_message",
-        };
-      }
+    dialogueHistory.push({
+      turn: turnCount++,
+      role: "assistant",
+      content: assistantResponse.content,
+      timestamp: new Date().toISOString(),
+      responseSource: assistantResponse.responseSource,
+      calculationSnapshot: contextPacket.calculation as unknown as Record<string, unknown>,
+    });
+    chatHistorySummary.push({ role: "assistant", content: assistantResponse.content });
+  }
 
-      // 2. Build Structured Context Packet
-      const contextPacket = buildStructuredContextPacket({
-        condition: config.condition,
-        action: currentAction,
-        syntheticProfile: syntheticProfileContext,
-        userProvidedFinances,
-      });
+  return { dialogueHistory, finalAction: currentAction };
+}
 
-      // 3. Generate Assistant Response
-      const assistantResponse = await generateAssistantResponse(
-        contextPacket,
-        userQuestion,
-        chatHistorySummary
-      );
+async function runMockSimulation() {
+  console.log("=================================================================");
+  console.log("       EKSEKUSI SIMULASI MOCK 8 SEL & PENGUJIAN KHUSUS          ");
+  console.log("=================================================================");
+  const model = getGeminiModel();
+  console.log(`Model AI: ${model}`);
 
-      console.log(`  < Assistant (${assistantResponse.isFallback ? "Fallback" : "Gemini"}): "${assistantResponse.content.slice(0, 80)}..."`);
+  const conversationId = "983da74a-8cd4-407a-a20f-2e91402564f8";
+  const scratchDir = path.resolve(
+    process.env.HOME || "",
+    `.gemini/antigravity/brain/${conversationId}/scratch`
+  );
+  if (!fs.existsSync(scratchDir)) {
+    fs.mkdirSync(scratchDir, { recursive: true });
+  }
 
-      dialogueHistory.push({
-        turn: turnCount++,
-        role: "assistant",
-        content: assistantResponse.content,
-        timestamp: new Date().toISOString(),
-        calculationSnapshot:
-          config.condition === "context_aware" ? contextPacket.calculation : null,
-      });
-      chatHistorySummary.push({ role: "assistant", content: assistantResponse.content });
-    }
+  // =========================================================================
+  // BAGIAN 1: Simulasi 8 Sel Eksperimen Terkontrol (Pertanyaan Identik Per Pasang)
+  // =========================================================================
+  console.log("\n--- BAGIAN 1: 8 SEL EKSPERIMEN TERKONTROL ---");
+  const results8Cells: MockCellResult[] = [];
 
-    results.push({
+  for (const config of MOCK_CONFIGS_8_CELLS) {
+    console.log(
+      `\n[Sel ${config.cellNumber}] Skenario: ${config.scenarioId} | Kondisi: ${config.condition.toUpperCase()}`
+    );
+
+    const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === config.scenarioId)!;
+    const { dialogueHistory } = await runDialogue(
+      config.scenarioId,
+      config.condition,
+      config.respondentQuestions
+    );
+
+    results8Cells.push({
       cellNumber: config.cellNumber,
       cellCode: `CELL_${config.cellNumber}_${config.scenarioId.toUpperCase()}_${config.condition.toUpperCase()}`,
       scenarioId: pkg.scenario.id,
@@ -236,21 +271,73 @@ async function runMockSimulation() {
     });
   }
 
-  // Save to scratch directory
-  const scratchDir = path.resolve(
-    process.env.HOME || "",
-    ".gemini/antigravity/brain/983da74a-8cd4-407a-a20f-2e91402564f8/scratch"
-  );
-  if (!fs.existsSync(scratchDir)) {
-    fs.mkdirSync(scratchDir, { recursive: true });
-  }
+  const path8Cells = path.join(scratchDir, "mock_conversations_8_cells.json");
+  fs.writeFileSync(path8Cells, JSON.stringify(results8Cells, null, 2), "utf-8");
+  const localCopyPath = path.resolve(process.cwd(), "mock_conversations_8_cells.json");
+  fs.writeFileSync(localCopyPath, JSON.stringify(results8Cells, null, 2), "utf-8");
+  console.log(`\n Hasil 8 Sel Tersimpan di: ${path8Cells}`);
+  console.log(` Salinan lokal tersimpan di: ${localCopyPath}`);
 
-  const outputPath = path.join(scratchDir, "mock_conversations_8_cells.json");
-  fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), "utf-8");
-  console.log(`\n=== BERHASIL! Seluruh 8 percakapan tersimpan di: ===\n${outputPath}`);
+  // =========================================================================
+  // BAGIAN 2: Pengujian Khusus Basic Menerima Data Manual
+  // =========================================================================
+  console.log("\n--- BAGIAN 2: PENGUJIAN BASIC MENERIMA DATA MANUAL ---");
+  console.log("[Test Case: Basic + User Memberikan Data Keuangan Manual]");
+  const manualQuestions = [
+    "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+    "Saldo saya saat ini Rp18.000.000, ada tagihan Rp1.800.000 dalam 6 hari ke depan, dan saya ingin mempertahankan dana darurat minimal Rp5.000.000.",
+  ];
+
+  const manualResult = await runDialogue("spending_high", "basic", manualQuestions);
+  const pathManual = path.join(scratchDir, "mock_manual_data_basic.json");
+  fs.writeFileSync(
+    pathManual,
+    JSON.stringify(
+      {
+        testCase: "Basic Assistant with User Provided Finances",
+        scenarioId: "spending_high",
+        dialogueHistory: manualResult.dialogueHistory,
+      },
+      null,
+      2
+    ),
+    "utf-8"
+  );
+  console.log(` Hasil Basic Data Manual Tersimpan di: ${pathManual}`);
+
+  // =========================================================================
+  // BAGIAN 3: Pengujian Khusus Perubahan Nominal (Rp 7 Juta -> Rp 14 Juta)
+  // =========================================================================
+  console.log("\n--- BAGIAN 3: PENGUJIAN PERUBAHAN NOMINAL (Rp 7 Juta -> Rp 14 Juta) ---");
+  console.log("[Test Case: Context-Aware + User Mengubah Nominal ke Rp 14.000.000]");
+  const nominalQuestions = [
+    "Apakah saya aman membeli laptop seharga Rp7.000.000 ini secara tunai sekarang?",
+    "Bagaimana jika saya mengganti pilihannya menjadi laptop gaming seharga Rp14.000.000 secara tunai?",
+  ];
+
+  const nominalResult = await runDialogue("spending_high", "context_aware", nominalQuestions);
+  const pathNominal = path.join(scratchDir, "mock_nominal_change_14jt.json");
+  fs.writeFileSync(
+    pathNominal,
+    JSON.stringify(
+      {
+        testCase: "Context-Aware with Nominal Modification to 14 Million",
+        scenarioId: "spending_high",
+        dialogueHistory: nominalResult.dialogueHistory,
+      },
+      null,
+      2
+    ),
+    "utf-8"
+  );
+  console.log(` Hasil Perubahan Nominal Tersimpan di: ${pathNominal}`);
+
+  console.log("\n=================================================================");
+  console.log("       SELURUH SIMULASI DAN PENGUJIAN SELESAI DENGAN SUKSES!     ");
+  console.log("=================================================================");
 }
 
 runMockSimulation().catch((err) => {
-  console.error("Gagal menjalankan simulasi mock:", err);
+  console.error("Gagal menjalankan simulasi:", err);
   process.exit(1);
 });
