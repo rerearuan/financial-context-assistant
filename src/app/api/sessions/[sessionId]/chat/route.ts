@@ -12,6 +12,7 @@ import {
 } from "@/lib/financial-engine/types";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
+import { sanitizeAmount } from "@/lib/financial-engine/validator";
 
 export const dynamic = "force-dynamic";
 
@@ -37,13 +38,33 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
   demoSess.currentAction = updatedAction;
 
   let userProvidedFinances: UserProvidedFinances | null = null;
+  const existingDetails = demoSess.currentAction.userProvidedDetails as Record<string, unknown> | undefined;
+
   if (intent.userProvidedFinances) {
     userProvidedFinances = {
-      ...intent.userProvidedFinances,
+      balance: intent.userProvidedFinances.balance ?? (existingDetails?.balance as number | undefined),
+      budget: intent.userProvidedFinances.budget ?? (existingDetails?.budget as number | undefined),
+      income: intent.userProvidedFinances.income ?? (existingDetails?.income as number | undefined),
+      liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
+      goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
+      source: "user_message",
+    };
+    demoSess.currentAction.userProvidedDetails = {
+      ...existingDetails,
+      ...userProvidedFinances,
+    };
+  } else if (existingDetails) {
+    userProvidedFinances = {
+      balance: existingDetails.balance as number | undefined,
+      budget: existingDetails.budget as number | undefined,
+      income: existingDetails.income as number | undefined,
+      liabilities: existingDetails.liabilities as number | undefined,
+      goals: existingDetails.goals as string | undefined,
       source: "user_message",
     };
   }
 
+  // Server-side permission check: Basic NEVER receives synthetic profile
   let syntheticProfileContext: FinancialProfileContext | null = null;
   if (demoSess.condition === "context_aware" && pkg?.syntheticProfile) {
     syntheticProfileContext = {
@@ -101,26 +122,35 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     role: "assistant",
     content: assistantResult.content,
     createdAt: new Date(),
-    calculationSnapshot:
-      demoSess.condition === "context_aware" ? (contextPacket.calculation as any) : null,
-    sourcesUsed:
-      demoSess.condition === "context_aware"
-        ? ["synthetic_profile", "deterministic_engine"]
-        : ["user_query", "deterministic_engine"],
+    calculationSnapshot: {
+      ...contextPacket.calculation,
+      isFallback: assistantResult.isFallback,
+      retryCount: assistantResult.retryCount,
+      promptVersion: assistantResult.promptVersion,
+      modelUsed: assistantResult.modelUsed,
+      validationResult: assistantResult.validationResult,
+    } as unknown as Record<string, unknown>,
+    sourcesUsed: contextPacket.dataSources,
   };
   existingMsgs.push(assistantMsg);
   demoMessages.set(sessionId, existingMsgs);
   demoSess.followupCount += 1;
 
   return NextResponse.json({
+    assistantMessage: {
+      id: assistantMsgId,
+      role: "assistant",
+      content: assistantResult.content,
+      createdAt: new Date().toISOString(),
+    },
     reply: assistantResult.content,
     messageId: assistantMsgId,
-    calculationSnapshot: assistantMsg.calculationSnapshot,
-    currentAction: updatedAction,
+    calculationSnapshot: contextPacket.calculation,
+    updatedAction,
     followupCount: demoSess.followupCount,
     maxFollowupAllowed: demoSess.maxFollowupAllowed,
     isFallback: assistantResult.isFallback,
-    modelUsed: assistantResult.modelUsed,
+    retryCount: assistantResult.retryCount,
   });
 }
 
@@ -133,6 +163,7 @@ export async function POST(
     const body = await req.json();
     const { message } = body;
 
+    // 1. Input Validation Guardrail
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json(
         { error: "Pesan tidak boleh kosong." },
@@ -147,7 +178,7 @@ export async function POST(
       );
     }
 
-    // 1. Fetch official session from database
+    // 2. Fetch official session from database (Session Isolation Guardrail)
     let session = null;
     try {
       const [dbSession] = await db
@@ -178,7 +209,7 @@ export async function POST(
             status: "in_progress",
             followupCount: 0,
             maxFollowupAllowed: 5,
-            promptVersion: "v1.0.0",
+            promptVersion: "v2.0.0",
             modelId: getGeminiModel(),
           };
           return handleDemoChat(fakeDevSess, sessionId, message.trim());
@@ -201,7 +232,7 @@ export async function POST(
       );
     }
 
-    // 2. Insert User Message
+    // 3. Insert User Message
     const userMsgId = `msg_u_${crypto.randomBytes(8).toString("hex")}`;
     await db.insert(messages).values({
       id: userMsgId,
@@ -211,7 +242,7 @@ export async function POST(
       sourcesUsed: ["user_message"],
     });
 
-    // 3. Extract Intent & Check Action Modifications
+    // 4. Extract Intent & Check Action Modifications (Structured Extraction)
     const actionBefore: FinancialAction = {
       type: session.currentAction.type,
       amount: session.currentAction.amount,
@@ -223,7 +254,7 @@ export async function POST(
 
     const intent = await extractIntent(message.trim(), actionBefore);
 
-    // Save extracted intent to the user message record
+    // Save extracted intent to user message record
     await db
       .update(messages)
       .set({ extractedIntent: intent })
@@ -236,7 +267,7 @@ export async function POST(
       updatedAction.modifiedByUser = true;
     }
 
-    // Handle user-provided financial info (especially for Basic condition)
+    // Handle user-provided financial info
     let userProvidedFinances: UserProvidedFinances | null = null;
     const existingDetails = session.currentAction.userProvidedDetails as Record<string, unknown> | undefined;
 
@@ -264,7 +295,7 @@ export async function POST(
       };
     }
 
-    // 4. Retrieve Context strictly by Condition
+    // 5. Retrieve Context strictly by Condition (Profile Access Guardrail)
     let syntheticProfileContext: FinancialProfileContext | null = null;
 
     if (session.condition === "context_aware") {
@@ -287,7 +318,7 @@ export async function POST(
       }
     }
 
-    // 5. Package Context & Compute Deterministic Financial Consequences
+    // 6. Package Context & Compute Deterministic Financial Consequences (Deterministic Engine)
     const contextPacket = buildStructuredContextPacket({
       condition: session.condition as "basic" | "context_aware",
       action: {
@@ -302,7 +333,7 @@ export async function POST(
       userProvidedFinances,
     });
 
-    // 6. Fetch strictly session-scoped chat history
+    // 7. Fetch strictly session-scoped chat history (Session Isolation Guardrail)
     const allSessionMessages = await db
       .select()
       .from(messages)
@@ -314,32 +345,34 @@ export async function POST(
       content: m.content,
     }));
 
-    // 7. Generate Grounded Explanation
+    // 8. Generate Grounded Explanation with Output Guardrail & Retry Harness
     const assistantResult = await generateAssistantResponse(
       contextPacket,
       message.trim(),
       chatHistory
     );
 
-    // 8. Record Assistant Message in Database
+    // 9. Save Assistant Message, Calculation Snapshot, and Harness Metadata
     const assistantMsgId = `msg_a_${crypto.randomBytes(8).toString("hex")}`;
+    const newFollowupCount = session.followupCount + 1;
+
     await db.insert(messages).values({
       id: assistantMsgId,
       sessionId,
       role: "assistant",
       content: assistantResult.content,
-      calculationSnapshot:
-        session.condition === "context_aware"
-          ? (contextPacket.calculation as unknown as Record<string, unknown>)
-          : null,
-      sourcesUsed:
-        session.condition === "context_aware"
-          ? ["synthetic_profile", "deterministic_engine"]
-          : ["user_query", "deterministic_engine"],
+      calculationSnapshot: {
+        ...contextPacket.calculation,
+        isFallback: assistantResult.isFallback,
+        retryCount: assistantResult.retryCount,
+        promptVersion: assistantResult.promptVersion,
+        modelUsed: assistantResult.modelUsed,
+        validationResult: assistantResult.validationResult,
+      } as unknown as Record<string, unknown>,
+      sourcesUsed: contextPacket.dataSources,
     });
 
-    // 9. Update Session state
-    const newFollowupCount = (session.followupCount || 0) + 1;
+    // 10. Update Session state
     await db
       .update(sessions)
       .set({
@@ -350,17 +383,20 @@ export async function POST(
       .where(eq(sessions.id, sessionId));
 
     return NextResponse.json({
+      assistantMessage: {
+        id: assistantMsgId,
+        role: "assistant",
+        content: assistantResult.content,
+        createdAt: new Date().toISOString(),
+      },
       reply: assistantResult.content,
       messageId: assistantMsgId,
-      calculationSnapshot:
-        session.condition === "context_aware"
-          ? (contextPacket.calculation as unknown as Record<string, unknown>)
-          : null,
-      currentAction: updatedAction,
+      calculationSnapshot: contextPacket.calculation,
+      updatedAction,
       followupCount: newFollowupCount,
       maxFollowupAllowed: session.maxFollowupAllowed,
       isFallback: assistantResult.isFallback,
-      modelUsed: assistantResult.modelUsed,
+      retryCount: assistantResult.retryCount,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);

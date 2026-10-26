@@ -6,6 +6,8 @@ import crypto from "crypto";
 import { buildStructuredContextPacket } from "@/lib/financial-engine/context-packager";
 import { FinancialProfileContext } from "@/lib/financial-engine/types";
 import { sanitizeAmount } from "@/lib/financial-engine/validator";
+import { demoSessions, demoMessages } from "@/lib/demo-store";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +27,64 @@ export async function POST(
       );
     }
 
-    const [session] = await db
-      .select()
-      .from(sessions)
-      .where(eq(sessions.id, sessionId));
+    let session: any = null;
+    try {
+      const [dbSession] = await db
+        .select()
+        .from(sessions)
+        .where(eq(sessions.id, sessionId));
+      session = dbSession;
+    } catch {
+      // DB not reachable, will check demoSessions
+    }
 
+    // Demo store fallback
     if (!session) {
+      const demoSess = demoSessions.get(sessionId);
+      if (demoSess) {
+        let updatedAction = { ...demoSess.currentAction };
+        if (decision === "modify") {
+          const sanitized = sanitizeAmount(newAmount);
+          if (sanitized && sanitized > 0) {
+            updatedAction.amount = sanitized;
+            updatedAction.modifiedByUser = true;
+          }
+          demoSess.currentAction = updatedAction;
+          return NextResponse.json({
+            success: true,
+            status: demoSess.status,
+            updatedAction,
+            message: `Nominal tindakan telah disesuaikan menjadi Rp ${(updatedAction.amount as number).toLocaleString("id-ID")}.`,
+          });
+        }
+
+        demoSess.status = decision;
+        const finalMsg = decision === "proceed"
+          ? `[SIMULASI TRANSAKSI SELESAI] Anda telah memilih untuk LANJUT. Transaksi dicatat sebagai simulasi.`
+          : decision === "postpone"
+          ? `[SIMULASI SELESAI] Anda telah memilih untuk MENUNDA tindakan ini.`
+          : `[SIMULASI SELESAI] Anda telah memilih untuk MEMBATALKAN tindakan ini.`;
+
+        const existingMsgs = demoMessages.get(sessionId) || [];
+        existingMsgs.push({
+          id: `msg_demo_${Date.now()}`,
+          sessionId,
+          role: "assistant",
+          content: finalMsg,
+          createdAt: new Date(),
+          sourcesUsed: ["scenario"],
+        });
+        demoMessages.set(sessionId, existingMsgs);
+
+        return NextResponse.json({
+          success: true,
+          decisionStatus: decision,
+          transactionId: `tx_demo_${Date.now()}`,
+          finalMessage: finalMsg,
+          updatedAction,
+        });
+      }
+
       return NextResponse.json(
         { error: "Sesi tidak ditemukan." },
         { status: 404 }

@@ -80,7 +80,11 @@ function ExperimentContent() {
   });
   const [occupationOther, setOccupationOther] = useState("");
 
-  // Step 4: Early Decision (Comprehension Check)
+  // Step 4: Comprehension Check & Early Decision
+  const [comprehension, setComprehension] = useState({
+    qAction: "",
+    qAmount: "",
+  });
   const [earlyDecision, setEarlyDecision] = useState({
     q1: "",
     q2: "",
@@ -259,13 +263,13 @@ function ExperimentContent() {
     }
   };
 
-  // Submit Step 4: Early Decision (Comprehension Check)
+  // Submit Step 4: Comprehension Check & Early Decision
   const handleEarlyDecisionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!participant) return;
 
-    if (!earlyDecision.q1 || !earlyDecision.q3.trim()) {
-      alert("Mohon jawab seluruh pertanyaan keputusan awal Anda.");
+    if (!comprehension.qAction || !comprehension.qAmount || !earlyDecision.q1 || !earlyDecision.q3.trim()) {
+      alert("Mohon jawab seluruh pertanyaan uji pemahaman skenario dan keputusan awal Anda.");
       return;
     }
 
@@ -279,7 +283,10 @@ function ExperimentContent() {
         body: JSON.stringify({
           action: "early_decision",
           participantId: participant.id,
-          earlyDecision,
+          earlyDecision: {
+            ...earlyDecision,
+            comprehensionCheck: comprehension,
+          },
         }),
       });
 
@@ -288,7 +295,7 @@ function ExperimentContent() {
         setStep(5);
       }
     } catch {
-      setErrorMessage("Terjadi kesalahan saat menyimpan keputusan awal.");
+      setErrorMessage("Terjadi kesalahan saat menyimpan pemahaman dan keputusan awal.");
     } finally {
       setSubmitting(false);
     }
@@ -833,100 +840,194 @@ function ExperimentContent() {
               {/* Kolom Kanan: Comprehension Check / Tugas Keputusan Awal */}
               <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm sticky top-20">
                 <div className="pb-3 mb-4 border-b border-slate-100">
-                  <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-                    Comprehension Check & Keputusan Awal
-                  </span>
-                  <h3 className="font-bold text-slate-900 text-sm mt-0.5">
-                    Evaluasi Pemahaman Skenario
+                  <h3 className="font-bold text-slate-900 text-sm">
+                    Uji Pemahaman & Keputusan Awal
                   </h3>
                   <p className="text-xs text-slate-500 mt-1">
-                    Sebelum berdiskusi dengan chatbot, tentukan pertimbangan awal Anda berdasarkan informasi di samping.
+                    Silakan jawab pertanyaan pemahaman skenario dan tentukan pertimbangan awal Anda sebelum berdiskusi dengan chatbot.
                   </p>
                 </div>
 
                 <form onSubmit={handleEarlyDecisionSubmit} className="space-y-4 text-xs sm:text-sm">
-                  {/* Pertanyaan 1 */}
-                  <div>
-                    <label className="block font-semibold text-slate-800 mb-1.5">
-                      1. {scenario.actionType === "spending"
-                        ? "Apakah Anda berencana melakukan pembelian laptop tersebut?"
-                        : "Apakah Anda berencana menambah Dana Darurat dari pendapatan bulan ini?"} *
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {["Ya", "Tidak"].map((opt) => (
-                        <label
-                          key={opt}
-                          className={`p-2.5 rounded-lg border text-center cursor-pointer text-xs font-medium transition ${
-                            earlyDecision.q1 === opt
-                              ? "bg-blue-50 border-blue-600 text-blue-700 font-bold"
-                              : "border-slate-200 hover:bg-slate-50"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="early_q1"
-                            value={opt}
-                            checked={earlyDecision.q1 === opt}
-                            onChange={(e) => setEarlyDecision({ ...earlyDecision, q1: e.target.value })}
-                            className="sr-only"
-                            required
-                          />
-                          {opt}
-                        </label>
-                      ))}
+                  {/* Bagian A: Comprehension Check (Uji Pemahaman Skenario) */}
+                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3.5">
+                    <div className="font-bold text-[11px] text-blue-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+                      Bagian 1: Uji Pemahaman Skenario
                     </div>
-                  </div>
 
-                  {/* Pertanyaan 2 */}
-                  {earlyDecision.q1 === "Ya" && (
+                    {/* Pertanyaan A.1: Pemahaman Rencana Tindakan */}
                     <div>
-                      <label className="block font-semibold text-slate-800 mb-1.5">
-                        2. {scenario.actionType === "spending"
-                          ? "Metode pembayaran apa yang Anda rencanakan?"
-                          : "Berapa jumlah yang rencananya akan Anda tambahkan?"} *
+                      <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
+                        1. Berdasarkan narasi situasi di samping, apa rencana yang sedang Anda pertimbangkan? *
                       </label>
                       <div className="space-y-1.5">
                         {(scenario.actionType === "spending"
-                          ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
-                          : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
+                          ? [
+                              "Membeli laptop baru untuk menunjang pekerjaan dan aktivitas",
+                              "Mengajukan pinjaman online untuk belanja konsumtif",
+                              "Membeli kendaraan bermotor secara kredit",
+                            ]
+                          : [
+                              "Menambah alokasi Dana Darurat dari pendapatan bulanan",
+                              "Menginvestasikan seluruh tabungan ke aset kripto",
+                              "Mengajukan kartu kredit baru untuk belanja bulanan",
+                            ]
                         ).map((opt) => (
                           <label
                             key={opt}
-                            className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
-                              earlyDecision.q2 === opt
+                            className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                              comprehension.qAction === opt
                                 ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
-                                : "border-slate-200 hover:bg-slate-50"
+                                : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
                             }`}
                           >
                             <input
                               type="radio"
-                              name="early_q2"
+                              name="comp_action"
                               value={opt}
-                              checked={earlyDecision.q2 === opt}
-                              onChange={(e) => setEarlyDecision({ ...earlyDecision, q2: e.target.value })}
-                              className="w-3.5 h-3.5 text-blue-600"
-                              required={earlyDecision.q1 === "Ya"}
+                              checked={comprehension.qAction === opt}
+                              onChange={(e) => setComprehension({ ...comprehension, qAction: e.target.value })}
+                              className="mt-0.5 text-blue-600"
+                              required
                             />
                             <span>{opt}</span>
                           </label>
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  {/* Pertanyaan 3 */}
-                  <div>
-                    <label className="block font-semibold text-slate-800 mb-1.5">
-                      3. Jelaskan alasan pertimbangan keputusan awal Anda! *
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={earlyDecision.q3}
-                      onChange={(e) => setEarlyDecision({ ...earlyDecision, q3: e.target.value })}
-                      placeholder="Tuliskan alasan pertimbangan Anda berdasarkan kondisi keuangan di samping..."
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
-                      required
-                    />
+                    {/* Pertanyaan A.2: Pemahaman Angka/Batasan Skenario */}
+                    <div>
+                      <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
+                        2. {scenario.actionType === "spending"
+                          ? scenario.id === "spending_low"
+                            ? "Berapa harga promosi laptop yang berlaku sampai hari ini?"
+                            : "Berapa estimasi biaya sertifikasi profesional yang sedang Anda siapkan?"
+                          : scenario.id === "saving_low"
+                          ? "Berapa target total Dana Darurat yang ingin Anda capai?"
+                          : "Berapa kekurangan dana untuk mencapai target Dana Darurat?"} *
+                      </label>
+                      <div className="space-y-1.5">
+                        {(scenario.actionType === "spending"
+                          ? scenario.id === "spending_low"
+                            ? ["Rp7.000.000", "Rp8.500.000", "Rp10.000.000"]
+                            : ["Rp4.000.000 – Rp4.500.000", "Rp1.000.000 – Rp1.500.000", "Rp8.000.000"]
+                          : scenario.id === "saving_low"
+                          ? ["Rp12.000.000", "Rp8.000.000", "Rp15.000.000"]
+                          : ["Kurang Rp4.000.000", "Kurang Rp1.000.000", "Kurang Rp8.000.000"]
+                        ).map((opt) => (
+                          <label
+                            key={opt}
+                            className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                              comprehension.qAmount === opt
+                                ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                                : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="comp_amount"
+                              value={opt}
+                              checked={comprehension.qAmount === opt}
+                              onChange={(e) => setComprehension({ ...comprehension, qAmount: e.target.value })}
+                              className="mt-0.5 text-blue-600"
+                              required
+                            />
+                            <span>{opt}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bagian B: Pertimbangan Keputusan Awal */}
+                  <div className="space-y-3 pt-2">
+                    <div className="font-bold text-[11px] text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-200">
+                      Bagian 2: Pertimbangan Keputusan Awal
+                    </div>
+
+                    {/* Pertanyaan 3 */}
+                    <div>
+                      <label className="block font-semibold text-slate-800 mb-1.5">
+                        3. Sebelum berdiskusi dengan chatbot, apakah Anda berencana melakukan {scenario.actionType === "spending" ? "pembelian laptop tersebut?" : "penambahan Dana Darurat dari pendapatan bulan ini?"} *
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {["Ya", "Tidak"].map((opt) => (
+                          <label
+                            key={opt}
+                            className={`p-2.5 rounded-lg border text-center cursor-pointer text-xs font-medium transition ${
+                              earlyDecision.q1 === opt
+                                ? "bg-blue-50 border-blue-600 text-blue-700 font-bold"
+                                : "border-slate-200 hover:bg-slate-50"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="early_q1"
+                              value={opt}
+                              checked={earlyDecision.q1 === opt}
+                              onChange={(e) => setEarlyDecision({ ...earlyDecision, q1: e.target.value })}
+                              className="sr-only"
+                              required
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Pertanyaan 4 */}
+                    {earlyDecision.q1 === "Ya" && (
+                      <div>
+                        <label className="block font-semibold text-slate-800 mb-1.5">
+                          4. {scenario.actionType === "spending"
+                            ? "Metode pembayaran apa yang Anda rencanakan?"
+                            : "Berapa jumlah yang rencananya akan Anda tambahkan?"} *
+                        </label>
+                        <div className="space-y-1.5">
+                          {(scenario.actionType === "spending"
+                            ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
+                            : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
+                          ).map((opt) => (
+                            <label
+                              key={opt}
+                              className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                                earlyDecision.q2 === opt
+                                  ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                                  : "border-slate-200 hover:bg-slate-50"
+                              }`}
+                            >
+                              <input
+                                type="radio"
+                                name="early_q2"
+                                value={opt}
+                                checked={earlyDecision.q2 === opt}
+                                onChange={(e) => setEarlyDecision({ ...earlyDecision, q2: e.target.value })}
+                                className="w-3.5 h-3.5 text-blue-600"
+                                required={earlyDecision.q1 === "Ya"}
+                              />
+                              <span>{opt}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Pertanyaan 5 */}
+                    <div>
+                      <label className="block font-semibold text-slate-800 mb-1.5">
+                        5. Jelaskan alasan pertimbangan keputusan awal Anda! *
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={earlyDecision.q3}
+                        onChange={(e) => setEarlyDecision({ ...earlyDecision, q3: e.target.value })}
+                        placeholder="Tuliskan alasan pertimbangan Anda berdasarkan kondisi keuangan di samping..."
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 pt-1">

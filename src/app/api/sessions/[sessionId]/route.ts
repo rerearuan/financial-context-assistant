@@ -31,16 +31,7 @@ function getDevFallbackSession(sessionId: string) {
       descriptionText: pkg.scenario.descriptionText,
       quickReplies: pkg.scenario.quickReplies || [],
     },
-    messages: [
-      {
-        id: `initial_${sessionId}`,
-        role: "assistant",
-        content: pkg.scenario.initialAssistantMessage,
-        createdAt: new Date().toISOString(),
-        calculationSnapshot: condition === "context_aware" ? pkg.expectedCalculations : null,
-        sourcesUsed: condition === "context_aware" ? ["synthetic_profile", "deterministic_calc"] : ["user_query"],
-      },
-    ],
+    messages: [],
     devProfile: condition === "context_aware" ? pkg.syntheticProfile : null,
   };
 }

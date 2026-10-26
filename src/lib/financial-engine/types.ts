@@ -1,5 +1,6 @@
 export type ActionType = "spending" | "saving";
 export type ConditionType = "basic" | "context_aware";
+export type AssessmentStatus = boolean | "unknown";
 
 export interface FinancialAction {
   type: ActionType;
@@ -8,6 +9,7 @@ export interface FinancialAction {
   targetCategory: string;
   description: string;
   source: "scenario" | "user_message";
+  modifiedByUser?: boolean;
 }
 
 export interface BudgetItem {
@@ -67,8 +69,19 @@ export interface UserProvidedFinances {
   budget?: number;
   income?: number;
   liabilities?: number;
+  buffer?: number;
   goals?: string;
   source: "user_message";
+}
+
+export interface GoalAllocationCalculation {
+  title: string;
+  targetAmount: number;
+  currentAllocated: number;
+  remainingShortfall: number;
+  availableSurplusAfterObligations: number | null;
+  canMeetGoal: AssessmentStatus;
+  explanation: string;
 }
 
 export interface FinancialCalculationResult {
@@ -93,17 +106,28 @@ export interface FinancialCalculationResult {
   liabilitiesDueAfterIncome: LiabilityItem[];
   totalLiabilitiesAfterIncome: number;
   
-  // Liquidity & Buffers
+  // Liquidity & Cash Flow
   remainingCashAfterImmediateObligations: number | null;
   isLiquidityThreatened: boolean;
   deficitAmount: number;
   
-  // Goals & Buffer impacts
+  // Separated Evaluation Statuses (Granular Financial Dimensions)
+  canPayAction: AssessmentStatus;
+  canCoverObligations: AssessmentStatus;
+  canCoverEssentialExpenses: AssessmentStatus;
+  isBufferMaintained: AssessmentStatus;
+  areProtectedAllocationsMaintained: AssessmentStatus;
+
+  // Buffer details
   bufferImpact: {
     minBuffer: number | null;
     projectedBufferRemaining: number | null;
-    isBufferIntact: boolean;
+    bufferShortfall: number; // 0 if maintained, > 0 if breached
+    isBufferIntact: AssessmentStatus;
   };
+
+  // Goals space evaluation
+  goalsEvaluation: GoalAllocationCalculation[];
   goalImpactNotes: string[];
 
   // Deterministic summary statements for LLM grounding

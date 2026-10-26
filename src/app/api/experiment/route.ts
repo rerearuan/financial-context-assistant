@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
 
       const sessionId = `ses_${crypto.randomBytes(16).toString("hex")}`;
       const modelId = getGeminiModel();
-      const maxFollowup = parseInt(process.env.MAX_FOLLOWUP_QUESTIONS || "2", 10);
+      const maxFollowup = parseInt(process.env.MAX_FOLLOWUP_QUESTIONS || "4", 10);
 
       try {
         let [scenario] = await db
@@ -191,18 +191,7 @@ export async function POST(req: NextRequest) {
           modelId,
         });
 
-        // Insert initial assistant message
-        const initialMsgId = `msg_${crypto.randomBytes(12).toString("hex")}`;
-        await db.insert(messages).values({
-          id: initialMsgId,
-          sessionId,
-          role: "assistant",
-          content: scenario.initialAssistantMessage,
-          sourcesUsed:
-            condition === "context_aware"
-              ? ["scenario", "synthetic_profile"]
-              : ["scenario"],
-        });
+        // Chat starts from the user, no initial assistant message is pre-inserted
 
         // Update participant with cell assignment & session link
         await db
@@ -261,22 +250,8 @@ export async function POST(req: NextRequest) {
         };
         demoSessions.set(sessionId, demoSess);
 
-        // Save initial message in demoMessages
-        demoMessages.set(sessionId, [
-          {
-            id: `msg_init_${sessionId}`,
-            sessionId,
-            role: "assistant",
-            content: scenarioFallback.initialAssistantMessage,
-            createdAt: new Date(),
-            sourcesUsed:
-              condition === "context_aware"
-                ? ["scenario", "synthetic_profile"]
-                : ["scenario"],
-            calculationSnapshot:
-              condition === "context_aware" ? (pkg?.expectedCalculations as Record<string, unknown>) : null,
-          },
-        ]);
+        // Start chat with empty message list so user sends the first message
+        demoMessages.set(sessionId, []);
 
         // Update demo participant
         if (part) {

@@ -4,10 +4,15 @@ import {
   buildSystemInstruction,
   buildUserPrompt,
   INTENT_EXTRACTION_PROMPT,
+  PROMPT_VERSION,
 } from "./prompts/templates";
 import { ExtractedIntent, ExtractedIntentSchema } from "./prompts/intent-schema";
 import { StructuredContextPacket } from "./financial-engine/types";
 import { sanitizeAmount } from "./financial-engine/validator";
+import {
+  validateAssistantOutput,
+  OutputValidationResult,
+} from "./financial-engine/output-guardrail";
 
 function getApiKey(): string {
   const key = process.env.GEMINI_API_KEY;
@@ -18,7 +23,7 @@ function getApiKey(): string {
 }
 
 export function getGeminiModel(): string {
-  return process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
+  return process.env.GEMINI_MODEL || "gemini-2.5-flash";
 }
 
 let genAIClient: GoogleGenAI | null = null;
@@ -62,7 +67,7 @@ export async function verifyModelAvailability(): Promise<{
 /**
  * Heuristic fallback parser for intent when LLM is unavailable or unparseable.
  */
-function heuristicExtractIntent(
+export function heuristicExtractIntent(
   userMessage: string,
   currentAction: StructuredContextPacket["action"]
 ): ExtractedIntent {
@@ -75,7 +80,7 @@ function heuristicExtractIntent(
     decision = "postpone";
   } else if (lower.includes("batal") || lower.includes("tidak jadi")) {
     decision = "cancel";
-  } else if (lower.includes("ubah") || lower.includes("ganti nominal")) {
+  } else if (lower.includes("ubah") || lower.includes("ganti nominal") || lower.includes("sesuaikan")) {
     decision = "modify";
   }
 
@@ -92,16 +97,34 @@ function heuristicExtractIntent(
     }
   }
 
-  // Look for user provided finances (e.g. "saldo saya 10 juta", "anggaran 2 jt")
-  const balanceMatch = userMessage.match(/saldo(?:[\w\s]{0,15})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
-  const budgetMatch = userMessage.match(/anggaran(?:[\w\s]{0,15})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
+  // Look for user provided finances (e.g. "saldo saya 10 juta", "anggaran 2 jt", "dana darurat 5 juta")
+  const balanceMatch = userMessage.match(/saldo(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
+  const budgetMatch = userMessage.match(/anggaran(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
+  const liabilitiesMatch = userMessage.match(/(?:tanggungan|kewajiban|tagihan|utang|cicilan)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
+  const bufferMatch = userMessage.match(/(?:dana darurat|buffer)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
 
   let userProvidedFinances: ExtractedIntent["userProvidedFinances"] = null;
-  if (balanceMatch || budgetMatch) {
+  if (balanceMatch || budgetMatch || liabilitiesMatch || bufferMatch) {
     userProvidedFinances = {
       balance: balanceMatch ? sanitizeAmount(balanceMatch[1]) || undefined : undefined,
       budget: budgetMatch ? sanitizeAmount(budgetMatch[1]) || undefined : undefined,
+      liabilities: liabilitiesMatch ? sanitizeAmount(liabilitiesMatch[1]) || undefined : undefined,
+      buffer: bufferMatch ? sanitizeAmount(bufferMatch[1]) || undefined : undefined,
     };
+
+    // If newAmount merely picked up the user's balance/budget/liabilities/buffer figure,
+    // do not treat it as an action modification unless explicit modification keywords are present
+    const hasModifyKeyword = /(ganti|ubah|harga|beli|jadinya|nominal|kalau)\b/i.test(userMessage);
+    if (!hasModifyKeyword && newAmount) {
+      if (
+        newAmount === userProvidedFinances.balance ||
+        newAmount === userProvidedFinances.budget ||
+        newAmount === userProvidedFinances.liabilities ||
+        newAmount === userProvidedFinances.buffer
+      ) {
+        newAmount = null;
+      }
+    }
   }
 
   let intentType: ExtractedIntent["intentType"] = "inquire";
@@ -124,7 +147,7 @@ function heuristicExtractIntent(
 }
 
 /**
- * 1. Extract intent & action modifications using structured extraction.
+ * 1. Extract intent & action modifications using structured extraction with schema validation.
  */
 export async function extractIntent(
   userMessage: string,
@@ -155,35 +178,34 @@ export async function extractIntent(
     // Validate with Zod
     const validated = ExtractedIntentSchema.safeParse(parsed);
     if (validated.success) {
-      // Clean and sanitize newAmount if present
       if (validated.data.newAmount) {
         validated.data.newAmount = sanitizeAmount(validated.data.newAmount);
       }
       return validated.data;
     }
   } catch {
-    // If Gemini fails, gracefully fallback to deterministic regex heuristic
+    // If Gemini fails or throws, gracefully fallback to deterministic regex heuristic
   }
 
   return heuristicExtractIntent(userMessage, currentAction);
 }
 
 /**
- * Generates a safe deterministic fallback response if Gemini is unavailable or fails validation.
+ * Generates a safe deterministic fallback response if Gemini is unavailable or fails guardrails.
  */
 export function generateSafeFallbackResponse(
   contextPacket: StructuredContextPacket,
-  userMessage: string
+  userMessage?: string
 ): string {
   const { condition, action, calculation } = contextPacket;
 
   if (condition === "basic" && calculation.status === "needs_clarification") {
     return (
-      `Anda sedang mempertimbangkan ${action.type === "spending" ? "pengeluaran" : "penyisihan dana"} sebesar ` +
+      `Anda sedang mempertimbangkan rencana ${action.type === "spending" ? "pengeluaran" : "penyisihan dana"} sebesar ` +
       `Rp ${action.amount.toLocaleString("id-ID")} untuk ${action.targetCategory} pada ${action.timing}.\n\n` +
-      `Karena saya belum memiliki data saldo kas operasional atau anggaran Anda dalam sesi ini, ` +
-      `saya belum dapat menghitung sisa dana atau dampak langsungnya secara numerik. ` +
-      `Jika Anda ingin evaluasi yang lebih spesifik, silakan bagikan perkiraan saldo atau anggaran yang Anda miliki saat ini.`
+      `Karena informasi saldo kas operasional atau alokasi anggaran Anda belum tercatat dalam sesi ini, ` +
+      `saya belum dapat melakukan perhitungan numerik spesifik. ` +
+      `Jika Anda ingin evaluasi perhitungan saldo atau kesiapan anggaran, silakan bagikan perkiraan saldo atau anggaran Anda saat ini.`
     );
   }
 
@@ -193,16 +215,16 @@ export function generateSafeFallbackResponse(
     `sebesar Rp ${action.amount.toLocaleString("id-ID")}:\n\n`;
 
   if (calculation.balanceAfterAction !== null) {
-    response += `• Saldo kas setelah tindakan menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}.\n`;
+    response += `• Sisa saldo kas setelah tindakan diperkirakan menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}.\n`;
   }
 
   if (calculation.relevantBudget) {
     if (calculation.isBudgetExceeded) {
-      response += `• Rencana ini melebihi sisa anggaran pos ${calculation.relevantBudget.category} sebesar Rp ${Math.abs(
+      response += `• Rencana ini melebihi sisa pos anggaran ${calculation.relevantBudget.category} sebesar Rp ${Math.abs(
         calculation.budgetVariance || 0
       ).toLocaleString("id-ID")}.\n`;
     } else {
-      response += `• Rencana ini masih dalam batas anggaran pos ${calculation.relevantBudget.category} (tersisa Rp ${(
+      response += `• Rencana ini masih dalam batas pos anggaran ${calculation.relevantBudget.category} (tersisa Rp ${(
         calculation.budgetVariance || 0
       ).toLocaleString("id-ID")}).\n`;
     }
@@ -216,33 +238,60 @@ export function generateSafeFallbackResponse(
 
   if (calculation.remainingCashAfterImmediateObligations !== null) {
     if (calculation.isLiquidityThreatened) {
-      response += `• PERHATIAN: Sisa kas likuid mengalami potensi defisit sebesar Rp ${calculation.deficitAmount.toLocaleString(
+      response += `• Sisa kas operasional: Mengalami defisit sebesar Rp ${calculation.deficitAmount.toLocaleString(
         "id-ID"
       )} untuk memenuhi kewajiban terdekat.\n`;
     } else {
-      response += `• Sisa kas likuid setelah kewajiban terdekat diperkirakan aman sebesar Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString(
+      response += `• Sisa kas operasional setelah kewajiban terdekat: Tersisa Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString(
         "id-ID"
       )}.\n`;
     }
   }
 
-  response += `\nAnda dapat memilih untuk melanjutkan simulasi ("Lanjut"), menyesuaikan nominal ("Ubah"), atau menunda tindakan ini.`;
+  if (calculation.bufferImpact.minBuffer !== null && calculation.bufferImpact.minBuffer > 0) {
+    if (!calculation.isBufferMaintained) {
+      response += `• Batas buffer dana darurat: Berada di bawah batas minimum (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString(
+        "id-ID"
+      )}), dengan kekurangan buffer sebesar Rp ${calculation.bufferImpact.bufferShortfall.toLocaleString(
+        "id-ID"
+      )}.\n`;
+    } else {
+      response += `• Batas buffer dana darurat: Tetap terlindungi (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString(
+        "id-ID"
+      )}).\n`;
+    }
+  }
+
+  if (calculation.goalsEvaluation.length > 0) {
+    for (const ge of calculation.goalsEvaluation) {
+      response += `• Pos tujuan ${ge.title}: ${ge.explanation}\n`;
+    }
+  }
+
+  response += `• Cakupan kebutuhan harian: Kecukupan untuk kebutuhan harian belum dapat dipastikan karena nominal kebutuhan harian belum tercatat.\n`;
+
+  response += `\nSilakan sampaikan tanggapan atau pertanyaan lebih lanjut terkait pertimbangan ini.`;
   return response;
 }
 
+export interface AssistantResponseResult {
+  content: string;
+  modelUsed: string;
+  promptVersion: string;
+  isFallback: boolean;
+  retryCount: number;
+  validationResult?: OutputValidationResult;
+}
+
 /**
- * 3. Generate assistant explanation using Gemini with strict facts grounding.
+ * 3. Generate assistant explanation using Gemini with strict facts grounding,
+ * output guardrails, and automated retry harness.
  */
 export async function generateAssistantResponse(
   contextPacket: StructuredContextPacket,
   userMessage: string,
   chatHistory: Array<{ role: "user" | "assistant"; content: string }>
-): Promise<{
-  content: string;
-  modelUsed: string;
-  promptVersion: string;
-  isFallback: boolean;
-}> {
+): Promise<AssistantResponseResult> {
   const model = getGeminiModel();
   const systemInstruction = buildSystemInstruction(contextPacket.condition);
 
@@ -252,13 +301,18 @@ export async function generateAssistantResponse(
     .map((m) => `${m.role === "user" ? "Pengguna" : "Asisten"}: ${m.content}`)
     .join("\n\n");
 
-  const userPrompt = buildUserPrompt(contextPacket, userMessage, historySummary);
+  const baseUserPrompt = buildUserPrompt(contextPacket, userMessage, historySummary);
+
+  let retryCount = 0;
+  let lastValidationResult: OutputValidationResult | undefined;
 
   try {
     const ai = getGeminiClient();
+
+    // First attempt
     const response = await ai.models.generateContent({
       model,
-      contents: userPrompt,
+      contents: baseUserPrompt,
       config: {
         systemInstruction,
         temperature: DEFAULT_GENERATION_PARAMS.temperature,
@@ -268,22 +322,73 @@ export async function generateAssistantResponse(
     });
 
     const reply = response.text?.trim();
-    if (reply && reply.length > 20) {
-      return {
-        content: reply,
-        modelUsed: model,
-        promptVersion: "v1.0.0",
-        isFallback: false,
-      };
+
+    if (reply && reply.length >= 20) {
+      // Run Output Guardrail
+      const guardrailResult = validateAssistantOutput(reply, contextPacket);
+      if (guardrailResult.isValid) {
+        return {
+          content: reply,
+          modelUsed: model,
+          promptVersion: PROMPT_VERSION,
+          isFallback: false,
+          retryCount: 0,
+          validationResult: guardrailResult,
+        };
+      }
+
+      // If guardrail failed, log violations and attempt 1 corrective retry
+      lastValidationResult = guardrailResult;
+      retryCount = 1;
+
+      const correctivePrompt = `${baseUserPrompt}
+
+<instruksi_koreksi_guardrail>
+PERHATIAN: Draf jawaban sebelumnya melanggar aturan guardrail sistem berikut:
+${guardrailResult.violations.map((v) => `- ${v}`).join("\n")}
+
+Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitungan_terverifikasi> secara ketat. Perbaiki semua pelanggaran di atas.
+</instruksi_koreksi_guardrail>`;
+
+      const retryResponse = await ai.models.generateContent({
+        model,
+        contents: correctivePrompt,
+        config: {
+          systemInstruction,
+          temperature: 0.05, // Lower temperature on retry
+          topP: DEFAULT_GENERATION_PARAMS.topP,
+          maxOutputTokens: DEFAULT_GENERATION_PARAMS.maxOutputTokens,
+        },
+      });
+
+      const retryReply = retryResponse.text?.trim();
+      if (retryReply && retryReply.length >= 20) {
+        const retryGuardrail = validateAssistantOutput(retryReply, contextPacket);
+        if (retryGuardrail.isValid) {
+          return {
+            content: retryReply,
+            modelUsed: model,
+            promptVersion: PROMPT_VERSION,
+            isFallback: false,
+            retryCount: 1,
+            validationResult: retryGuardrail,
+          };
+        }
+        lastValidationResult = retryGuardrail;
+      }
     }
-  } catch {
-    // If Gemini call fails, return the validated deterministic calculation fallback
+  } catch (err: unknown) {
+    console.warn("Gemini generation call failed, executing fallback:", err);
   }
 
+  // If both generation/retry attempts fail or violate guardrails, activate safe deterministic fallback
+  const fallbackText = generateSafeFallbackResponse(contextPacket, userMessage);
   return {
-    content: generateSafeFallbackResponse(contextPacket, userMessage),
+    content: fallbackText,
     modelUsed: model,
-    promptVersion: "v1.0.0",
+    promptVersion: PROMPT_VERSION,
     isFallback: true,
+    retryCount,
+    validationResult: lastValidationResult,
   };
 }

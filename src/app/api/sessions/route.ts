@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       participantCode || `P-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
     const modelId = getGeminiModel();
 
-    const maxFollowup = parseInt(process.env.MAX_FOLLOWUP_QUESTIONS || "2", 10);
+    const maxFollowup = parseInt(process.env.MAX_FOLLOWUP_QUESTIONS || "4", 10);
 
     // Insert session
     await db.insert(sessions).values({

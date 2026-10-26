@@ -17,6 +17,7 @@ export const ExtractedIntentSchema = z.object({
       budget: z.number().optional(),
       income: z.number().optional(),
       liabilities: z.number().optional(),
+      buffer: z.number().optional(),
       goals: z.string().optional(),
     })
     .nullable()

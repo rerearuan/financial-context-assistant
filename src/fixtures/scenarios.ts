@@ -84,7 +84,7 @@ export const SCENARIO_PACKAGES: ScenarioPackage[] = [
     scenario: {
       id: "spending_low",
       code: "SCN-SPEND-LOW",
-      title: "Skenario Spending dengan Low MAC",
+      title: "Pertimbangan Pembelian Laptop",
       actionType: "spending",
       conflictLevel: "low",
       situasiText: `Anda sedang mempertimbangkan untuk membeli laptop baru untuk mendukung pekerjaan dan aktivitas sehari-hari.
@@ -110,20 +110,20 @@ Tersedia dua metode pembayaran:
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
-      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 (promo hari ini dari harga normal Rp8.500.000) dengan opsi tunai atau cicilan 12 bulan.`,
+      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
       initialAction: {
         type: "spending",
         amount: 7000000,
         timing: "Hari ini (Promo terbatas)",
-        targetCategory: "Pembelian Laptop Baru",
-        description: "Pembelian laptop baru penunjang kerja (Tunai Rp7.000.000 atau Cicilan 12 bulan)",
+        targetCategory: "Pembelian Laptop",
+        description: "Pertimbangan pembelian laptop baru seharga Rp7.000.000",
       },
-      initialAssistantMessage: `Halo! Saya asisten percakapan finansial Anda. Anda sedang mempertimbangkan pembelian laptop baru seharga Rp7.000.000 hari ini (harga promo dari Rp8.500.000) dengan opsi pembayaran tunai atau cicilan 12 bulan. Apakah Anda ingin mengevaluasi keputusan ini dan membandingkan opsi pembayarannya dengan kondisi keuangan Anda?`,
+      initialAssistantMessage: `Halo, saya akan membantu Anda mempertimbangkan keputusan dalam simulasi ini. Silakan sampaikan tindakan yang ingin Anda pertimbangkan.`,
       quickReplies: [
-        "Apakah aman membeli laptop ini secara tunai?",
-        "Bagaimana jika saya memilih opsi cicilan 12 bulan?",
-        "Berapa sisa dana operasional saya setelah tagihan terdekat?",
-        "Apakah pembelian ini mengganggu dana darurat saya?",
+        "Apa dampaknya terhadap kondisi keuangan saya?",
+        "Bagaimana jika nominalnya dikurangi?",
+        "Bagaimana pengaruhnya terhadap kewajiban pembayaran terdekat?",
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
       ],
       tugasQuestions: [
         {
@@ -215,7 +215,7 @@ Tersedia dua metode pembayaran:
     scenario: {
       id: "spending_high",
       code: "SCN-SPEND-HIGH",
-      title: "Skenario Spending dengan High MAC",
+      title: "Pertimbangan Pembelian Laptop",
       actionType: "spending",
       conflictLevel: "high",
       situasiText: `Anda sedang mempertimbangkan untuk membeli laptop baru untuk mendukung pekerjaan dan aktivitas sehari-hari.
@@ -248,20 +248,20 @@ Tersedia dua metode pembayaran:
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
-      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 di tengah persaingan alokasi dana dengan persiapan program sertifikasi profesional (Rp4.000.000–Rp4.500.000).`,
+      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
       initialAction: {
         type: "spending",
         amount: 7000000,
         timing: "Hari ini (Promo terbatas)",
-        targetCategory: "Pembelian Laptop Baru",
-        description: "Pembelian laptop baru Rp7.000.000 (bersaing dengan dana sertifikasi profesional)",
+        targetCategory: "Pembelian Laptop",
+        description: "Pertimbangan pembelian laptop baru seharga Rp7.000.000",
       },
-      initialAssistantMessage: `Halo! Saya asisten percakapan finansial Anda. Anda sedang mempertimbangkan pembelian laptop baru seharga Rp7.000.000 hari ini, sementara Anda juga sedang mengumpulkan dana untuk program sertifikasi profesional (estimasi Rp4.000.000–Rp4.500.000). Apakah Anda ingin mengevaluasi bagaimana keputusan ini memengaruhi kedua tujuan penting tersebut?`,
+      initialAssistantMessage: `Halo, saya akan membantu Anda mempertimbangkan keputusan dalam simulasi ini. Silakan sampaikan tindakan yang ingin Anda pertimbangkan.`,
       quickReplies: [
-        "Apakah pembelian tunai laptop akan mengganggu dana sertifikasi saya?",
-        "Bagaimana jika saya mencicil laptop tersebut selama 12 bulan?",
-        "Berapa sisa dana kebutuhan rutin saya setelah tagihan 6 hari ke depan?",
-        "Pilihan apa yang paling seimbang untuk laptop dan sertifikasi?",
+        "Apa dampaknya terhadap kondisi keuangan saya?",
+        "Bagaimana jika nominalnya dikurangi?",
+        "Bagaimana pengaruhnya terhadap kewajiban pembayaran terdekat?",
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
       ],
       tugasQuestions: [
         {
@@ -362,7 +362,7 @@ Tersedia dua metode pembayaran:
     scenario: {
       id: "saving_low",
       code: "SCN-SAVE-LOW",
-      title: "Skenario Saving dengan Low MAC",
+      title: "Pertimbangan Alokasi Tabungan",
       actionType: "saving",
       conflictLevel: "low",
       situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
@@ -384,20 +384,20 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
-      descriptionText: `Evaluasi penambahan Dana Darurat (target Rp12.000.000, saat ini Rp8.000.000) dari pendapatan bulanan baru Rp8.000.000 tanpa adanya tujuan finansial besar lain yang bersaing.`,
+      descriptionText: `Pertimbangan alokasi penambahan tabungan sebesar Rp2.000.000 dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
         amount: 2000000,
         timing: "Bulan ini",
-        targetCategory: "Penambahan Dana Darurat",
-        description: "Alokasi penambahan Dana Darurat dari pendapatan bulanan baru",
+        targetCategory: "Penambahan Tabungan",
+        description: "Pertimbangan alokasi penambahan tabungan sebesar Rp2.000.000",
       },
-      initialAssistantMessage: `Halo! Saya asisten percakapan finansial Anda. Anda baru menerima pendapatan bulanan sebesar Rp8.000.000 dan berencana menambah Dana Darurat (target Rp12.000.000, saat ini Rp8.000.000). Apakah Anda ingin mengevaluasi berapa nominal yang aman untuk disisihkan dengan mempertimbangkan kewajiban sewa tempat tinggal, kartu/BNPL, utilitas, dan kebutuhan harian bulan ini?`,
+      initialAssistantMessage: `Halo, saya akan membantu Anda mempertimbangkan keputusan dalam simulasi ini. Silakan sampaikan tindakan yang ingin Anda pertimbangkan.`,
       quickReplies: [
-        "Berapa total kewajiban dan kebutuhan rutin saya bulan ini?",
-        "Apakah aman menyisihkan Rp2.000.000 ke Dana Darurat?",
-        "Berapa surplus kas bebas saya bulan ini?",
-        "Bagaimana rekomendasi pembagian alokasi gaji saya?",
+        "Apa dampaknya terhadap kondisi keuangan saya?",
+        "Bagaimana jika nominalnya dikurangi?",
+        "Bagaimana pengaruhnya terhadap kewajiban pembayaran terdekat?",
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
       ],
       tugasQuestions: [
         {
@@ -496,7 +496,7 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
     scenario: {
       id: "saving_high",
       code: "SCN-SAVE-HIGH",
-      title: "Skenario Saving dengan High MAC",
+      title: "Pertimbangan Alokasi Tabungan",
       actionType: "saving",
       conflictLevel: "high",
       situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
@@ -523,20 +523,20 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
-      descriptionText: `Evaluasi alokasi pendapatan bulanan Rp8.000.000 antara memperkuat Dana Darurat (kurang Rp4.000.000) dan menambah dana persiapan Sertifikasi Profesional (kurang Rp2.000.000–Rp2.500.000 dalam 2–3 bulan lagi).`,
+      descriptionText: `Pertimbangan alokasi penambahan tabungan sebesar Rp2.000.000 dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
         amount: 2000000,
         timing: "Bulan ini",
-        targetCategory: "Penambahan Dana Darurat vs Sertifikasi",
-        description: "Alokasi penambahan tabungan dengan persaingan prioritas Dana Darurat dan Sertifikasi",
+        targetCategory: "Penambahan Tabungan",
+        description: "Pertimbangan alokasi penambahan tabungan sebesar Rp2.000.000",
       },
-      initialAssistantMessage: `Halo! Saya asisten percakapan finansial Anda. Anda baru menerima pendapatan bulanan sebesar Rp8.000.000 dan menghadapi pilihan alokasi antara memperkuat Dana Darurat (target kurang Rp4.000.000) atau mempercepat tabungan Sertifikasi Profesional (kurang Rp2.000.000–Rp2.500.000). Apakah Anda ingin mengevaluasi bagaimana membagi alokasi ini secara optimal setelah memenuhi kebutuhan dan kewajiban bulan ini?`,
+      initialAssistantMessage: `Halo, saya akan membantu Anda mempertimbangkan keputusan dalam simulasi ini. Silakan sampaikan tindakan yang ingin Anda pertimbangkan.`,
       quickReplies: [
-        "Berapa surplus dana bebas saya setelah kewajiban tempat tinggal dan tagihan?",
-        "Berapa idealnya alokasi untuk Dana Darurat vs Sertifikasi bulan ini?",
-        "Apakah jika saya menabung Rp2.000.000 ke Dana Darurat, sertifikasi masih aman?",
-        "Bagaimana strategi terbaik menghadapi dua tujuan penting ini?",
+        "Apa dampaknya terhadap kondisi keuangan saya?",
+        "Bagaimana jika nominalnya dikurangi?",
+        "Bagaimana pengaruhnya terhadap kewajiban pembayaran terdekat?",
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
       ],
       tugasQuestions: [
         {
