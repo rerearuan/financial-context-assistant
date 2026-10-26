@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ArrowRight, BookOpen, GraduationCap, FileText } from "lucide-react";
+import { ArrowRight, GraduationCap, FileText } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -46,15 +46,9 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Footer / Researcher link */}
-      <footer className="text-center pt-4 border-t border-slate-200">
-        <Link
-          href="/dev-preview"
-          className="text-xs text-slate-400 hover:text-slate-600 inline-flex items-center gap-1.5 transition"
-        >
-          <BookOpen className="w-3.5 h-3.5" />
-          Matriks Preview Skenario (Khusus Tim Peneliti)
-        </Link>
+      {/* Academic Footer */}
+      <footer className="text-center pt-4 border-t border-slate-200 text-[11px] text-slate-400">
+        Program Studi Sistem Informasi • Fakultas Ilmu Komputer Universitas Indonesia
       </footer>
     </div>
   );
