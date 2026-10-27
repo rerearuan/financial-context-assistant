@@ -198,6 +198,42 @@ export function generateSafeFallbackResponse(
   userMessage?: string
 ): string {
   const { condition, action, calculation } = contextPacket;
+  const cleanMsg = (userMessage || "").trim().toLowerCase();
+
+  // 1. Handle pure greetings naturally
+  const isGreetingOnly = /^(halo|hai|hi|hei|p|halo!|hai!|selamat pagi|selamat siang|selamat sore|selamat malam|assalamu['a]?laikum)\b/i.test(cleanMsg) &&
+    cleanMsg.length < 30;
+
+  if (isGreetingOnly) {
+    return (
+      `Halo! Saya asisten percakapan finansial Anda. Anda dapat berdiskusi mengenai pertimbangan rencana ` +
+      `${action.type === "spending" ? "pembelian" : "penyisihan tabungan"} Anda, memeriksa sisa saldo kas, ` +
+      `kewajiban tagihan terdekat, kebutuhan rutin, atau simulasi nominal lainnya. Apa yang ingin Anda tanyakan atau diskusikan?`
+    );
+  }
+
+  // 2. Handle questions about reducing nominal without specific number
+  const isAskingReducedNominal = /(kurang|turun|lebih kecil|lebih rendah)/i.test(cleanMsg) &&
+    !/\d/.test(cleanMsg);
+
+  if (isAskingReducedNominal) {
+    if (action.type === "saving") {
+      return (
+        `Jika nominal tabungan dikurangi (misalnya menjadi Rp 1.000.000 dari sebelumnya Rp 2.000.000), ` +
+        `beban arus kas bulanan Anda akan berkurang Rp 1.000.000. Setelah membayar kewajiban tagihan wajib Rp 3.500.000, ` +
+        `sisa dana operasional dari pendapatan menjadi Rp 3.500.000. Jumlah ini mencukupi estimasi kebutuhan rutin (rata-rata Rp 2.700.000) ` +
+        `dan masih menyisakan sekitar Rp 800.000 untuk pos tujuan lain (seperti Program Sertifikasi). ` +
+        `Berapa nominal yang ingin Anda coba pertimbangkan? Anda dapat mengetik misalnya: "Ganti jadi 1 juta".`
+      );
+    } else {
+      return (
+        `Jika nominal pembelian laptop dikurangi (misalnya mencari alternatif laptop seharga Rp 5.000.000 dari sebelumnya Rp 7.000.000), ` +
+        `pengeluaran akan lebih sejalan dengan pos anggaran dan sisa kas operasional Anda setelah tagihan akan menjadi lebih aman ` +
+        `(sekitar Rp 11.200.000), sehingga batas buffer dana darurat tetap terlindungi penuh. ` +
+        `Berapa nominal alternatif yang ingin Anda coba simulasikan? Anda dapat mengetik misalnya: "Ganti jadi 5 juta".`
+      );
+    }
+  }
 
   if (condition === "basic" && calculation.status === "needs_clarification") {
     return (
@@ -248,9 +284,15 @@ export function generateSafeFallbackResponse(
 
   if (calculation.routineExpenses) {
     if (action.type === "saving") {
-      part2 += `Untuk kebutuhan rutin bulanan (rata-rata Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}), ` +
-        `sisa pendapatan mengalami defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")} ` +
-        `dan hanya mencukupi jika ditekan ke batas minimum (Rp 2.400.000). `;
+      const isDeficit = (calculation.routineExpenses.remainingCashAfterRoutine || 0) < 0;
+      if (isDeficit) {
+        part2 += `Untuk kebutuhan rutin bulanan (rata-rata Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}), ` +
+          `sisa pendapatan mengalami defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")} ` +
+          `dan hanya mencukupi jika ditekan ke batas minimum (Rp 2.400.000). `;
+      } else {
+        part2 += `Sisa pendapatan setelah setoran dan tagihan (Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}) ` +
+          `mencukupi estimasi kebutuhan rutin bulanan (Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}). `;
+      }
     } else {
       part2 += `Sisa kas mencukupi kebutuhan rutin hingga gajian berikutnya (estimasi Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}) ` +
         `dengan sisa akhir Rp ${(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}. `;

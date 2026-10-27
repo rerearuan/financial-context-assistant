@@ -58,7 +58,11 @@ export function calculateFinancialConsequences(
 
     if (profile.routineExpenses) {
       const routineRemaining = profile.routineExpenses.remainingEstimate;
-      const baseForRoutine = remainingCashAfterImmediateObligations;
+      // In saving: base is monthly available income after action and bills (e.g. 8jt - 2jt - 3.5jt = 2.5jt)
+      // In spending: base is remaining cash after action and bills (e.g. 18jt - 7jt - 1.8jt = 9.2jt)
+      const monthlyAvailable = selected.relevantBudget?.remaining ?? profile.incomeSchedule.amount;
+      const remainingMonthlyAfterBills = (monthlyAvailable - action.amount) - totalLiabilitiesBeforeIncome;
+      const baseForRoutine = action.type === "saving" ? remainingMonthlyAfterBills : remainingCashAfterImmediateObligations;
       const remainingCashAfterRoutine = baseForRoutine - routineRemaining;
       canCoverEssentialExpenses = remainingCashAfterRoutine >= 0;
 
