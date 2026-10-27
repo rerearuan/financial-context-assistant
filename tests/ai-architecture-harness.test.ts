@@ -193,6 +193,54 @@ describe("AI Architecture Harness & Evaluation (Uji Berpasangan & Workflow)", ()
       expect(fallback).toContain("Rp 1.800.000"); // liabilities
       expect(fallback).toContain("Rp 9.200.000"); // remaining cash
     });
+
+    it("handles multi-turn follow-up on sufficiency without repeating introductory disclaimers in Basic", () => {
+      const basicPacket = buildStructuredContextPacket({
+        condition: "basic",
+        action,
+        syntheticProfile: null,
+      });
+
+      const history = [
+        { role: "user" as const, content: "Apa dampaknya terhadap keuangan saya?" },
+        { role: "assistant" as const, content: "Setelah pembelian Rp 7.000.000..." },
+        { role: "user" as const, content: "Apakah sisa saldo masih mencukupi untuk kebutuhan?" },
+      ];
+
+      const followupReply = generateSafeFallbackResponse(
+        basicPacket,
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
+        history
+      );
+
+      expect(followupReply).toContain("Untuk memastikan apakah sisa saldo masih mencukupi");
+      expect(followupReply).toContain("saldo rekening Anda saat ini dan total tagihan");
+      expect(followupReply).not.toContain("alokasi anggaran Anda belum tercatat dalam sesi ini, untuk menghitung apakah tindakan ini aman");
+    });
+
+    it("directly answers sufficiency and buffer impact on Context-Aware follow-up queries", () => {
+      const caPacket = buildStructuredContextPacket({
+        condition: "context_aware",
+        action,
+        syntheticProfile,
+      });
+
+      const history = [
+        { role: "user" as const, content: "Apa dampaknya?" },
+        { role: "assistant" as const, content: "Berdasarkan evaluasi..." },
+        { role: "user" as const, content: "Apakah sisa saldo masih mencukupi untuk kebutuhan?" },
+      ];
+
+      const followupReply = generateSafeFallbackResponse(
+        caPacket,
+        "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
+        history
+      );
+
+      expect(followupReply).toContain("Setelah pembelian, saldo menjadi Rp 11.000.000");
+      expect(followupReply).toContain("Rp 1.800.000");
+      expect(followupReply).toContain("Rp 9.200.000");
+    });
   });
 
   describe("6. Prompt Layering & Experiment Boundary Isolation", () => {

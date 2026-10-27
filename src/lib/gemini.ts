@@ -195,10 +195,12 @@ export async function extractIntent(
  */
 export function generateSafeFallbackResponse(
   contextPacket: StructuredContextPacket,
-  userMessage?: string
+  userMessage?: string,
+  chatHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): string {
   const { condition, action, calculation } = contextPacket;
   const cleanMsg = (userMessage || "").trim().toLowerCase();
+  const isFollowup = Boolean(chatHistory && chatHistory.length > 1);
 
   // 1. Handle pure greetings naturally
   const isGreetingOnly = /^(halo|hai|hi|hei|p|halo!|hai!|selamat pagi|selamat siang|selamat sore|selamat malam|assalamu['a]?laikum)\b/i.test(cleanMsg) &&
@@ -235,7 +237,18 @@ export function generateSafeFallbackResponse(
     }
   }
 
+  // 3. Basic Condition handling
   if (condition === "basic" && calculation.status === "needs_clarification") {
+    const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan|kas)/i.test(cleanMsg);
+    if (isFollowup && isAskingSufficiency) {
+      return (
+        `Untuk memastikan apakah sisa saldo masih mencukupi kebutuhan Anda setelah ` +
+        `${action.type === "spending" ? "pembelian" : "penyisihan"} Rp ${action.amount.toLocaleString("id-ID")}, ` +
+        `saya memerlukan informasi saldo rekening Anda saat ini dan total tagihan sebelum pemasukan berikutnya. ` +
+        `Setelah nominal tersebut Anda sampaikan, saya bisa langsung menghitung sisa dana yang aman untuk kebutuhan Anda.`
+      );
+    }
+
     return (
       `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} ${action.targetCategory} sebesar ` +
       `Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening Anda akan berkurang sebesar nominal tersebut. ` +
@@ -246,7 +259,35 @@ export function generateSafeFallbackResponse(
     );
   }
 
-  // For Context-Aware or Basic with user-provided data:
+  // 4. Context-Aware: Targeted answer if user specifically asks about sufficiency or obligations
+  const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan rutin|kas operasional)/i.test(cleanMsg);
+  if (isFollowup && isAskingSufficiency) {
+    if (action.type === "spending") {
+      const shortfallNote =
+        calculation.bufferImpact.minBuffer && !calculation.isBufferMaintained
+          ? `Namun, jumlah itu Rp ${calculation.bufferImpact.bufferShortfall.toLocaleString("id-ID")} di bawah buffer minimum Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}, sebelum kebutuhan harian.`
+          : `Jumlah tersebut aman di atas buffer minimum Rp ${calculation.bufferImpact.minBuffer?.toLocaleString("id-ID")}, dan mencukupi estimasi kebutuhan rutin hingga gajian berikutnya.`;
+
+      return (
+        `Setelah pembelian, saldo menjadi Rp ${calculation.balanceAfterAction?.toLocaleString("id-ID")}. ` +
+        `Tagihan Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")} masih dapat dibayar, sehingga tersisa Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}. ` +
+        `${shortfallNote}`
+      );
+    } else {
+      const routineNote =
+        calculation.routineExpenses && (calculation.routineExpenses.remainingCashAfterRoutine || 0) < 0
+          ? `Jumlah ini berada di bawah estimasi kebutuhan rutin bulanan Anda (rata-rata Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}, defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}), sehingga ruang alokasi untuk pos Program Sertifikasi Profesional pada bulan ini adalah Rp 0.`
+          : `Jumlah ini mencukupi estimasi kebutuhan rutin bulanan Anda (Rp ${calculation.routineExpenses?.estimatedRemaining.toLocaleString("id-ID")}).`;
+
+      return (
+        `Setelah penyisihan Rp ${action.amount.toLocaleString("id-ID")} dan pembayaran kewajiban tagihan terdekat Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}, ` +
+        `sisa pendapatan operasional Anda bulan ini adalah Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}. ` +
+        `${routineNote}`
+      );
+    }
+  }
+
+  // For Context-Aware or Basic with user-provided data (General Full Evaluation):
   // Format as natural, structured paragraphs instead of rigid raw lists
   let part1 = `Berdasarkan evaluasi terhadap rencana ${action.type === "spending" ? "pengeluaran" : "penyisihan tabungan"} ` +
     `sebesar Rp ${action.amount.toLocaleString("id-ID")}: `;
@@ -331,7 +372,11 @@ export async function generateAssistantResponse(
   const systemInstruction = buildSystemInstruction(contextPacket.condition);
 
   // Format short recent chat history summary (max last 4 messages)
-  const recentHistory = chatHistory.slice(-4);
+  // Exclude the current user message if it is already the last entry in chatHistory
+  const priorHistory = chatHistory.filter(
+    (m, idx) => !(idx === chatHistory.length - 1 && m.role === "user" && m.content === userMessage)
+  );
+  const recentHistory = priorHistory.slice(-4);
   const historySummary = recentHistory
     .map((m) => `${m.role === "user" ? "Pengguna" : "Asisten"}: ${m.content}`)
     .join("\n\n");
@@ -454,7 +499,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
   }
 
   // If both generation/retry attempts fail or violate guardrails, activate safe deterministic fallback
-  const fallbackText = generateSafeFallbackResponse(contextPacket, userMessage);
+  const fallbackText = generateSafeFallbackResponse(contextPacket, userMessage, chatHistory);
   return {
     content: fallbackText,
     modelUsed: model,
