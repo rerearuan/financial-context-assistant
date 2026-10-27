@@ -202,7 +202,22 @@ export function generateSafeFallbackResponse(
   const cleanMsg = (userMessage || "").trim().toLowerCase();
   const isFollowup = Boolean(chatHistory && chatHistory.length > 1);
 
-  // 1. Handle pure greetings naturally
+  // Clean target category label to avoid "pembelian Pembelian Laptop"
+  const categoryLabel = action.targetCategory.toLowerCase().startsWith("pembelian")
+    ? action.targetCategory.replace(/^pembelian\s+/i, "")
+    : action.targetCategory;
+
+  // 1. Handle test / ping messages naturally
+  const isTestOrPing = /^(tes|test|testing|ping|cek|coba)\b/i.test(cleanMsg) && cleanMsg.length < 20;
+  if (isTestOrPing) {
+    return (
+      `Halo! Sistem aktif dan siap mendampingi Anda berdiskusi. Anda dapat menanyakan dampak rencana ` +
+      `${action.type === "spending" ? "pembelian" : "penyisihan tabungan"} ini terhadap sisa saldo kas, ` +
+      `kewajiban tagihan terdekat, kebutuhan rutin, atau simulasi nominal alternatif. Apa yang ingin Anda diskusikan?`
+    );
+  }
+
+  // 2. Handle pure greetings naturally
   const isGreetingOnly = /^(halo|hai|hi|hei|p|halo!|hai!|selamat pagi|selamat siang|selamat sore|selamat malam|assalamu['a]?laikum)\b/i.test(cleanMsg) &&
     cleanMsg.length < 30;
 
@@ -214,7 +229,7 @@ export function generateSafeFallbackResponse(
     );
   }
 
-  // 2. Handle questions about reducing nominal without specific number
+  // 3. Handle questions about reducing nominal without specific number
   const isAskingReducedNominal = /(kurang|turun|lebih kecil|lebih rendah)/i.test(cleanMsg) &&
     !/\d/.test(cleanMsg);
 
@@ -237,20 +252,20 @@ export function generateSafeFallbackResponse(
     }
   }
 
-  // 3. Basic Condition handling
+  // 4. Basic Condition handling
   if (condition === "basic" && calculation.status === "needs_clarification") {
     const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan|kas)/i.test(cleanMsg);
     if (isFollowup && isAskingSufficiency) {
       return (
         `Untuk memastikan apakah sisa saldo masih mencukupi kebutuhan Anda setelah ` +
-        `${action.type === "spending" ? "pembelian" : "penyisihan"} Rp ${action.amount.toLocaleString("id-ID")}, ` +
+        `${action.type === "spending" ? "pembelian" : "penyisihan"} ${categoryLabel} Rp ${action.amount.toLocaleString("id-ID")}, ` +
         `saya memerlukan informasi saldo rekening Anda saat ini dan total tagihan sebelum pemasukan berikutnya. ` +
         `Setelah nominal tersebut Anda sampaikan, saya bisa langsung menghitung sisa dana yang aman untuk kebutuhan Anda.`
       );
     }
 
     return (
-      `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} ${action.targetCategory} sebesar ` +
+      `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} ${categoryLabel} sebesar ` +
       `Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening Anda akan berkurang sebesar nominal tersebut. ` +
       `Karena informasi saldo kas operasional atau alokasi anggaran Anda belum tercatat dalam sesi ini, ` +
       `untuk menghitung apakah tindakan ini aman bagi keuangan Anda, berapa perkiraan saldo rekening yang tersedia saat ini ` +
@@ -259,7 +274,7 @@ export function generateSafeFallbackResponse(
     );
   }
 
-  // 4. Context-Aware: Targeted answer if user specifically asks about sufficiency or obligations
+  // 5. Context-Aware: Targeted answer if user specifically asks about sufficiency or obligations
   const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan rutin|kas operasional)/i.test(cleanMsg);
   if (isFollowup && isAskingSufficiency) {
     if (action.type === "spending") {
