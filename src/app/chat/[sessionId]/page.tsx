@@ -14,6 +14,7 @@ import {
   X,
   Info,
 } from "lucide-react";
+import { ScenarioViewer } from "@/components/ScenarioViewer";
 
 interface ActionData {
   type: "spending" | "saving";

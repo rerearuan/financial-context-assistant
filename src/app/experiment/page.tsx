@@ -16,6 +16,7 @@ import {
   Award,
   FileText,
 } from "lucide-react";
+import { ScenarioViewer } from "@/components/ScenarioViewer";
 import {
   POST_QUESTIONNAIRE_ITEMS,
   LIKERT_OPTIONS,
@@ -814,27 +815,7 @@ function ExperimentContent() {
                   </h3>
                 </div>
 
-                <div className="space-y-5 text-xs sm:text-sm text-slate-800 leading-relaxed">
-                  {/* Bagian Situasi */}
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-sm mb-1.5 pb-1 border-b border-slate-100">
-                      Situasi
-                    </h4>
-                    <div className="whitespace-pre-line text-slate-700">
-                      {scenario.situasiText}
-                    </div>
-                  </div>
-
-                  {/* Bagian Kondisi Keuangan Anda */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <h4 className="font-bold text-slate-900 text-sm mb-2 pb-1 border-b border-slate-200">
-                      Kondisi Keuangan Anda
-                    </h4>
-                    <div className="whitespace-pre-line text-slate-700 font-normal">
-                      {scenario.kondisiKeuanganText}
-                    </div>
-                  </div>
-                </div>
+                <ScenarioViewer scenario={scenario} />
               </div>
 
               {/* Kolom Kanan: Comprehension Check / Tugas Keputusan Awal */}
