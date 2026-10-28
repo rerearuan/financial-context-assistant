@@ -241,7 +241,7 @@ export async function POST(req: NextRequest) {
           participantCode: partCode,
           scenarioId,
           condition,
-          currentAction: scenarioFallback.initialAction as Record<string, unknown>,
+          currentAction: scenarioFallback.initialAction as unknown as Record<string, unknown>,
           status: "in_progress",
           followupCount: 0,
           maxFollowupAllowed: maxFollowup,

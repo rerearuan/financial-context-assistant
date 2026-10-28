@@ -1,0 +1,42 @@
+[
+  {
+    "scenario": "spending_low",
+    "transactions": 97,
+    "opening": 6400000,
+    "credits": 32000000,
+    "debits": 20400000,
+    "closing": 18000000,
+    "allocation_total": 18000000,
+    "checks": "PASS"
+  },
+  {
+    "scenario": "spending_high",
+    "transactions": 97,
+    "opening": 6400000,
+    "credits": 32000000,
+    "debits": 20400000,
+    "closing": 18000000,
+    "allocation_total": 18000000,
+    "checks": "PASS"
+  },
+  {
+    "scenario": "saving_low",
+    "transactions": 85,
+    "opening": 2600000,
+    "credits": 32000000,
+    "debits": 18600000,
+    "closing": 16000000,
+    "allocation_total": 16000000,
+    "checks": "PASS"
+  },
+  {
+    "scenario": "saving_high",
+    "transactions": 85,
+    "opening": 4600000,
+    "credits": 32000000,
+    "debits": 18600000,
+    "closing": 18000000,
+    "allocation_total": 18000000,
+    "checks": "PASS"
+  }
+]

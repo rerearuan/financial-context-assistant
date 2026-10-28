@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
+import { BankTransactionItem } from "@/lib/financial-engine/types";
 import {
   Wallet,
   Banknote,
@@ -18,6 +20,11 @@ import {
   Sparkles,
   Layers,
   AlertTriangle,
+  Receipt,
+  Search,
+  ArrowDownRight,
+  ArrowUpRight,
+  Filter,
 } from "lucide-react";
 
 export interface ScenarioData {
@@ -38,6 +45,10 @@ interface ScenarioViewerProps {
 }
 
 export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProps) {
+  const [activeTab, setActiveTab] = React.useState<"ringkasan" | "mutasi">("ringkasan");
+  const [txFilter, setTxFilter] = React.useState<"all" | "debit" | "credit">("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
+
   const id = scenario.id || "";
   const isSpendingLow = id === "spending_low";
   const isSpendingHigh = id === "spending_high";
@@ -45,8 +56,195 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
   const isSavingHigh = id === "saving_high";
   const isKnownScenario = isSpendingLow || isSpendingHigh || isSavingLow || isSavingHigh;
 
+  const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === id);
+  const transactions: BankTransactionItem[] = (pkg?.syntheticProfile as any)?.transactions || [];
+  const h0Date = pkg?.scenario.h0Date || (isSpendingLow || isSpendingHigh ? "2026-10-20" : "2026-11-01");
+
+  const filteredTransactions = React.useMemo(() => {
+    return transactions
+      .map((tx, idx) => {
+        const isCredit = (tx.credit ?? 0) > 0;
+        const amt = isCredit ? (tx.credit ?? 0) : (tx.debit ?? (tx.amount ?? 0));
+        const bal = tx.balance ?? tx.runningBalance ?? 0;
+        const txId = tx.transaction_id || tx.transactionId || tx.id || `tx_${idx}`;
+        return {
+          ...tx,
+          computedId: txId,
+          computedType: isCredit ? ("credit" as const) : ("debit" as const),
+          computedAmount: amt,
+          computedBalance: bal,
+        };
+      })
+      .filter((tx) => {
+        if (txFilter === "debit" && tx.computedType !== "debit") return false;
+        if (txFilter === "credit" && tx.computedType !== "credit") return false;
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchDesc = (tx.description || "").toLowerCase().includes(q);
+          const matchCat = (tx.category || "").toLowerCase().includes(q);
+          if (!matchDesc && !matchCat) return false;
+        }
+        return true;
+      });
+  }, [transactions, txFilter, searchQuery]);
+
   return (
-    <div className={`space-y-5 ${compact ? "text-xs" : "text-xs sm:text-sm"}`}>
+    <div className={`space-y-4 ${compact ? "text-xs" : "text-xs sm:text-sm"}`}>
+      {/* Tab Navigation */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab("ringkasan")}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
+            activeTab === "ringkasan"
+              ? "bg-blue-600 text-white shadow-xs"
+              : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5" />
+          Ringkasan Profil & Skenario
+        </button>
+
+        {transactions.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setActiveTab("mutasi")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
+              activeTab === "mutasi"
+                ? "bg-blue-600 text-white shadow-xs"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+            }`}
+          >
+            <Receipt className="w-3.5 h-3.5" />
+            Mutasi Rekening Bank
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                activeTab === "mutasi" ? "bg-white text-blue-700" : "bg-slate-200 text-slate-700"
+              }`}
+            >
+              {transactions.length}
+            </span>
+          </button>
+        )}
+      </div>
+
+      {activeTab === "mutasi" && (
+        <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:p-5 shadow-xs space-y-3.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-100">
+            <div>
+              <div className="flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-blue-600" />
+                <h4 className="font-bold text-slate-900 text-sm">
+                  Buku Tabungan / Mutasi Rekening
+                </h4>
+              </div>
+              <p className="text-[11px] text-slate-500 mt-0.5">
+                Snapshot transaksi historis hingga tanggal <strong>{h0Date} (H0 Skenario)</strong>
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-semibold">
+                Saldo H0: {isSavingLow ? "Rp 16.000.000" : "Rp 18.000.000"}
+              </span>
+            </div>
+          </div>
+
+          {/* Filter & Search Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setTxFilter("all")}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                  txFilter === "all"
+                    ? "bg-slate-800 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Semua ({transactions.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setTxFilter("debit")}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                  txFilter === "debit"
+                    ? "bg-rose-600 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Debit (Keluar)
+              </button>
+              <button
+                type="button"
+                onClick={() => setTxFilter("credit")}
+                className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition ${
+                  txFilter === "credit"
+                    ? "bg-emerald-600 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Kredit (Masuk)
+              </button>
+            </div>
+
+            <div className="relative min-w-[180px]">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Cari transaksi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-2.5 py-1 text-xs rounded-md border border-slate-200 focus:outline-hidden focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Transactions Table */}
+          <div className="overflow-x-auto max-h-[380px] overflow-y-auto border border-slate-200 rounded-lg">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead className="bg-slate-50 text-slate-600 sticky top-0 z-10 border-b border-slate-200 text-[11px]">
+                <tr>
+                  <th className="p-2 font-semibold">Tanggal</th>
+                  <th className="p-2 font-semibold">Keterangan</th>
+                  <th className="p-2 font-semibold">Kategori</th>
+                  <th className="p-2 font-semibold text-right">Nominal</th>
+                  <th className="p-2 font-semibold text-right">Saldo</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredTransactions.map((tx) => (
+                  <tr key={tx.computedId} className="hover:bg-slate-50/70 transition">
+                    <td className="p-2 whitespace-nowrap text-slate-600 font-mono text-[11px]">
+                      {tx.date}
+                    </td>
+                    <td className="p-2 text-slate-900 font-medium">
+                      {tx.description}
+                    </td>
+                    <td className="p-2 text-slate-500 whitespace-nowrap text-[11px]">
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200">
+                        {tx.category}
+                      </span>
+                    </td>
+                    <td
+                      className={`p-2 text-right whitespace-nowrap font-semibold ${
+                        tx.computedType === "credit" ? "text-emerald-700" : "text-rose-700"
+                      }`}
+                    >
+                      {tx.computedType === "credit" ? "+" : "-"}Rp {tx.computedAmount.toLocaleString("id-ID")}
+                    </td>
+                    <td className="p-2 text-right whitespace-nowrap font-mono text-slate-700 text-[11px]">
+                      Rp {tx.computedBalance.toLocaleString("id-ID")}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "ringkasan" && (
+        <>
       {/* =========================================================================
           BAGIAN 1: SITUASI & LATAR BELAKANG
       ========================================================================= */}
@@ -600,6 +798,8 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }

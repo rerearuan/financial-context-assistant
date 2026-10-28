@@ -2,14 +2,31 @@ export type ActionType = "spending" | "saving";
 export type ConditionType = "basic" | "context_aware";
 export type AssessmentStatus = boolean | "unknown";
 
+export interface BankTransactionItem {
+  id?: string;
+  transactionId?: string;
+  transaction_id?: string;
+  date: string; // YYYY-MM-DD
+  description: string;
+  category: string;
+  amount?: number;
+  credit?: number;
+  debit?: number;
+  balance?: number;
+  runningBalance?: number;
+  type?: "credit" | "debit";
+}
+
 export interface FinancialAction {
   type: ActionType;
-  amount: number;
+  amount: number; // 0 or positive; 0 indicates not yet selected (e.g. saving baseline)
   timing: string;
   targetCategory: string;
   description: string;
-  source: "scenario" | "user_message";
+  source: "scenario" | "user_message" | "alternative_exploration";
   modifiedByUser?: boolean;
+  paymentMethod?: "cash" | "installment";
+  tenorMonths?: number;
 }
 
 export interface BudgetItem {
@@ -21,20 +38,26 @@ export interface BudgetItem {
 }
 
 export interface LiabilityItem {
+  id?: string;
   title: string;
   amount: number;
-  dueDate: string; // YYYY-MM-DD
+  amountMin?: number;
+  amountMax?: number;
+  dueDate: string | null; // YYYY-MM-DD or null if estimated/no fixed date
   isPriority: boolean;
+  status?: "unpaid" | "estimated" | "paid";
+  period?: string;
   source: "synthetic_profile" | "user_message";
 }
 
 export interface GoalItem {
+  id?: string;
   title: string;
   targetAmount: number;
   currentAllocated: number;
   targetDate?: string;
   priority: "high" | "medium" | "low";
-  lockIn: boolean;
+  lockIn: boolean; // if true, funds in this goal cannot be liquidated immediately without penalty
   source: "synthetic_profile" | "user_message";
 }
 
@@ -62,14 +85,37 @@ export interface RoutineExpensesContext {
 }
 
 export interface FinancialProfileContext {
+  id?: string;
+  scenarioId?: string;
+  h0Date?: string; // YYYY-MM-DD
   totalCashBalance: number;
   liquidBalance: number;
+  allocations?: Record<string, number>;
   budgets: BudgetItem[];
   liabilities: LiabilityItem[];
   goals: GoalItem[];
   buffer: BufferItem;
   routineExpenses?: RoutineExpensesContext;
   incomeSchedule: IncomeScheduleItem;
+  historyMonths?: string[];
+  routineMonthlyTotals?: number[];
+  transactions?: BankTransactionItem[];
+  installmentPlan?: any;
+  laptopOffer?: {
+    price: number;
+    regularPrice: number;
+    installmentMonths: number;
+    flatInterestMonthly: number;
+    adminRate: number;
+    firstPaymentDate: string | null;
+    adminPaymentDate: string | null;
+  };
+  emergencyTarget?: number;
+  certificationGoal?: {
+    costMin: number;
+    costMax: number;
+    horizonMonths: number[];
+  };
   source: "synthetic_profile";
 }
 
@@ -79,8 +125,42 @@ export interface UserProvidedFinances {
   income?: number;
   liabilities?: number;
   buffer?: number;
+  routine?: number;
   goals?: string;
-  source: "user_message";
+  source?: "user_message";
+}
+
+export interface UserConstraints {
+  prohibitCertificationFunds?: boolean;
+  maintainBufferAmount?: number;
+  preferredPaymentMethod?: "cash" | "installment";
+  preferredTenor?: number;
+  otherConstraints?: string[];
+}
+
+export interface ExploredAlternative {
+  amount: number;
+  type: ActionType;
+  paymentMethod?: "cash" | "installment";
+  tenorMonths?: number;
+  label?: string;
+  calculationSnapshot?: FinancialCalculationResult;
+  timestamp: string;
+}
+
+export interface ConversationState {
+  activePlan: FinancialAction | null;
+  exploredAlternatives: ExploredAlternative[];
+  userProvidedFacts: UserProvidedFinances;
+  userConstraints: UserConstraints;
+  lastReferencedEntity?: {
+    type: "plan" | "alternative" | "bill" | "budget" | "goal" | "general";
+    amount?: number;
+    label?: string;
+  };
+  openClarifications: string[];
+  confusionCount: number;
+  declinedDiscussion: boolean;
 }
 
 export interface GoalAllocationCalculation {
@@ -90,7 +170,21 @@ export interface GoalAllocationCalculation {
   remainingShortfall: number;
   availableSurplusAfterObligations: number | null;
   canMeetGoal: AssessmentStatus;
+  isUntouchedAndProtected: boolean;
   explanation: string;
+}
+
+export interface InstallmentCalculation {
+  price: number;
+  tenorMonths: number;
+  monthlyPrincipal: number;
+  monthlyFlatInterest: number;
+  monthlyTotalInstallment: number;
+  adminFee: number;
+  totalPayment12Months: number;
+  excessOverCash: number;
+  knownFirstDueDate: string | null;
+  knownAdminDueDate: string | null;
 }
 
 export interface FinancialCalculationResult {
@@ -99,23 +193,32 @@ export interface FinancialCalculationResult {
   actionAmount: number;
   actionType: ActionType;
   
-  // Balances
+  // Balances & Cash Status
   initialBalance: number | null;
-  balanceAfterAction: number | null;
+  balanceAfterAction: number | null; // For spending: bank cash reduces. For saving: bank cash unchanged (virtual allocation)
+  netCashFlowImpact: number; // Actual cash outflow to external parties (spending = amount, saving = 0)
   
-  // Budget
+  // Virtual Allocations (Mental Accounting)
+  virtualAllocationsBefore: Record<string, number>;
+  virtualAllocationsAfter: Record<string, number>;
+  
+  // Operating Cash & Budget
+  operatingCashBefore: number | null;
+  operatingCashAfterAction: number | null;
   relevantBudget: BudgetItem | null;
   budgetVariance: number | null; // positive = surplus, negative = deficit
   isBudgetExceeded: boolean;
+  budgetShortfallCoverSource?: "operating_cash" | "certification_funds" | "uncovered";
   
   // Liabilities & Horizon
   nextIncomeDate: string | null;
+  daysToNextIncome: number | null;
   liabilitiesDueBeforeIncome: LiabilityItem[];
   totalLiabilitiesBeforeIncome: number;
   liabilitiesDueAfterIncome: LiabilityItem[];
   totalLiabilitiesAfterIncome: number;
   
-  // Liquidity & Cash Flow
+  // Liquidity & Cash Flow After Immediate Obligations
   remainingCashAfterImmediateObligations: number | null;
   isLiquidityThreatened: boolean;
   deficitAmount: number;
@@ -126,16 +229,22 @@ export interface FinancialCalculationResult {
     rangeMin?: number;
     rangeMax?: number;
     isCovered: AssessmentStatus;
-    remainingCashAfterRoutine: number | null;
+    remainingCashAfterRoutine: number | null; // midpoint
+    rangeRemainingMin?: number; // if expenses at max
+    rangeRemainingMax?: number; // if expenses at min
   } | null;
 
-  // Emergency Fund details
+  // Emergency Fund Details
   emergencyFundEvaluation?: {
     currentAccumulated: number;
     targetAmount: number;
     newAccumulated: number;
     remainingShortfall: number;
+    percentageOfTarget: number;
   } | null;
+
+  // Installment Details (if applicable)
+  installmentDetails?: InstallmentCalculation | null;
 
   // Separated Evaluation Statuses (Granular Financial Dimensions)
   canPayAction: AssessmentStatus;
@@ -156,24 +265,64 @@ export interface FinancialCalculationResult {
   goalsEvaluation: GoalAllocationCalculation[];
   goalImpactNotes: string[];
 
+  // Assumptions & Unknowns
+  statedAssumptions: string[];
+  unknownVariables: string[];
+
   // Deterministic summary statements for LLM grounding
   deterministicFacts: string[];
+}
+
+export type IntentType =
+  | "inquire"
+  | "modify_action"
+  | "ask_impact"
+  | "clarify_info"
+  | "greeting_or_ping"
+  | "decline_discussion"
+  | "general_impact_query"
+  | "specific_aspect_query"
+  | "alternative_exploration"
+  | "action_modification"
+  | "relative_modification"
+  | "constraint_setting"
+  | "advice_request"
+  | "confusion"
+  | "fact_provision_or_correction"
+  | "final_decision"
+  | "out_of_scope"
+  | "other";
+
+export interface ResponsePlan {
+  intentType: IntentType;
+  focalDimension?: "liquidity" | "bills" | "routine" | "buffer" | "goals" | "installment" | "alternatives" | "general";
+  isAlternativeOnly: boolean;
+  comparedAmounts?: number[];
+  simplifyExplanation: boolean;
+  avoidQuestionnaireRepeat: boolean;
+  honoredConstraints?: string[];
+  clarificationToAsk?: string | null;
 }
 
 export interface StructuredContextPacket {
   condition: ConditionType;
   action: FinancialAction;
   calculation: FinancialCalculationResult;
+  conversationState: ConversationState;
+  responsePlan: ResponsePlan;
   availableProfile: {
+    h0Date?: string;
     totalCashBalance?: number;
     liquidBalance?: number;
+    allocations?: Record<string, number>;
     budgets?: BudgetItem[];
     liabilities?: LiabilityItem[];
     goals?: GoalItem[];
     buffer?: BufferItem;
     routineExpenses?: RoutineExpensesContext;
     incomeSchedule?: IncomeScheduleItem;
+    transactions?: BankTransactionItem[];
     userProvidedFinances?: UserProvidedFinances;
   } | null;
-  dataSources: Array<"synthetic_profile" | "scenario" | "user_message">;
+  dataSources: Array<"synthetic_profile" | "scenario" | "user_message" | "state_machine">;
 }

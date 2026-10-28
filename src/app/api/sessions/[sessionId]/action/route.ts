@@ -141,11 +141,11 @@ export async function POST(
         profileContext = {
           totalCashBalance: profile.totalCashBalance,
           liquidBalance: profile.liquidBalance,
-          budgets: profile.budgets,
-          liabilities: profile.liabilities,
-          goals: profile.goals,
-          buffer: profile.buffer,
-          incomeSchedule: profile.incomeSchedule,
+          budgets: profile.budgets as any,
+          liabilities: profile.liabilities as any,
+          goals: profile.goals as any,
+          buffer: profile.buffer as any,
+          incomeSchedule: profile.incomeSchedule as any,
           source: "synthetic_profile",
         };
       }

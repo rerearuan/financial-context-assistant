@@ -1,3 +1,5 @@
+import { ConversationState } from "./financial-engine/types";
+
 export interface DemoParticipant {
   id: string;
   participantCode: string;
@@ -29,6 +31,7 @@ export interface DemoSession {
   maxFollowupAllowed: number;
   promptVersion: string;
   modelId: string;
+  conversationState?: ConversationState;
 }
 
 export interface DemoMessage {

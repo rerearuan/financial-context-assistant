@@ -1,0 +1,86 @@
+date,description,category,credit,debit,transaction_id,balance
+2026-08-01,Pendapatan bulanan,income,8000000,0,saving_low-001,10600000
+2026-08-02,Makan dan minum,routine,0,100000,saving_low-002,10500000
+2026-08-03,Transportasi,routine,0,66000,saving_low-003,10434000
+2026-08-04,Belanja kebutuhan,routine,0,133000,saving_low-004,10301000
+2026-08-05,Makan dan minum,routine,0,100000,saving_low-005,10201000
+2026-08-06,Kebutuhan pribadi,routine,0,66000,saving_low-006,10135000
+2026-08-06,Pembayaran kartu/BNPL,card_bnpl,0,600000,saving_low-007,9535000
+2026-08-07,Belanja kebutuhan,routine,0,133000,saving_low-008,9402000
+2026-08-08,Makan dan minum,routine,0,100000,saving_low-009,9302000
+2026-08-09,Transportasi,routine,0,66000,saving_low-010,9236000
+2026-08-09,Sewa tempat tinggal,rent,0,2400000,saving_low-011,6836000
+2026-08-10,Belanja kebutuhan,routine,0,133000,saving_low-012,6703000
+2026-08-11,Makan dan minum,routine,0,100000,saving_low-013,6603000
+2026-08-12,Kebutuhan pribadi,routine,0,66000,saving_low-014,6537000
+2026-08-13,Belanja kebutuhan,routine,0,133000,saving_low-015,6404000
+2026-08-14,Makan dan minum,routine,0,100000,saving_low-016,6304000
+2026-08-15,Transportasi,routine,0,66000,saving_low-017,6238000
+2026-08-15,Pembayaran utilitas,utilities,0,500000,saving_low-018,5738000
+2026-08-16,Belanja kebutuhan,routine,0,133000,saving_low-019,5605000
+2026-08-17,Makan dan minum,routine,0,100000,saving_low-020,5505000
+2026-08-18,Kebutuhan pribadi,routine,0,66000,saving_low-021,5439000
+2026-08-19,Belanja kebutuhan,routine,0,133000,saving_low-022,5306000
+2026-08-20,Makan dan minum,routine,0,100000,saving_low-023,5206000
+2026-08-21,Transportasi,routine,0,66000,saving_low-024,5140000
+2026-08-22,Belanja kebutuhan,routine,0,133000,saving_low-025,5007000
+2026-08-23,Makan dan minum,routine,0,100000,saving_low-026,4907000
+2026-08-24,Kebutuhan pribadi,routine,0,66000,saving_low-027,4841000
+2026-08-25,Belanja kebutuhan,routine,0,141000,saving_low-028,4700000
+2026-09-01,Pendapatan bulanan,income,8000000,0,saving_low-029,12700000
+2026-09-02,Makan dan minum,routine,0,112000,saving_low-030,12588000
+2026-09-03,Transportasi,routine,0,75000,saving_low-031,12513000
+2026-09-04,Belanja kebutuhan,routine,0,150000,saving_low-032,12363000
+2026-09-05,Makan dan minum,routine,0,112000,saving_low-033,12251000
+2026-09-06,Kebutuhan pribadi,routine,0,75000,saving_low-034,12176000
+2026-09-06,Pembayaran kartu/BNPL,card_bnpl,0,600000,saving_low-035,11576000
+2026-09-07,Belanja kebutuhan,routine,0,150000,saving_low-036,11426000
+2026-09-08,Makan dan minum,routine,0,112000,saving_low-037,11314000
+2026-09-09,Transportasi,routine,0,75000,saving_low-038,11239000
+2026-09-09,Sewa tempat tinggal,rent,0,2400000,saving_low-039,8839000
+2026-09-10,Belanja kebutuhan,routine,0,150000,saving_low-040,8689000
+2026-09-11,Makan dan minum,routine,0,112000,saving_low-041,8577000
+2026-09-12,Kebutuhan pribadi,routine,0,75000,saving_low-042,8502000
+2026-09-13,Belanja kebutuhan,routine,0,150000,saving_low-043,8352000
+2026-09-14,Makan dan minum,routine,0,112000,saving_low-044,8240000
+2026-09-15,Transportasi,routine,0,75000,saving_low-045,8165000
+2026-09-15,Pembayaran utilitas,utilities,0,500000,saving_low-046,7665000
+2026-09-16,Belanja kebutuhan,routine,0,150000,saving_low-047,7515000
+2026-09-17,Makan dan minum,routine,0,112000,saving_low-048,7403000
+2026-09-18,Kebutuhan pribadi,routine,0,75000,saving_low-049,7328000
+2026-09-19,Belanja kebutuhan,routine,0,150000,saving_low-050,7178000
+2026-09-20,Makan dan minum,routine,0,112000,saving_low-051,7066000
+2026-09-21,Transportasi,routine,0,75000,saving_low-052,6991000
+2026-09-22,Belanja kebutuhan,routine,0,150000,saving_low-053,6841000
+2026-09-23,Makan dan minum,routine,0,112000,saving_low-054,6729000
+2026-09-24,Kebutuhan pribadi,routine,0,75000,saving_low-055,6654000
+2026-09-25,Belanja kebutuhan,routine,0,154000,saving_low-056,6500000
+2026-10-01,Pendapatan bulanan,income,8000000,0,saving_low-057,14500000
+2026-10-02,Makan dan minum,routine,0,125000,saving_low-058,14375000
+2026-10-03,Transportasi,routine,0,83000,saving_low-059,14292000
+2026-10-04,Belanja kebutuhan,routine,0,166000,saving_low-060,14126000
+2026-10-05,Makan dan minum,routine,0,125000,saving_low-061,14001000
+2026-10-06,Kebutuhan pribadi,routine,0,83000,saving_low-062,13918000
+2026-10-06,Pembayaran kartu/BNPL,card_bnpl,0,600000,saving_low-063,13318000
+2026-10-07,Belanja kebutuhan,routine,0,166000,saving_low-064,13152000
+2026-10-08,Makan dan minum,routine,0,125000,saving_low-065,13027000
+2026-10-09,Transportasi,routine,0,83000,saving_low-066,12944000
+2026-10-09,Sewa tempat tinggal,rent,0,2400000,saving_low-067,10544000
+2026-10-10,Belanja kebutuhan,routine,0,166000,saving_low-068,10378000
+2026-10-11,Makan dan minum,routine,0,125000,saving_low-069,10253000
+2026-10-12,Kebutuhan pribadi,routine,0,83000,saving_low-070,10170000
+2026-10-13,Belanja kebutuhan,routine,0,166000,saving_low-071,10004000
+2026-10-14,Makan dan minum,routine,0,125000,saving_low-072,9879000
+2026-10-15,Transportasi,routine,0,83000,saving_low-073,9796000
+2026-10-15,Pembayaran utilitas,utilities,0,500000,saving_low-074,9296000
+2026-10-16,Belanja kebutuhan,routine,0,166000,saving_low-075,9130000
+2026-10-17,Makan dan minum,routine,0,125000,saving_low-076,9005000
+2026-10-18,Kebutuhan pribadi,routine,0,83000,saving_low-077,8922000
+2026-10-19,Belanja kebutuhan,routine,0,166000,saving_low-078,8756000
+2026-10-20,Makan dan minum,routine,0,125000,saving_low-079,8631000
+2026-10-21,Transportasi,routine,0,83000,saving_low-080,8548000
+2026-10-22,Belanja kebutuhan,routine,0,166000,saving_low-081,8382000
+2026-10-23,Makan dan minum,routine,0,125000,saving_low-082,8257000
+2026-10-24,Kebutuhan pribadi,routine,0,83000,saving_low-083,8174000
+2026-10-25,Belanja kebutuhan,routine,0,174000,saving_low-084,8000000
+2026-11-01,Pendapatan bulanan,income,8000000,0,saving_low-085,16000000

@@ -32,7 +32,7 @@ async function runLiveChatTurn() {
     syntheticProfile: {
       ...profileCtx,
       source: "synthetic_profile",
-    },
+    } as any,
   });
 
   const userQuery = "Apakah aman membeli ponsel ini minggu ini?";

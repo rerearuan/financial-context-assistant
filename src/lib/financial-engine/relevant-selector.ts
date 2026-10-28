@@ -50,13 +50,19 @@ export function selectRelevantFinancialContext(
   let totalLiabilitiesAfterIncome = 0;
 
   for (const liability of profile.liabilities) {
-    const dueDate = new Date(liability.dueDate);
-    if (dueDate <= incomeDate) {
+    if (liability.dueDate) {
+      const dueDate = new Date(liability.dueDate);
+      if (dueDate <= incomeDate) {
+        liabilitiesDueBeforeIncome.push(liability);
+        totalLiabilitiesBeforeIncome += liability.amount;
+      } else {
+        liabilitiesDueAfterIncome.push(liability);
+        totalLiabilitiesAfterIncome += liability.amount;
+      }
+    } else {
+      // Due date is null/unspecified -> treat as due in current cycle before income
       liabilitiesDueBeforeIncome.push(liability);
       totalLiabilitiesBeforeIncome += liability.amount;
-    } else {
-      liabilitiesDueAfterIncome.push(liability);
-      totalLiabilitiesAfterIncome += liability.amount;
     }
   }
 

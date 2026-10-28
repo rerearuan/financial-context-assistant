@@ -65,14 +65,111 @@ export async function verifyModelAvailability(): Promise<{
 }
 
 /**
- * Heuristic fallback parser for intent when LLM is unavailable or unparseable.
+ * Enhanced Heuristic Intent Extractor with 11 granular intent types,
+ * focal dimensions, relative deltas, and constraint tracking.
  */
 export function heuristicExtractIntent(
   userMessage: string,
   currentAction: StructuredContextPacket["action"]
 ): ExtractedIntent {
-  const lower = userMessage.toLowerCase();
+  const lower = userMessage.toLowerCase().trim();
 
+  // 1. Detect pure greeting or ping
+  const isGreetingOrPing =
+    /^(halo|hai|hi|hei|p|halo!|hai!|tes|test|testing|ping|cek|coba|selamat (?:pagi|siang|sore|malam))\b/i.test(
+      lower
+    ) && lower.length < 35 && !/\d/.test(lower) && !/(aman|dampak|bisa|gimana|kenapa)/i.test(lower);
+
+  if (isGreetingOrPing) {
+    return {
+      intentType: "greeting_or_ping",
+      focalDimension: "general",
+      newAmount: null,
+      relativeDelta: null,
+      newTiming: null,
+      preferredPaymentMethod: null,
+      userProvidedFinances: null,
+      userConstraints: null,
+      isAlternativeOnly: false,
+      decision: null,
+      summaryOfIntent: "Pengguna menyapa atau mengetes sistem",
+    };
+  }
+
+  // 2. Detect decline / stop discussion
+  const isDecline =
+    /(?:ga|tidak|nggak|nda|tak) (?:butuh|usah|perlu)|cukup (?:deh|ya|dulu|sampai di sini)|batal diskusi|berhenti|stop\b/i.test(
+      lower
+    );
+  if (isDecline) {
+    return {
+      intentType: "decline_discussion",
+      focalDimension: "general",
+      newAmount: null,
+      relativeDelta: null,
+      newTiming: null,
+      preferredPaymentMethod: null,
+      userProvidedFinances: null,
+      userConstraints: null,
+      isAlternativeOnly: false,
+      decision: "cancel",
+      summaryOfIntent: "Pengguna menolak atau ingin mengakhiri diskusi",
+    };
+  }
+
+  // 3. Detect confusion / asking for clarification of terminology
+  const isConfusion =
+    /(?:maksudnya (?:gimana|apa)|bingung|pusing|ga paham|kurang paham|tidak paham|tidak mengerti|susah di(?:pahami|mengerti)|maksudmu apa)/i.test(
+      lower
+    );
+  if (isConfusion) {
+    return {
+      intentType: "confusion",
+      focalDimension: "general",
+      newAmount: null,
+      relativeDelta: null,
+      newTiming: null,
+      preferredPaymentMethod: null,
+      userProvidedFinances: null,
+      userConstraints: null,
+      isAlternativeOnly: false,
+      decision: null,
+      summaryOfIntent: "Pengguna menyatakan kebingungan atau meminta penjelasan sederhana",
+    };
+  }
+
+  // 4. Detect user constraints (e.g. "jangan pakai dana sertifikasi", "jangan sentuh")
+  let userConstraints: ExtractedIntent["userConstraints"] = null;
+  const isProhibitCertification =
+    /(?:jangan|tidak boleh|tidak mau|ga mau|dilarang|tanpa).*(?:pakai|guna|sentuh|nyentuh|korban|ngorban|ambil).*sertifikasi/i.test(
+      lower
+    ) || /(?:pertahankan|amankan|lindungi).*sertifikasi/i.test(lower);
+
+  const bufferConstraintMatch = lower.match(
+    /(?:pertahankan|amankan|jaga) (?:buffer|cadangan|dana darurat) (?:minimal|sebesar)? (?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
+
+  if (isProhibitCertification || bufferConstraintMatch) {
+    userConstraints = {
+      prohibitCertificationFunds: isProhibitCertification ? true : undefined,
+      maintainBufferAmount: bufferConstraintMatch
+        ? sanitizeAmount(bufferConstraintMatch[1]) || undefined
+        : undefined,
+    };
+  }
+
+  // 5. Detect relative modification (e.g. "kurangi 500 ribu", "turunkan 1 juta", "tambah 500rb")
+  let relativeDelta: number | null = null;
+  const relativeMatch = lower.match(
+    /(kurangi|turunkan|potong|tambah|naikkan)\s+(?:sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000)/i
+  );
+  if (relativeMatch) {
+    const isNegative = /(kurangi|turunkan|potong)/i.test(relativeMatch[1]);
+    const deltaVal = sanitizeAmount(`${relativeMatch[2]} ${relativeMatch[3]}`) || 0;
+    relativeDelta = isNegative ? -deltaVal : deltaVal;
+  }
+
+  // 6. Detect decision words
   let decision: ExtractedIntent["decision"] = null;
   if (lower.includes("lanjut") || lower.includes("setuju") || lower.includes("eksekusi")) {
     decision = "proceed";
@@ -84,63 +181,109 @@ export function heuristicExtractIntent(
     decision = "modify";
   }
 
-  // Look for new amount
+  // 7. Look for new absolute amount
   let newAmount: number | null = null;
-  const nominalMatch = userMessage.match(/(?:rp\.?\s*|\b)(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000)/i);
+  const nominalMatch = userMessage.match(
+    /(?:rp\.?\s*|\b)(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000)/i
+  );
   if (nominalMatch) {
     newAmount = sanitizeAmount(nominalMatch[0]);
   } else {
-    // Look for raw numbers > 1000
     const rawNumMatch = userMessage.match(/\b\d{4,9}\b/);
     if (rawNumMatch) {
       newAmount = sanitizeAmount(rawNumMatch[0]);
     }
   }
 
-  // Look for user provided finances (e.g. "saldo saya 10 juta", "anggaran 2 jt", "dana darurat 5 juta")
-  const balanceMatch = userMessage.match(/saldo(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
-  const budgetMatch = userMessage.match(/anggaran(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
-  const liabilitiesMatch = userMessage.match(/(?:tanggungan|kewajiban|tagihan|utang|cicilan)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
-  const bufferMatch = userMessage.match(/(?:dana darurat|buffer)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i);
+  // 8. Look for user provided finances
+  const balanceMatch = userMessage.match(
+    /saldo(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
+  const budgetMatch = userMessage.match(
+    /anggaran(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
+  const liabilitiesMatch = userMessage.match(
+    /(?:tanggungan|kewajiban|tagihan|utang|cicilan)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
+  const bufferMatch = userMessage.match(
+    /(?:dana darurat|buffer)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
+  const routineMatch = userMessage.match(
+    /(?:kebutuhan (?:rutin|harian)|biaya hidup)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
+  );
 
   let userProvidedFinances: ExtractedIntent["userProvidedFinances"] = null;
-  if (balanceMatch || budgetMatch || liabilitiesMatch || bufferMatch) {
+  if (balanceMatch || budgetMatch || liabilitiesMatch || bufferMatch || routineMatch) {
     userProvidedFinances = {
       balance: balanceMatch ? sanitizeAmount(balanceMatch[1]) || undefined : undefined,
       budget: budgetMatch ? sanitizeAmount(budgetMatch[1]) || undefined : undefined,
       liabilities: liabilitiesMatch ? sanitizeAmount(liabilitiesMatch[1]) || undefined : undefined,
       buffer: bufferMatch ? sanitizeAmount(bufferMatch[1]) || undefined : undefined,
+      routine: routineMatch ? sanitizeAmount(routineMatch[1]) || undefined : undefined,
     };
 
-    // If newAmount merely picked up the user's balance/budget/liabilities/buffer figure,
-    // do not treat it as an action modification unless explicit modification keywords are present
     const hasModifyKeyword = /(ganti|ubah|harga|beli|jadinya|nominal|kalau)\b/i.test(userMessage);
     if (!hasModifyKeyword && newAmount) {
       if (
         newAmount === userProvidedFinances.balance ||
         newAmount === userProvidedFinances.budget ||
         newAmount === userProvidedFinances.liabilities ||
-        newAmount === userProvidedFinances.buffer
+        newAmount === userProvidedFinances.buffer ||
+        newAmount === userProvidedFinances.routine
       ) {
         newAmount = null;
       }
     }
   }
 
-  let intentType: ExtractedIntent["intentType"] = "inquire";
-  if (decision) {
+  // 9. Detect preferred payment method (Cash vs Installment)
+  let preferredPaymentMethod: ExtractedIntent["preferredPaymentMethod"] = null;
+  const isInstallment = /(cicil|cicilan|kredit|angsuran|tenor|12 bulan)/i.test(lower);
+  const isCash = /(tunai|kontan|cash|langsung lunas)/i.test(lower);
+  if (isInstallment) preferredPaymentMethod = "installment";
+  else if (isCash) preferredPaymentMethod = "cash";
+
+  // 10. Detect Focal Dimension
+  let focalDimension: ExtractedIntent["focalDimension"] = "general";
+  if (/(saldo|kas|uang kas)/i.test(lower)) focalDimension = "liquidity";
+  else if (/(tagihan|kewajiban|utang|sewa|kartu kredit)/i.test(lower)) focalDimension = "bills";
+  else if (/(kebutuhan rutin|belanja harian|biaya hidup)/i.test(lower)) focalDimension = "routine";
+  else if (/(buffer|dana darurat)/i.test(lower)) focalDimension = "buffer";
+  else if (/(sertifikasi|tujuan|laptop)/i.test(lower)) focalDimension = "goals";
+  else if (isInstallment) focalDimension = "installment";
+  else if (/(alternatif|pilihan lain|opsi)/i.test(lower)) focalDimension = "alternatives";
+
+  // 11. Determine intentType
+  let intentType: ExtractedIntent["intentType"] = "general_impact_query";
+
+  if (userConstraints) {
+    intentType = "constraint_setting";
+  } else if (relativeDelta !== null) {
+    intentType = "relative_modification";
+  } else if (isInstallment || /(bagaimana jika|kalau|opsi lain)/i.test(lower)) {
+    intentType = "alternative_exploration";
+  } else if (decision) {
     intentType = "final_decision";
   } else if (newAmount && newAmount !== currentAction.amount) {
     intentType = "modify_action";
   } else if (userProvidedFinances) {
     intentType = "clarify_info";
+  } else if (focalDimension !== "general") {
+    intentType = "specific_aspect_query";
+  } else if (/(saran|rekomendasi|sebaiknya)/i.test(lower)) {
+    intentType = "advice_request";
   }
 
   return {
     intentType,
+    focalDimension,
     newAmount,
+    relativeDelta,
     newTiming: null,
+    preferredPaymentMethod,
     userProvidedFinances,
+    userConstraints,
+    isAlternativeOnly: intentType === "alternative_exploration" || intentType === "relative_modification",
     decision,
     summaryOfIntent: `Ekstraksi heuristik: ${intentType}`,
   };
@@ -155,28 +298,31 @@ export async function extractIntent(
 ): Promise<ExtractedIntent> {
   const clean = userMessage.trim().toLowerCase();
 
-  // Fast-Path 1: Pure inquiry questions without numbers, decisions, or financial amounts
-  const hasDigits = /\d/.test(clean);
-  const hasCurrencyWord = /(juta|jt|ribu|rb|rupiah|rp\.?)\b/i.test(clean);
-  const hasDecisionWord = /(lanjut|setuju|eksekusi|tunda|batal|tidak jadi|ubah|ganti|sesuaikan|kurang|tambah)/i.test(clean);
-  const hasFinancialKey = /(saldo|anggaran|tagihan|utang|cicilan|tanggungan|dana darurat|buffer)/i.test(clean);
-
-  if (!hasDigits && !hasCurrencyWord && !hasDecisionWord && !hasFinancialKey) {
-    // Pure conceptual question or standard quick reply -> resolve in 0ms without extra LLM roundtrip
-    return heuristicExtractIntent(userMessage, currentAction);
-  }
-
-  // Fast-Path 2: Clear heuristic matches (regex successfully extracted decision, amount, or finances)
+  // Fast-Path 1: Standard quick phrases & greetings
   const heuristic = heuristicExtractIntent(userMessage, currentAction);
   if (
-    heuristic.decision !== null ||
+    heuristic.intentType === "greeting_or_ping" ||
+    heuristic.intentType === "decline_discussion" ||
+    heuristic.intentType === "confusion" ||
+    heuristic.intentType === "constraint_setting" ||
+    heuristic.relativeDelta !== null ||
     (typeof heuristic.newAmount === "number" && heuristic.newAmount > 0) ||
     heuristic.userProvidedFinances !== null
   ) {
     return heuristic;
   }
 
-  // Fallback: Use Gemini for complex or ambiguous user phrasing
+  // Fast-Path 2: Pure inquiry without complex constructs
+  const hasDigits = /\d/.test(clean);
+  const hasCurrencyWord = /(juta|jt|ribu|rb|rupiah|rp\.?)\b/i.test(clean);
+  const hasDecisionWord = /(lanjut|setuju|eksekusi|tunda|batal|tidak jadi|ubah|ganti|sesuaikan|kurang|tambah)/i.test(clean);
+  const hasFinancialKey = /(saldo|anggaran|tagihan|utang|cicilan|tanggungan|dana darurat|buffer|sertifikasi)/i.test(clean);
+
+  if (!hasDigits && !hasCurrencyWord && !hasDecisionWord && !hasFinancialKey) {
+    return heuristic;
+  }
+
+  // Fallback: Call Gemini for complex ambiguity
   try {
     const ai = getGeminiClient();
     const model = getGeminiModel();
@@ -199,7 +345,6 @@ export async function extractIntent(
     const cleanedText = text.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
     const parsed = JSON.parse(cleanedText);
 
-    // Validate with Zod
     const validated = ExtractedIntentSchema.safeParse(parsed);
     if (validated.success) {
       if (validated.data.newAmount) {
@@ -211,7 +356,7 @@ export async function extractIntent(
     // If Gemini fails or throws, gracefully fallback to deterministic regex heuristic
   }
 
-  return heuristicExtractIntent(userMessage, currentAction);
+  return heuristic;
 }
 
 /**
@@ -222,85 +367,98 @@ export function generateSafeFallbackResponse(
   userMessage?: string,
   chatHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ): string {
-  const { condition, action, calculation } = contextPacket;
+  const { condition, action, calculation, conversationState, responsePlan } = contextPacket;
   const cleanMsg = (userMessage || "").trim().toLowerCase();
   const isFollowup = Boolean(chatHistory && chatHistory.length > 1);
 
-  // Clean target category label to avoid "pembelian Pembelian Laptop"
-  const categoryLabel = action.targetCategory.toLowerCase().startsWith("pembelian")
-    ? action.targetCategory.replace(/^pembelian\s+/i, "")
-    : action.targetCategory;
-
-  // 1. Handle test / ping messages naturally
-  const isTestOrPing = /^(tes|test|testing|ping|cek|coba)\b/i.test(cleanMsg) && cleanMsg.length < 20;
-  if (isTestOrPing) {
+  // 1. Sapaan / Tes
+  if (responsePlan.intentType === "greeting_or_ping") {
     return (
-      `Halo! Sistem aktif dan siap mendampingi Anda berdiskusi. Anda dapat menanyakan dampak rencana ` +
-      `${action.type === "spending" ? "pembelian" : "penyisihan tabungan"} ini terhadap sisa saldo kas, ` +
-      `kewajiban tagihan terdekat, kebutuhan rutin, atau simulasi nominal alternatif. Apa yang ingin Anda diskusikan?`
+      `Halo! Saya siap mendampingi Anda mengevaluasi rencana ` +
+      `${action.type === "spending" ? "pengeluaran" : "penyisihan tabungan"} ini secara objektif sebelum Anda mengambil tindakan nyata. ` +
+      `Ada aspek tertentu yang ingin Anda diskusikan mengenai rencana ini?`
     );
   }
 
-  // 2. Handle pure greetings naturally
-  const isGreetingOnly = /^(halo|hai|hi|hei|p|halo!|hai!|selamat pagi|selamat siang|selamat sore|selamat malam|assalamu['a]?laikum)\b/i.test(cleanMsg) &&
-    cleanMsg.length < 30;
-
-  if (isGreetingOnly) {
+  // 2. Penolakan Diskusi
+  if (responsePlan.intentType === "decline_discussion") {
     return (
-      `Halo! Saya asisten percakapan finansial Anda. Anda dapat berdiskusi mengenai pertimbangan rencana ` +
-      `${action.type === "spending" ? "pembelian" : "penyisihan tabungan"} Anda, memeriksa sisa saldo kas, ` +
-      `kewajiban tagihan terdekat, kebutuhan rutin, atau simulasi nominal lainnya. Apa yang ingin Anda tanyakan atau diskusikan?`
+      `Baik, terima kasih atas waktu Anda berdiskusi. Ringkasan utamanya: pastikan pengeluaran atau tabungan yang Anda ambil ` +
+      `tidak menekan kas operasional untuk kebutuhan rutin dan tagihan wajib. Keputusan akhir sepenuhnya berada di tangan Anda.`
     );
   }
 
-  // 3. Handle questions about reducing nominal without specific number
-  const isAskingReducedNominal = /(kurang|turun|lebih kecil|lebih rendah)/i.test(cleanMsg) &&
-    !/\d/.test(cleanMsg);
-
-  if (isAskingReducedNominal) {
+  // 3. Kebingungan / Penjelasan Sederhana
+  if (responsePlan.intentType === "confusion" || responsePlan.simplifyExplanation) {
     if (action.type === "saving") {
       return (
-        `Jika nominal tabungan dikurangi (misalnya menjadi Rp 1.000.000 dari sebelumnya Rp 2.000.000), ` +
-        `beban arus kas bulanan Anda akan berkurang Rp 1.000.000. Setelah membayar kewajiban tagihan wajib Rp 3.500.000, ` +
-        `sisa dana operasional dari pendapatan menjadi Rp 3.500.000. Jumlah ini mencukupi estimasi kebutuhan rutin (rata-rata Rp 2.700.000) ` +
-        `dan masih menyisakan sekitar Rp 800.000 untuk pos tujuan lain (seperti Program Sertifikasi). ` +
-        `Berapa nominal yang ingin Anda coba pertimbangkan? Anda dapat mengetik misalnya: "Ganti jadi 1 juta".`
+        `Singkatnya begini: Pendapatan bulan ini Rp 8.000.000. Jika langsung disisihkan Rp ${action.amount.toLocaleString("id-ID")} untuk tabungan ` +
+        `dan Rp 3.500.000 untuk tagihan wajib, sisa uang operasional tinggal Rp ${(8000000 - action.amount - 3500000).toLocaleString("id-ID")}. ` +
+        `Padahal kebutuhan hidup rutin rata-rata Rp 2.700.000. Artinya uang belanja bulanan Anda akan sangat ketat dan tidak menyisakan ruang untuk tabungan sertifikasi.`
       );
     } else {
       return (
-        `Jika nominal pembelian laptop dikurangi (misalnya mencari alternatif laptop seharga Rp 5.000.000 dari sebelumnya Rp 7.000.000), ` +
-        `pengeluaran akan lebih sejalan dengan pos anggaran dan sisa kas operasional Anda setelah tagihan akan menjadi lebih aman ` +
-        `(sekitar Rp 11.200.000), sehingga batas buffer dana darurat tetap terlindungi penuh. ` +
-        `Berapa nominal alternatif yang ingin Anda coba simulasikan? Anda dapat mengetik misalnya: "Ganti jadi 5 juta".`
+        `Singkatnya begini: Dari saldo kas Rp 18.000.000, jika membeli laptop tunai Rp 7.000.000, sisa saldo kas Anda menjadi Rp 11.000.000. ` +
+        `Setelah membayar tagihan wajib Rp 1.800.000 dalam 6 hari, sisa kas Anda adalah Rp 9.200.000. Jumlah ini masih aman di atas batas cadangan darurat (Rp 5.000.000).`
       );
     }
   }
 
-  // 4. Basic Condition handling
-  if (condition === "basic" && calculation.status === "needs_clarification") {
-    const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan|kas)/i.test(cleanMsg);
-    if (isFollowup && isAskingSufficiency) {
-      return (
-        `Untuk memastikan apakah sisa saldo masih mencukupi kebutuhan Anda setelah ` +
-        `${action.type === "spending" ? "pembelian" : "penyisihan"} ${categoryLabel} Rp ${action.amount.toLocaleString("id-ID")}, ` +
-        `saya memerlukan informasi saldo rekening Anda saat ini dan total tagihan sebelum pemasukan berikutnya. ` +
-        `Setelah nominal tersebut Anda sampaikan, saya bisa langsung menghitung sisa dana yang aman untuk kebutuhan Anda.`
-      );
-    }
-
+  // 4. Batasan Pengguna (Constraint)
+  if (responsePlan.intentType === "constraint_setting" || conversationState.userConstraints?.prohibitCertificationFunds) {
     return (
-      `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} ${categoryLabel} sebesar ` +
-      `Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening Anda akan berkurang sebesar nominal tersebut. ` +
-      `Karena informasi saldo kas operasional atau alokasi anggaran Anda belum tercatat dalam sesi ini, ` +
-      `untuk menghitung apakah tindakan ini aman bagi keuangan Anda, berapa perkiraan saldo rekening yang tersedia saat ini ` +
-      `dan total tagihan sebelum pemasukan berikutnya? Saya juga perlu mengetahui estimasi kebutuhan rutin serta batas dana cadangan ` +
-      `minimum yang ingin Anda pertahankan untuk menilai kecukupannya secara presisi.`
+      `Batasan Anda dicatat: alokasi dana sertifikasi tetap dilindungi dan tidak boleh digunakan. ` +
+      `Dengan melindungi pos sertifikasi, seluruh kebutuhan operasional harus dipenuhi dari sisa kas bulanan. ` +
+      `Pastikan rencana ${action.type === "spending" ? "pengeluaran" : "tabungan"} disesuaikan agar tidak menimbulkan defisit pada kebutuhan rutin.`
     );
   }
 
-  // 5. Context-Aware: Targeted answer if user specifically asks about sufficiency or obligations
+  // 5. Cicilan vs Tunai (Spending)
+  if (action.type === "spending" && (cleanMsg.includes("cicil") || responsePlan.intentType === "alternative_exploration")) {
+    return (
+      `Jika membeli laptop seharga Rp 7.000.000 dengan cicilan 12 bulan (bunga flat 1,2% per bulan dan admin 1%), kewajiban bulanan Anda ` +
+      `adalah Rp 667.333 per bulan ditambah biaya administrasi Rp 70.000. Total dana yang Anda bayarkan selama 12 bulan menjadi Rp 8.078.000 ` +
+      `(lebih mahal Rp 1.078.000 dibandingkan harga tunai).\n\n` +
+      `Skema cicilan menjaga kas operasional bulan ini tetap longgar, namun menambah beban tagihan rutin bulanan selama 1 tahun ke depan. ` +
+      `Sementara jika dibayar tunai, Anda berhemat Rp 1.078.000 dan kas setelah tagihan masih tersisa Rp 9.200.000 (aman di atas buffer Rp 5.000.000).`
+    );
+  }
+
+  // 6. Pertanyaan Pengurangan Nominal Relatif
+  if (responsePlan.intentType === "relative_modification" || cleanMsg.includes("kurang") || cleanMsg.includes("turun")) {
+    if (action.type === "saving") {
+      return (
+        `Jika nominal tabungan dikurangi (misalnya menjadi Rp 1.000.000), beban kas operasional bulanan Anda menjadi lebih longgar. ` +
+        `Setelah membayar tagihan wajib Rp 3.500.000, sisa pendapatan adalah Rp 3.500.000. Jumlah ini mencukupi kebutuhan rutin (rata-rata Rp 2.700.000) ` +
+        `dan menyisakan ruang alokasi sekitar Rp 800.000 untuk Program Sertifikasi.`
+      );
+    } else {
+      return (
+        `Jika pengeluaran laptop dikurangi (misalnya menjadi Rp 6.000.000 atau Rp 5.000.000), pengeluaran akan sejalan dengan dana alokasi laptop ` +
+        `dan menyisakan kas operasional yang lebih tebal di atas batas buffer dana darurat.`
+      );
+    }
+  }
+
+  // 7. Basic Condition
+  if (condition === "basic" && calculation.status === "needs_clarification") {
+    if (isFollowup) {
+      return (
+        `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} sebesar Rp ${action.amount.toLocaleString("id-ID")}, ` +
+        `saldo kas rekening Anda akan berkurang sebesar nominal tersebut. Untuk memastikan apakah sisa saldo masih mencukupi ` +
+        `kebutuhan hidup dan tagihan terdekat, silakan bagikan perkiraan saldo rekening Anda saat ini dan total tagihan sebelum pemasukan berikutnya.`
+      );
+    }
+    return (
+      `Setelah ${action.type === "spending" ? "pembelian" : "penyisihan"} sebesar Rp ${action.amount.toLocaleString("id-ID")}, ` +
+      `saldo rekening Anda akan berkurang sebesar nominal tersebut. Karena informasi saldo kas operasional atau alokasi anggaran Anda belum tercatat dalam sesi ini, ` +
+      `untuk menghitung kelayakan rencana ini secara presisi, berapa perkiraan saldo rekening yang Anda miliki saat ini dan tagihan terdekat sebelum pemasukan berikutnya?`
+    );
+  }
+
+  // 8. Context-Aware Targeted Response
   const isAskingSufficiency = /(cukup|mencukupi|sisa saldo|kebutuhan rutin|kas operasional)/i.test(cleanMsg);
-  if (isFollowup && isAskingSufficiency) {
+  if (isFollowup && (responsePlan.focalDimension === "liquidity" || isAskingSufficiency)) {
     if (action.type === "spending") {
       const shortfallNote =
         calculation.bufferImpact.minBuffer && !calculation.isBufferMaintained
@@ -326,13 +484,16 @@ export function generateSafeFallbackResponse(
     }
   }
 
-  // For Context-Aware or Basic with user-provided data (General Full Evaluation):
-  // Format as natural, structured paragraphs instead of rigid raw lists
+  // 9. Context-Aware Full Skenario Evaluation
   let part1 = `Berdasarkan evaluasi terhadap rencana ${action.type === "spending" ? "pengeluaran" : "penyisihan tabungan"} ` +
     `sebesar Rp ${action.amount.toLocaleString("id-ID")}: `;
 
   if (calculation.balanceAfterAction !== null) {
-    part1 += `saldo rekening kas menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}. `;
+    if (action.type === "saving") {
+      part1 += `total saldo rekening bank Anda tetap Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")} karena tabungan merupakan pemindahan pos di rekening yang sama. Kas operasional bulan berjalan menjadi Rp ${calculation.operatingCashAfterAction?.toLocaleString("id-ID")}. `;
+    } else {
+      part1 += `saldo kas rekening berkurang menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}. `;
+    }
   }
 
   if (calculation.relevantBudget) {
@@ -347,8 +508,8 @@ export function generateSafeFallbackResponse(
     }
   }
 
-  if (calculation.liabilitiesDueBeforeIncome.length > 0) {
-    part1 += `Setelah melunasi kewajiban tagihan terdekat sebesar Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}, ` +
+  if (calculation.totalLiabilitiesBeforeIncome > 0) {
+    part1 += `Setelah melunasi tagihan wajib terdekat sebesar Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}, ` +
       `sisa kas operasional Anda adalah Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}. `;
   }
 
@@ -358,7 +519,7 @@ export function generateSafeFallbackResponse(
       part2 += `Sisa kas tersebut berada di bawah batas minimum buffer dana darurat (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}) ` +
         `dengan kekurangan buffer sebesar Rp ${calculation.bufferImpact.bufferShortfall.toLocaleString("id-ID")}. `;
     } else {
-      part2 += `Batas minimum buffer dana darurat (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}) tetap terlindungi secara aman. `;
+      part2 += `Batas minimum buffer dana darurat (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}) tetap terlindungi aman. `;
     }
   }
 
@@ -367,21 +528,15 @@ export function generateSafeFallbackResponse(
       const isDeficit = (calculation.routineExpenses.remainingCashAfterRoutine || 0) < 0;
       if (isDeficit) {
         part2 += `Untuk kebutuhan rutin bulanan (rata-rata Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}), ` +
-          `sisa pendapatan mengalami defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")} ` +
-          `dan hanya mencukupi jika ditekan ke batas minimum (Rp 2.400.000). `;
+          `sisa kas mengalami defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")} ` +
+          `dan hanya mencukupi jika ditekan ke batas minimum (Rp 2.400.000). Akibatnya, ruang alokasi untuk pos Program Sertifikasi Profesional bulan ini menjadi Rp 0.`;
       } else {
         part2 += `Sisa pendapatan setelah setoran dan tagihan (Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}) ` +
-          `mencukupi estimasi kebutuhan rutin bulanan (Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}). `;
+          `mencukupi estimasi kebutuhan rutin bulanan (Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}).`;
       }
     } else {
       part2 += `Sisa kas mencukupi kebutuhan rutin hingga gajian berikutnya (estimasi Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}) ` +
-        `dengan sisa akhir Rp ${(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}. `;
-    }
-  }
-
-  if (calculation.goalsEvaluation.length > 0) {
-    for (const ge of calculation.goalsEvaluation) {
-      part2 += `${ge.explanation} `;
+        `dengan sisa akhir Rp ${(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}.`;
     }
   }
 
@@ -395,23 +550,23 @@ export interface AssistantResponseResult {
   isFallback: boolean;
   responseSource: "gemini" | "safe_fallback";
   retryCount: number;
+  latencyMs: number;
   validationResult?: OutputValidationResult;
 }
 
 /**
  * 3. Generate assistant explanation using Gemini with strict facts grounding,
- * output guardrails, and automated retry harness.
+ * output guardrails, structured logging, and automated retry harness.
  */
 export async function generateAssistantResponse(
   contextPacket: StructuredContextPacket,
   userMessage: string,
   chatHistory: Array<{ role: "user" | "assistant"; content: string }>
 ): Promise<AssistantResponseResult> {
+  const startTime = Date.now();
   const model = getGeminiModel();
   const systemInstruction = buildSystemInstruction(contextPacket.condition);
 
-  // Format short recent chat history summary (max last 4 messages)
-  // Exclude the current user message if it is already the last entry in chatHistory
   const priorHistory = chatHistory.filter(
     (m, idx) => !(idx === chatHistory.length - 1 && m.role === "user" && m.content === userMessage)
   );
@@ -443,9 +598,10 @@ export async function generateAssistantResponse(
     const reply = response.text?.trim();
 
     if (reply && reply.length >= 20) {
-      // Run Output Guardrail
       const guardrailResult = validateAssistantOutput(reply, contextPacket);
       if (guardrailResult.isValid) {
+        const latencyMs = Date.now() - startTime;
+        console.log(`[AssistantResponse] Success via Gemini (${model}) | Latency: ${latencyMs}ms | Intent: ${contextPacket.responsePlan.intentType}`);
         return {
           content: reply,
           modelUsed: model,
@@ -453,11 +609,12 @@ export async function generateAssistantResponse(
           isFallback: false,
           responseSource: "gemini",
           retryCount: 0,
+          latencyMs,
           validationResult: guardrailResult,
         };
       }
 
-      // If guardrail failed, log violations and attempt 1 corrective retry
+      // If guardrail failed, attempt 1 corrective retry
       lastValidationResult = guardrailResult;
       retryCount = 1;
 
@@ -475,7 +632,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
         contents: correctivePrompt,
         config: {
           systemInstruction,
-          temperature: 0.05, // Lower temperature on retry
+          temperature: 0.05,
           topP: DEFAULT_GENERATION_PARAMS.topP,
           maxOutputTokens: DEFAULT_GENERATION_PARAMS.maxOutputTokens,
         },
@@ -485,6 +642,8 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
       if (retryReply && retryReply.length >= 20) {
         const retryGuardrail = validateAssistantOutput(retryReply, contextPacket);
         if (retryGuardrail.isValid) {
+          const latencyMs = Date.now() - startTime;
+          console.log(`[AssistantResponse] Success via Gemini Retry (${model}) | Latency: ${latencyMs}ms`);
           return {
             content: retryReply,
             modelUsed: model,
@@ -492,6 +651,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
             isFallback: false,
             responseSource: "gemini",
             retryCount: 1,
+            latencyMs,
             validationResult: retryGuardrail,
           };
         }
@@ -500,7 +660,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
     }
   } catch (err: unknown) {
     if (String(err).includes("429") || String(err).includes("RESOURCE_EXHAUSTED")) {
-      console.warn("Gemini rate limited (429), pausing 5 seconds and retrying once...");
+      console.warn("Gemini rate limited (429), pausing 5.5s and retrying once...");
       try {
         await new Promise((resolve) => setTimeout(resolve, 5500));
         const ai = getGeminiClient();
@@ -518,6 +678,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
         if (retryText && retryText.length >= 20) {
           const guardrailResult = validateAssistantOutput(retryText, contextPacket);
           if (guardrailResult.isValid) {
+            const latencyMs = Date.now() - startTime;
             return {
               content: retryText,
               modelUsed: model,
@@ -525,6 +686,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
               isFallback: false,
               responseSource: "gemini",
               retryCount: 1,
+              latencyMs,
               validationResult: guardrailResult,
             };
           }
@@ -537,8 +699,10 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
     }
   }
 
-  // If both generation/retry attempts fail or violate guardrails, activate safe deterministic fallback
+  // Activate safe deterministic fallback
   const fallbackText = generateSafeFallbackResponse(contextPacket, userMessage, chatHistory);
+  const latencyMs = Date.now() - startTime;
+  console.log(`[AssistantResponse] Deterministic Safe Fallback Activated | Latency: ${latencyMs}ms | Intent: ${contextPacket.responsePlan.intentType}`);
   return {
     content: fallbackText,
     modelUsed: model,
@@ -546,6 +710,7 @@ Harap susun ulang respons dengan mematuhi <kontrak_respons> dan <fakta_perhitung
     isFallback: true,
     responseSource: "safe_fallback",
     retryCount,
+    latencyMs,
     validationResult: lastValidationResult,
   };
 }

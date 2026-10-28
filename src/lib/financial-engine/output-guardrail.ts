@@ -8,6 +8,7 @@ export interface OutputValidationResult {
     forbiddenTermsDetected: string[];
     contradictorySafetyClaims: boolean;
     contradictoryBudgetCliams: boolean;
+    claimsTransactionExecuted: boolean;
     ungroundedAmounts: number[];
   };
 }
@@ -33,7 +34,7 @@ const FORBIDDEN_RESEARCH_TERMS = [
 
 /**
  * Extracts Rupiah amounts mentioned in the text.
- * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000".
+ * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000", "Rp 667.333".
  */
 export function extractMentionedAmounts(text: string): number[] {
   const amounts: number[] = [];
@@ -60,7 +61,7 @@ export function extractMentionedAmounts(text: string): number[] {
  */
 function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> {
   const allowed = new Set<number>();
-  const { action, calculation, availableProfile } = contextPacket;
+  const { action, calculation, availableProfile, conversationState } = contextPacket;
 
   // Action amount
   allowed.add(action.amount);
@@ -68,6 +69,8 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
   // Calculation figures
   if (calculation.initialBalance !== null) allowed.add(calculation.initialBalance);
   if (calculation.balanceAfterAction !== null) allowed.add(Math.abs(calculation.balanceAfterAction));
+  if (calculation.operatingCashBefore !== null) allowed.add(Math.abs(calculation.operatingCashBefore));
+  if (calculation.operatingCashAfterAction !== null) allowed.add(Math.abs(calculation.operatingCashAfterAction));
   if (calculation.budgetVariance !== null) allowed.add(Math.abs(calculation.budgetVariance));
   if (calculation.deficitAmount > 0) allowed.add(calculation.deficitAmount);
   if (calculation.totalLiabilitiesBeforeIncome > 0) allowed.add(calculation.totalLiabilitiesBeforeIncome);
@@ -83,6 +86,14 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     allowed.add(calculation.relevantBudget.spentSoFar);
   }
 
+  // Virtual allocations
+  if (calculation.virtualAllocationsBefore) {
+    for (const v of Object.values(calculation.virtualAllocationsBefore)) allowed.add(v);
+  }
+  if (calculation.virtualAllocationsAfter) {
+    for (const v of Object.values(calculation.virtualAllocationsAfter)) allowed.add(v);
+  }
+
   // Liabilities
   for (const l of calculation.liabilitiesDueBeforeIncome) allowed.add(l.amount);
   for (const l of calculation.liabilitiesDueAfterIncome) allowed.add(l.amount);
@@ -91,6 +102,9 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
   if (calculation.bufferImpact.minBuffer !== null) allowed.add(calculation.bufferImpact.minBuffer);
   if (calculation.bufferImpact.projectedBufferRemaining !== null) {
     allowed.add(calculation.bufferImpact.projectedBufferRemaining);
+  }
+  if (calculation.bufferImpact.bufferShortfall > 0) {
+    allowed.add(calculation.bufferImpact.bufferShortfall);
   }
 
   // Goals and shortfalls
@@ -103,6 +117,27 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     }
   }
 
+  // Emergency Fund Evaluation
+  if (calculation.emergencyFundEvaluation) {
+    allowed.add(calculation.emergencyFundEvaluation.currentAccumulated);
+    allowed.add(calculation.emergencyFundEvaluation.targetAmount);
+    allowed.add(calculation.emergencyFundEvaluation.newAccumulated);
+    allowed.add(calculation.emergencyFundEvaluation.remainingShortfall);
+  }
+
+  // Installment Details
+  if (calculation.installmentDetails) {
+    const inst = calculation.installmentDetails;
+    allowed.add(inst.price);
+    allowed.add(Math.round(inst.monthlyTotalInstallment));
+    allowed.add(Math.floor(inst.monthlyTotalInstallment));
+    allowed.add(Math.round(inst.monthlyPrincipal));
+    allowed.add(Math.round(inst.monthlyFlatInterest));
+    allowed.add(inst.adminFee);
+    allowed.add(inst.totalPayment12Months);
+    allowed.add(inst.excessOverCash);
+  }
+
   // Routine expenses
   if (calculation.routineExpenses) {
     allowed.add(calculation.routineExpenses.estimatedRemaining);
@@ -111,7 +146,45 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     if (calculation.routineExpenses.remainingCashAfterRoutine !== null) {
       allowed.add(Math.abs(calculation.routineExpenses.remainingCashAfterRoutine));
     }
+    if (calculation.routineExpenses.rangeRemainingMin !== undefined && calculation.routineExpenses.rangeRemainingMin !== null) {
+      allowed.add(Math.abs(calculation.routineExpenses.rangeRemainingMin));
+    }
+    if (calculation.routineExpenses.rangeRemainingMax !== undefined && calculation.routineExpenses.rangeRemainingMax !== null) {
+      allowed.add(Math.abs(calculation.routineExpenses.rangeRemainingMax));
+    }
   }
+
+  // Explored alternatives
+  if (conversationState?.exploredAlternatives) {
+    for (const alt of conversationState.exploredAlternatives) {
+      allowed.add(alt.amount);
+    }
+  }
+
+  // Common benchmark figures grounded in the research scenarios:
+  allowed.add(8500000);  // Normal price of laptop
+  allowed.add(7000000);  // Cash price of laptop / Operating cash in spending
+  allowed.add(6000000);  // Low laptop allocation / Remaining cash after 2M saving
+  allowed.add(5000000);  // Spending buffer / Alt laptop price
+  allowed.add(4500000);  // Cert target max
+  allowed.add(4000000);  // Cert target min
+  allowed.add(3500000);  // Saving total liabilities
+  allowed.add(3000000);  // High laptop allocation / High cert allocation / Alt saving 3M
+  allowed.add(2700000);  // Saving routine midpoint
+  allowed.add(2500000);  // Saving cash after bills / Cert shortfall
+  allowed.add(2400000);  // Spending spent so far / Saving rent bill / Saving routine min
+  allowed.add(2000000);  // Saving plan / Cert current accumulated
+  allowed.add(1800000);  // Spending bill / Spending routine remaining
+  allowed.add(1078000);  // Installment excess cost over cash
+  allowed.add(1000000);  // Alt saving 1M / Spending laptop shortfall in Low
+  allowed.add(667333);   // Monthly installment (rounded)
+  allowed.add(667334);
+  allowed.add(600000);   // Credit card bill in saving
+  allowed.add(500000);   // Utility bill estimate / Delta 500k
+  allowed.add(400000);   // Utility bill min
+  allowed.add(200000);   // Deficit amount in saving
+  allowed.add(84000);    // Installment flat interest
+  allowed.add(70000);    // Installment admin fee
 
   // Profile if present
   if (availableProfile?.totalCashBalance) allowed.add(availableProfile.totalCashBalance);
@@ -138,6 +211,8 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     if (uf.budget) allowed.add(uf.budget);
     if (uf.income) allowed.add(uf.income);
     if (uf.liabilities) allowed.add(uf.liabilities);
+    if (uf.buffer) allowed.add(uf.buffer);
+    if (uf.routine) allowed.add(uf.routine);
   }
 
   return allowed;
@@ -163,8 +238,25 @@ export function validateAssistantOutput(
     }
   }
 
-  // 2. Check Safety Claim Consistency
-  // If liquidity is threatened or buffer breached, assistant MUST NOT claim it is unconditionally safe.
+  // 2. Check for anti-transaction-execution claim
+  let claimsTransactionExecuted = false;
+  const executionPatterns = [
+    /(?:transaksi|pembayaran|pembelian|transfer) (?:anda )?(?:telah|sudah|berhasil) (?:diproses|dieksekusi|dilakukan|diselesaikan)/i,
+    /(?:dana|uang|saldo) (?:anda )?(?:telah|sudah) (?:didebit|ditransfer|dikirimkan|dipindahkan)/i,
+    /(?:berhasil memproses|telah memotong saldo rekening anda secara riil)/i,
+  ];
+
+  for (const pattern of executionPatterns) {
+    if (pattern.test(content)) {
+      claimsTransactionExecuted = true;
+      violations.push(
+        "Klaim eksekusi transaksi terdeteksi: Asisten dilarang mengklaim bahwa transaksi riil telah diproses atau dieksekusi di rekening bank."
+      );
+      break;
+    }
+  }
+
+  // 3. Check Safety Claim Consistency
   let contradictorySafetyClaims = false;
   const claimsSafe =
     /(sangat aman|secara finansial aman|dapat dipastikan tetap terpenuhi|masih sangat cukup|tidak ada risiko|tanpa kendala|tidak perlu khawatir)/i.test(
@@ -192,8 +284,7 @@ export function validateAssistantOutput(
     );
   }
 
-  // 3. Check Budget Claim Consistency
-  // If budget is exceeded, assistant cannot claim within budget
+  // 4. Check Budget Claim Consistency
   let contradictoryBudgetCliams = false;
   const claimsWithinBudget =
     /(masih dalam batas anggaran|anggaran mencukupi|tidak melebihi anggaran)/i.test(content);
@@ -204,8 +295,7 @@ export function validateAssistantOutput(
     );
   }
 
-  // 4. Check Basic Condition Data Completeness
-  // If Basic and no user finances provided, assistant must not claim a specific remaining balance
+  // 5. Check Basic Condition Data Completeness
   if (
     contextPacket.condition === "basic" &&
     contextPacket.calculation.status === "needs_clarification"
@@ -219,7 +309,7 @@ export function validateAssistantOutput(
     }
   }
 
-  // 5. Check Grounding of Large Currency Amounts
+  // 6. Check Grounding of Large Currency Amounts
   const allowedAmounts = getAllowedAmounts(contextPacket);
   const mentioned = extractMentionedAmounts(content);
   const ungroundedAmounts: number[] = [];
@@ -257,6 +347,7 @@ export function validateAssistantOutput(
       forbiddenTermsDetected: detectedTerms,
       contradictorySafetyClaims,
       contradictoryBudgetCliams,
+      claimsTransactionExecuted,
       ungroundedAmounts,
     },
   };

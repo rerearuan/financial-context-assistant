@@ -1,0 +1,3501 @@
+{
+  "schema_version": "1.0",
+  "currency": "IDR",
+  "synthetic": true,
+  "scenarios": [
+    {
+      "scenario_id": "spending_low",
+      "h0": "2026-10-20",
+      "next_income_date": "2026-11-01",
+      "monthly_income": 8000000,
+      "opening_balance": 6400000,
+      "current_balance": 18000000,
+      "allocations": {
+        "emergency": 5000000,
+        "laptop": 6000000,
+        "operating": 7000000
+      },
+      "upcoming_bills": [
+        {
+          "id": "special_bill",
+          "due": "2026-10-26",
+          "amount": 1800000,
+          "status": "unpaid"
+        }
+      ],
+      "history_months": [
+        "2026-07",
+        "2026-08",
+        "2026-09"
+      ],
+      "routine_monthly_totals": [
+        3800000,
+        4200000,
+        4600000
+      ],
+      "active_action": null,
+      "action_options": [
+        "cash",
+        "installment"
+      ],
+      "transactions": [
+        {
+          "date": "2026-07-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_low-001",
+          "balance": 14400000
+        },
+        {
+          "date": "2026-07-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-002",
+          "balance": 14242000
+        },
+        {
+          "date": "2026-07-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-003",
+          "balance": 14137000
+        },
+        {
+          "date": "2026-07-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-004",
+          "balance": 13926000
+        },
+        {
+          "date": "2026-07-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-005",
+          "balance": 13768000
+        },
+        {
+          "date": "2026-07-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-006",
+          "balance": 13663000
+        },
+        {
+          "date": "2026-07-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-007",
+          "balance": 13452000
+        },
+        {
+          "date": "2026-07-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-008",
+          "balance": 13294000
+        },
+        {
+          "date": "2026-07-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-009",
+          "balance": 13189000
+        },
+        {
+          "date": "2026-07-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-010",
+          "balance": 12978000
+        },
+        {
+          "date": "2026-07-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-011",
+          "balance": 12820000
+        },
+        {
+          "date": "2026-07-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-012",
+          "balance": 12715000
+        },
+        {
+          "date": "2026-07-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-013",
+          "balance": 12504000
+        },
+        {
+          "date": "2026-07-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-014",
+          "balance": 12346000
+        },
+        {
+          "date": "2026-07-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-015",
+          "balance": 12241000
+        },
+        {
+          "date": "2026-07-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-016",
+          "balance": 12030000
+        },
+        {
+          "date": "2026-07-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-017",
+          "balance": 11872000
+        },
+        {
+          "date": "2026-07-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-018",
+          "balance": 11767000
+        },
+        {
+          "date": "2026-07-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-019",
+          "balance": 11556000
+        },
+        {
+          "date": "2026-07-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-020",
+          "balance": 11398000
+        },
+        {
+          "date": "2026-07-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-021",
+          "balance": 11293000
+        },
+        {
+          "date": "2026-07-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_low-022",
+          "balance": 11082000
+        },
+        {
+          "date": "2026-07-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_low-023",
+          "balance": 10924000
+        },
+        {
+          "date": "2026-07-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_low-024",
+          "balance": 10819000
+        },
+        {
+          "date": "2026-07-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 219000,
+          "transaction_id": "spending_low-025",
+          "balance": 10600000
+        },
+        {
+          "date": "2026-07-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_low-026",
+          "balance": 8800000
+        },
+        {
+          "date": "2026-08-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_low-027",
+          "balance": 16800000
+        },
+        {
+          "date": "2026-08-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-028",
+          "balance": 16625000
+        },
+        {
+          "date": "2026-08-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-029",
+          "balance": 16509000
+        },
+        {
+          "date": "2026-08-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-030",
+          "balance": 16276000
+        },
+        {
+          "date": "2026-08-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-031",
+          "balance": 16101000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-032",
+          "balance": 15985000
+        },
+        {
+          "date": "2026-08-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-033",
+          "balance": 15752000
+        },
+        {
+          "date": "2026-08-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-034",
+          "balance": 15577000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-035",
+          "balance": 15461000
+        },
+        {
+          "date": "2026-08-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-036",
+          "balance": 15228000
+        },
+        {
+          "date": "2026-08-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-037",
+          "balance": 15053000
+        },
+        {
+          "date": "2026-08-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-038",
+          "balance": 14937000
+        },
+        {
+          "date": "2026-08-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-039",
+          "balance": 14704000
+        },
+        {
+          "date": "2026-08-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-040",
+          "balance": 14529000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-041",
+          "balance": 14413000
+        },
+        {
+          "date": "2026-08-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-042",
+          "balance": 14180000
+        },
+        {
+          "date": "2026-08-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-043",
+          "balance": 14005000
+        },
+        {
+          "date": "2026-08-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-044",
+          "balance": 13889000
+        },
+        {
+          "date": "2026-08-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-045",
+          "balance": 13656000
+        },
+        {
+          "date": "2026-08-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-046",
+          "balance": 13481000
+        },
+        {
+          "date": "2026-08-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-047",
+          "balance": 13365000
+        },
+        {
+          "date": "2026-08-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_low-048",
+          "balance": 13132000
+        },
+        {
+          "date": "2026-08-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_low-049",
+          "balance": 12957000
+        },
+        {
+          "date": "2026-08-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_low-050",
+          "balance": 12841000
+        },
+        {
+          "date": "2026-08-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 241000,
+          "transaction_id": "spending_low-051",
+          "balance": 12600000
+        },
+        {
+          "date": "2026-08-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_low-052",
+          "balance": 10800000
+        },
+        {
+          "date": "2026-09-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_low-053",
+          "balance": 18800000
+        },
+        {
+          "date": "2026-09-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-054",
+          "balance": 18609000
+        },
+        {
+          "date": "2026-09-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-055",
+          "balance": 18482000
+        },
+        {
+          "date": "2026-09-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-056",
+          "balance": 18227000
+        },
+        {
+          "date": "2026-09-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-057",
+          "balance": 18036000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-058",
+          "balance": 17909000
+        },
+        {
+          "date": "2026-09-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-059",
+          "balance": 17654000
+        },
+        {
+          "date": "2026-09-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-060",
+          "balance": 17463000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-061",
+          "balance": 17336000
+        },
+        {
+          "date": "2026-09-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-062",
+          "balance": 17081000
+        },
+        {
+          "date": "2026-09-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-063",
+          "balance": 16890000
+        },
+        {
+          "date": "2026-09-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-064",
+          "balance": 16763000
+        },
+        {
+          "date": "2026-09-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-065",
+          "balance": 16508000
+        },
+        {
+          "date": "2026-09-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-066",
+          "balance": 16317000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-067",
+          "balance": 16190000
+        },
+        {
+          "date": "2026-09-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-068",
+          "balance": 15935000
+        },
+        {
+          "date": "2026-09-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-069",
+          "balance": 15744000
+        },
+        {
+          "date": "2026-09-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-070",
+          "balance": 15617000
+        },
+        {
+          "date": "2026-09-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-071",
+          "balance": 15362000
+        },
+        {
+          "date": "2026-09-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-072",
+          "balance": 15171000
+        },
+        {
+          "date": "2026-09-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-073",
+          "balance": 15044000
+        },
+        {
+          "date": "2026-09-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_low-074",
+          "balance": 14789000
+        },
+        {
+          "date": "2026-09-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_low-075",
+          "balance": 14598000
+        },
+        {
+          "date": "2026-09-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_low-076",
+          "balance": 14471000
+        },
+        {
+          "date": "2026-09-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 271000,
+          "transaction_id": "spending_low-077",
+          "balance": 14200000
+        },
+        {
+          "date": "2026-09-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_low-078",
+          "balance": 12400000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_low-079",
+          "balance": 20400000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-080",
+          "balance": 20270000
+        },
+        {
+          "date": "2026-10-02",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-081",
+          "balance": 20140000
+        },
+        {
+          "date": "2026-10-03",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-082",
+          "balance": 20010000
+        },
+        {
+          "date": "2026-10-04",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-083",
+          "balance": 19880000
+        },
+        {
+          "date": "2026-10-05",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-084",
+          "balance": 19750000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-085",
+          "balance": 19620000
+        },
+        {
+          "date": "2026-10-07",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-086",
+          "balance": 19490000
+        },
+        {
+          "date": "2026-10-08",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-087",
+          "balance": 19360000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-088",
+          "balance": 19230000
+        },
+        {
+          "date": "2026-10-10",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-089",
+          "balance": 19100000
+        },
+        {
+          "date": "2026-10-11",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-090",
+          "balance": 18970000
+        },
+        {
+          "date": "2026-10-12",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-091",
+          "balance": 18840000
+        },
+        {
+          "date": "2026-10-13",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-092",
+          "balance": 18710000
+        },
+        {
+          "date": "2026-10-14",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-093",
+          "balance": 18580000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-094",
+          "balance": 18450000
+        },
+        {
+          "date": "2026-10-16",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-095",
+          "balance": 18320000
+        },
+        {
+          "date": "2026-10-17",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_low-096",
+          "balance": 18190000
+        },
+        {
+          "date": "2026-10-18",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 190000,
+          "transaction_id": "spending_low-097",
+          "balance": 18000000
+        }
+      ],
+      "laptop_offer": {
+        "price": 7000000,
+        "regular_price": 8500000,
+        "installment_months": 12,
+        "flat_interest_monthly": 0.012,
+        "admin_rate": 0.01,
+        "first_payment_date": null,
+        "admin_payment_date": null
+      }
+    },
+    {
+      "scenario_id": "spending_high",
+      "h0": "2026-10-20",
+      "next_income_date": "2026-11-01",
+      "monthly_income": 8000000,
+      "opening_balance": 6400000,
+      "current_balance": 18000000,
+      "allocations": {
+        "emergency": 5000000,
+        "laptop": 3000000,
+        "operating": 7000000,
+        "certification": 3000000
+      },
+      "upcoming_bills": [
+        {
+          "id": "special_bill",
+          "due": "2026-10-26",
+          "amount": 1800000,
+          "status": "unpaid"
+        }
+      ],
+      "history_months": [
+        "2026-07",
+        "2026-08",
+        "2026-09"
+      ],
+      "routine_monthly_totals": [
+        3800000,
+        4200000,
+        4600000
+      ],
+      "active_action": null,
+      "action_options": [
+        "cash",
+        "installment"
+      ],
+      "transactions": [
+        {
+          "date": "2026-07-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_high-001",
+          "balance": 14400000
+        },
+        {
+          "date": "2026-07-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-002",
+          "balance": 14242000
+        },
+        {
+          "date": "2026-07-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-003",
+          "balance": 14137000
+        },
+        {
+          "date": "2026-07-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-004",
+          "balance": 13926000
+        },
+        {
+          "date": "2026-07-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-005",
+          "balance": 13768000
+        },
+        {
+          "date": "2026-07-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-006",
+          "balance": 13663000
+        },
+        {
+          "date": "2026-07-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-007",
+          "balance": 13452000
+        },
+        {
+          "date": "2026-07-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-008",
+          "balance": 13294000
+        },
+        {
+          "date": "2026-07-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-009",
+          "balance": 13189000
+        },
+        {
+          "date": "2026-07-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-010",
+          "balance": 12978000
+        },
+        {
+          "date": "2026-07-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-011",
+          "balance": 12820000
+        },
+        {
+          "date": "2026-07-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-012",
+          "balance": 12715000
+        },
+        {
+          "date": "2026-07-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-013",
+          "balance": 12504000
+        },
+        {
+          "date": "2026-07-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-014",
+          "balance": 12346000
+        },
+        {
+          "date": "2026-07-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-015",
+          "balance": 12241000
+        },
+        {
+          "date": "2026-07-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-016",
+          "balance": 12030000
+        },
+        {
+          "date": "2026-07-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-017",
+          "balance": 11872000
+        },
+        {
+          "date": "2026-07-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-018",
+          "balance": 11767000
+        },
+        {
+          "date": "2026-07-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-019",
+          "balance": 11556000
+        },
+        {
+          "date": "2026-07-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-020",
+          "balance": 11398000
+        },
+        {
+          "date": "2026-07-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-021",
+          "balance": 11293000
+        },
+        {
+          "date": "2026-07-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 211000,
+          "transaction_id": "spending_high-022",
+          "balance": 11082000
+        },
+        {
+          "date": "2026-07-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 158000,
+          "transaction_id": "spending_high-023",
+          "balance": 10924000
+        },
+        {
+          "date": "2026-07-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 105000,
+          "transaction_id": "spending_high-024",
+          "balance": 10819000
+        },
+        {
+          "date": "2026-07-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 219000,
+          "transaction_id": "spending_high-025",
+          "balance": 10600000
+        },
+        {
+          "date": "2026-07-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_high-026",
+          "balance": 8800000
+        },
+        {
+          "date": "2026-08-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_high-027",
+          "balance": 16800000
+        },
+        {
+          "date": "2026-08-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-028",
+          "balance": 16625000
+        },
+        {
+          "date": "2026-08-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-029",
+          "balance": 16509000
+        },
+        {
+          "date": "2026-08-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-030",
+          "balance": 16276000
+        },
+        {
+          "date": "2026-08-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-031",
+          "balance": 16101000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-032",
+          "balance": 15985000
+        },
+        {
+          "date": "2026-08-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-033",
+          "balance": 15752000
+        },
+        {
+          "date": "2026-08-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-034",
+          "balance": 15577000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-035",
+          "balance": 15461000
+        },
+        {
+          "date": "2026-08-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-036",
+          "balance": 15228000
+        },
+        {
+          "date": "2026-08-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-037",
+          "balance": 15053000
+        },
+        {
+          "date": "2026-08-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-038",
+          "balance": 14937000
+        },
+        {
+          "date": "2026-08-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-039",
+          "balance": 14704000
+        },
+        {
+          "date": "2026-08-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-040",
+          "balance": 14529000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-041",
+          "balance": 14413000
+        },
+        {
+          "date": "2026-08-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-042",
+          "balance": 14180000
+        },
+        {
+          "date": "2026-08-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-043",
+          "balance": 14005000
+        },
+        {
+          "date": "2026-08-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-044",
+          "balance": 13889000
+        },
+        {
+          "date": "2026-08-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-045",
+          "balance": 13656000
+        },
+        {
+          "date": "2026-08-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-046",
+          "balance": 13481000
+        },
+        {
+          "date": "2026-08-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-047",
+          "balance": 13365000
+        },
+        {
+          "date": "2026-08-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 233000,
+          "transaction_id": "spending_high-048",
+          "balance": 13132000
+        },
+        {
+          "date": "2026-08-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 175000,
+          "transaction_id": "spending_high-049",
+          "balance": 12957000
+        },
+        {
+          "date": "2026-08-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 116000,
+          "transaction_id": "spending_high-050",
+          "balance": 12841000
+        },
+        {
+          "date": "2026-08-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 241000,
+          "transaction_id": "spending_high-051",
+          "balance": 12600000
+        },
+        {
+          "date": "2026-08-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_high-052",
+          "balance": 10800000
+        },
+        {
+          "date": "2026-09-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_high-053",
+          "balance": 18800000
+        },
+        {
+          "date": "2026-09-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-054",
+          "balance": 18609000
+        },
+        {
+          "date": "2026-09-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-055",
+          "balance": 18482000
+        },
+        {
+          "date": "2026-09-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-056",
+          "balance": 18227000
+        },
+        {
+          "date": "2026-09-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-057",
+          "balance": 18036000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-058",
+          "balance": 17909000
+        },
+        {
+          "date": "2026-09-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-059",
+          "balance": 17654000
+        },
+        {
+          "date": "2026-09-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-060",
+          "balance": 17463000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-061",
+          "balance": 17336000
+        },
+        {
+          "date": "2026-09-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-062",
+          "balance": 17081000
+        },
+        {
+          "date": "2026-09-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-063",
+          "balance": 16890000
+        },
+        {
+          "date": "2026-09-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-064",
+          "balance": 16763000
+        },
+        {
+          "date": "2026-09-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-065",
+          "balance": 16508000
+        },
+        {
+          "date": "2026-09-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-066",
+          "balance": 16317000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-067",
+          "balance": 16190000
+        },
+        {
+          "date": "2026-09-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-068",
+          "balance": 15935000
+        },
+        {
+          "date": "2026-09-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-069",
+          "balance": 15744000
+        },
+        {
+          "date": "2026-09-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-070",
+          "balance": 15617000
+        },
+        {
+          "date": "2026-09-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-071",
+          "balance": 15362000
+        },
+        {
+          "date": "2026-09-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-072",
+          "balance": 15171000
+        },
+        {
+          "date": "2026-09-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-073",
+          "balance": 15044000
+        },
+        {
+          "date": "2026-09-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 255000,
+          "transaction_id": "spending_high-074",
+          "balance": 14789000
+        },
+        {
+          "date": "2026-09-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 191000,
+          "transaction_id": "spending_high-075",
+          "balance": 14598000
+        },
+        {
+          "date": "2026-09-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 127000,
+          "transaction_id": "spending_high-076",
+          "balance": 14471000
+        },
+        {
+          "date": "2026-09-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 271000,
+          "transaction_id": "spending_high-077",
+          "balance": 14200000
+        },
+        {
+          "date": "2026-09-26",
+          "description": "Pembayaran tagihan khusus bulanan",
+          "category": "special_bill",
+          "credit": 0,
+          "debit": 1800000,
+          "transaction_id": "spending_high-078",
+          "balance": 12400000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "spending_high-079",
+          "balance": 20400000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-080",
+          "balance": 20270000
+        },
+        {
+          "date": "2026-10-02",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-081",
+          "balance": 20140000
+        },
+        {
+          "date": "2026-10-03",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-082",
+          "balance": 20010000
+        },
+        {
+          "date": "2026-10-04",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-083",
+          "balance": 19880000
+        },
+        {
+          "date": "2026-10-05",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-084",
+          "balance": 19750000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-085",
+          "balance": 19620000
+        },
+        {
+          "date": "2026-10-07",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-086",
+          "balance": 19490000
+        },
+        {
+          "date": "2026-10-08",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-087",
+          "balance": 19360000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-088",
+          "balance": 19230000
+        },
+        {
+          "date": "2026-10-10",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-089",
+          "balance": 19100000
+        },
+        {
+          "date": "2026-10-11",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-090",
+          "balance": 18970000
+        },
+        {
+          "date": "2026-10-12",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-091",
+          "balance": 18840000
+        },
+        {
+          "date": "2026-10-13",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-092",
+          "balance": 18710000
+        },
+        {
+          "date": "2026-10-14",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-093",
+          "balance": 18580000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-094",
+          "balance": 18450000
+        },
+        {
+          "date": "2026-10-16",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-095",
+          "balance": 18320000
+        },
+        {
+          "date": "2026-10-17",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 130000,
+          "transaction_id": "spending_high-096",
+          "balance": 18190000
+        },
+        {
+          "date": "2026-10-18",
+          "description": "Kebutuhan rutin bulan berjalan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 190000,
+          "transaction_id": "spending_high-097",
+          "balance": 18000000
+        }
+      ],
+      "laptop_offer": {
+        "price": 7000000,
+        "regular_price": 8500000,
+        "installment_months": 12,
+        "flat_interest_monthly": 0.012,
+        "admin_rate": 0.01,
+        "first_payment_date": null,
+        "admin_payment_date": null
+      },
+      "certification_goal": {
+        "cost_min": 4000000,
+        "cost_max": 4500000,
+        "horizon_months": [
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "scenario_id": "saving_low",
+      "h0": "2026-11-01",
+      "next_income_date": "2026-12-01",
+      "monthly_income": 8000000,
+      "opening_balance": 2600000,
+      "current_balance": 16000000,
+      "allocations": {
+        "emergency": 8000000,
+        "operating": 8000000
+      },
+      "upcoming_bills": [
+        {
+          "id": "card",
+          "due": "2026-11-07",
+          "amount": 600000,
+          "status": "unpaid"
+        },
+        {
+          "id": "rent",
+          "due": "2026-11-10",
+          "amount": 2400000,
+          "status": "unpaid"
+        },
+        {
+          "id": "utilities",
+          "due": null,
+          "amount_min": 400000,
+          "amount_max": 600000,
+          "status": "estimated",
+          "period": "2026-11"
+        }
+      ],
+      "history_months": [
+        "2026-08",
+        "2026-09",
+        "2026-10"
+      ],
+      "routine_monthly_totals": [
+        2400000,
+        2700000,
+        3000000
+      ],
+      "active_action": null,
+      "action_options": [
+        1000000,
+        2000000,
+        3000000
+      ],
+      "transactions": [
+        {
+          "date": "2026-08-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_low-001",
+          "balance": 10600000
+        },
+        {
+          "date": "2026-08-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-002",
+          "balance": 10500000
+        },
+        {
+          "date": "2026-08-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-003",
+          "balance": 10434000
+        },
+        {
+          "date": "2026-08-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-004",
+          "balance": 10301000
+        },
+        {
+          "date": "2026-08-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-005",
+          "balance": 10201000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-006",
+          "balance": 10135000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_low-007",
+          "balance": 9535000
+        },
+        {
+          "date": "2026-08-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-008",
+          "balance": 9402000
+        },
+        {
+          "date": "2026-08-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-009",
+          "balance": 9302000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-010",
+          "balance": 9236000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_low-011",
+          "balance": 6836000
+        },
+        {
+          "date": "2026-08-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-012",
+          "balance": 6703000
+        },
+        {
+          "date": "2026-08-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-013",
+          "balance": 6603000
+        },
+        {
+          "date": "2026-08-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-014",
+          "balance": 6537000
+        },
+        {
+          "date": "2026-08-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-015",
+          "balance": 6404000
+        },
+        {
+          "date": "2026-08-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-016",
+          "balance": 6304000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-017",
+          "balance": 6238000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_low-018",
+          "balance": 5738000
+        },
+        {
+          "date": "2026-08-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-019",
+          "balance": 5605000
+        },
+        {
+          "date": "2026-08-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-020",
+          "balance": 5505000
+        },
+        {
+          "date": "2026-08-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-021",
+          "balance": 5439000
+        },
+        {
+          "date": "2026-08-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-022",
+          "balance": 5306000
+        },
+        {
+          "date": "2026-08-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-023",
+          "balance": 5206000
+        },
+        {
+          "date": "2026-08-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-024",
+          "balance": 5140000
+        },
+        {
+          "date": "2026-08-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_low-025",
+          "balance": 5007000
+        },
+        {
+          "date": "2026-08-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_low-026",
+          "balance": 4907000
+        },
+        {
+          "date": "2026-08-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_low-027",
+          "balance": 4841000
+        },
+        {
+          "date": "2026-08-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 141000,
+          "transaction_id": "saving_low-028",
+          "balance": 4700000
+        },
+        {
+          "date": "2026-09-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_low-029",
+          "balance": 12700000
+        },
+        {
+          "date": "2026-09-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-030",
+          "balance": 12588000
+        },
+        {
+          "date": "2026-09-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-031",
+          "balance": 12513000
+        },
+        {
+          "date": "2026-09-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-032",
+          "balance": 12363000
+        },
+        {
+          "date": "2026-09-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-033",
+          "balance": 12251000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-034",
+          "balance": 12176000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_low-035",
+          "balance": 11576000
+        },
+        {
+          "date": "2026-09-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-036",
+          "balance": 11426000
+        },
+        {
+          "date": "2026-09-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-037",
+          "balance": 11314000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-038",
+          "balance": 11239000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_low-039",
+          "balance": 8839000
+        },
+        {
+          "date": "2026-09-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-040",
+          "balance": 8689000
+        },
+        {
+          "date": "2026-09-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-041",
+          "balance": 8577000
+        },
+        {
+          "date": "2026-09-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-042",
+          "balance": 8502000
+        },
+        {
+          "date": "2026-09-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-043",
+          "balance": 8352000
+        },
+        {
+          "date": "2026-09-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-044",
+          "balance": 8240000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-045",
+          "balance": 8165000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_low-046",
+          "balance": 7665000
+        },
+        {
+          "date": "2026-09-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-047",
+          "balance": 7515000
+        },
+        {
+          "date": "2026-09-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-048",
+          "balance": 7403000
+        },
+        {
+          "date": "2026-09-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-049",
+          "balance": 7328000
+        },
+        {
+          "date": "2026-09-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-050",
+          "balance": 7178000
+        },
+        {
+          "date": "2026-09-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-051",
+          "balance": 7066000
+        },
+        {
+          "date": "2026-09-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-052",
+          "balance": 6991000
+        },
+        {
+          "date": "2026-09-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_low-053",
+          "balance": 6841000
+        },
+        {
+          "date": "2026-09-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_low-054",
+          "balance": 6729000
+        },
+        {
+          "date": "2026-09-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_low-055",
+          "balance": 6654000
+        },
+        {
+          "date": "2026-09-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 154000,
+          "transaction_id": "saving_low-056",
+          "balance": 6500000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_low-057",
+          "balance": 14500000
+        },
+        {
+          "date": "2026-10-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-058",
+          "balance": 14375000
+        },
+        {
+          "date": "2026-10-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-059",
+          "balance": 14292000
+        },
+        {
+          "date": "2026-10-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-060",
+          "balance": 14126000
+        },
+        {
+          "date": "2026-10-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-061",
+          "balance": 14001000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-062",
+          "balance": 13918000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_low-063",
+          "balance": 13318000
+        },
+        {
+          "date": "2026-10-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-064",
+          "balance": 13152000
+        },
+        {
+          "date": "2026-10-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-065",
+          "balance": 13027000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-066",
+          "balance": 12944000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_low-067",
+          "balance": 10544000
+        },
+        {
+          "date": "2026-10-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-068",
+          "balance": 10378000
+        },
+        {
+          "date": "2026-10-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-069",
+          "balance": 10253000
+        },
+        {
+          "date": "2026-10-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-070",
+          "balance": 10170000
+        },
+        {
+          "date": "2026-10-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-071",
+          "balance": 10004000
+        },
+        {
+          "date": "2026-10-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-072",
+          "balance": 9879000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-073",
+          "balance": 9796000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_low-074",
+          "balance": 9296000
+        },
+        {
+          "date": "2026-10-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-075",
+          "balance": 9130000
+        },
+        {
+          "date": "2026-10-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-076",
+          "balance": 9005000
+        },
+        {
+          "date": "2026-10-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-077",
+          "balance": 8922000
+        },
+        {
+          "date": "2026-10-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-078",
+          "balance": 8756000
+        },
+        {
+          "date": "2026-10-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-079",
+          "balance": 8631000
+        },
+        {
+          "date": "2026-10-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-080",
+          "balance": 8548000
+        },
+        {
+          "date": "2026-10-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_low-081",
+          "balance": 8382000
+        },
+        {
+          "date": "2026-10-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_low-082",
+          "balance": 8257000
+        },
+        {
+          "date": "2026-10-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_low-083",
+          "balance": 8174000
+        },
+        {
+          "date": "2026-10-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 174000,
+          "transaction_id": "saving_low-084",
+          "balance": 8000000
+        },
+        {
+          "date": "2026-11-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_low-085",
+          "balance": 16000000
+        }
+      ],
+      "emergency_target": 12000000
+    },
+    {
+      "scenario_id": "saving_high",
+      "h0": "2026-11-01",
+      "next_income_date": "2026-12-01",
+      "monthly_income": 8000000,
+      "opening_balance": 4600000,
+      "current_balance": 18000000,
+      "allocations": {
+        "emergency": 8000000,
+        "operating": 8000000,
+        "certification": 2000000
+      },
+      "upcoming_bills": [
+        {
+          "id": "card",
+          "due": "2026-11-07",
+          "amount": 600000,
+          "status": "unpaid"
+        },
+        {
+          "id": "rent",
+          "due": "2026-11-10",
+          "amount": 2400000,
+          "status": "unpaid"
+        },
+        {
+          "id": "utilities",
+          "due": null,
+          "amount_min": 400000,
+          "amount_max": 600000,
+          "status": "estimated",
+          "period": "2026-11"
+        }
+      ],
+      "history_months": [
+        "2026-08",
+        "2026-09",
+        "2026-10"
+      ],
+      "routine_monthly_totals": [
+        2400000,
+        2700000,
+        3000000
+      ],
+      "active_action": null,
+      "action_options": [
+        1000000,
+        2000000,
+        3000000
+      ],
+      "transactions": [
+        {
+          "date": "2026-08-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_high-001",
+          "balance": 12600000
+        },
+        {
+          "date": "2026-08-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-002",
+          "balance": 12500000
+        },
+        {
+          "date": "2026-08-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-003",
+          "balance": 12434000
+        },
+        {
+          "date": "2026-08-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-004",
+          "balance": 12301000
+        },
+        {
+          "date": "2026-08-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-005",
+          "balance": 12201000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-006",
+          "balance": 12135000
+        },
+        {
+          "date": "2026-08-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_high-007",
+          "balance": 11535000
+        },
+        {
+          "date": "2026-08-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-008",
+          "balance": 11402000
+        },
+        {
+          "date": "2026-08-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-009",
+          "balance": 11302000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-010",
+          "balance": 11236000
+        },
+        {
+          "date": "2026-08-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_high-011",
+          "balance": 8836000
+        },
+        {
+          "date": "2026-08-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-012",
+          "balance": 8703000
+        },
+        {
+          "date": "2026-08-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-013",
+          "balance": 8603000
+        },
+        {
+          "date": "2026-08-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-014",
+          "balance": 8537000
+        },
+        {
+          "date": "2026-08-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-015",
+          "balance": 8404000
+        },
+        {
+          "date": "2026-08-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-016",
+          "balance": 8304000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-017",
+          "balance": 8238000
+        },
+        {
+          "date": "2026-08-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_high-018",
+          "balance": 7738000
+        },
+        {
+          "date": "2026-08-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-019",
+          "balance": 7605000
+        },
+        {
+          "date": "2026-08-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-020",
+          "balance": 7505000
+        },
+        {
+          "date": "2026-08-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-021",
+          "balance": 7439000
+        },
+        {
+          "date": "2026-08-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-022",
+          "balance": 7306000
+        },
+        {
+          "date": "2026-08-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-023",
+          "balance": 7206000
+        },
+        {
+          "date": "2026-08-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-024",
+          "balance": 7140000
+        },
+        {
+          "date": "2026-08-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 133000,
+          "transaction_id": "saving_high-025",
+          "balance": 7007000
+        },
+        {
+          "date": "2026-08-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 100000,
+          "transaction_id": "saving_high-026",
+          "balance": 6907000
+        },
+        {
+          "date": "2026-08-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 66000,
+          "transaction_id": "saving_high-027",
+          "balance": 6841000
+        },
+        {
+          "date": "2026-08-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 141000,
+          "transaction_id": "saving_high-028",
+          "balance": 6700000
+        },
+        {
+          "date": "2026-09-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_high-029",
+          "balance": 14700000
+        },
+        {
+          "date": "2026-09-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-030",
+          "balance": 14588000
+        },
+        {
+          "date": "2026-09-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-031",
+          "balance": 14513000
+        },
+        {
+          "date": "2026-09-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-032",
+          "balance": 14363000
+        },
+        {
+          "date": "2026-09-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-033",
+          "balance": 14251000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-034",
+          "balance": 14176000
+        },
+        {
+          "date": "2026-09-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_high-035",
+          "balance": 13576000
+        },
+        {
+          "date": "2026-09-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-036",
+          "balance": 13426000
+        },
+        {
+          "date": "2026-09-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-037",
+          "balance": 13314000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-038",
+          "balance": 13239000
+        },
+        {
+          "date": "2026-09-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_high-039",
+          "balance": 10839000
+        },
+        {
+          "date": "2026-09-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-040",
+          "balance": 10689000
+        },
+        {
+          "date": "2026-09-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-041",
+          "balance": 10577000
+        },
+        {
+          "date": "2026-09-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-042",
+          "balance": 10502000
+        },
+        {
+          "date": "2026-09-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-043",
+          "balance": 10352000
+        },
+        {
+          "date": "2026-09-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-044",
+          "balance": 10240000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-045",
+          "balance": 10165000
+        },
+        {
+          "date": "2026-09-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_high-046",
+          "balance": 9665000
+        },
+        {
+          "date": "2026-09-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-047",
+          "balance": 9515000
+        },
+        {
+          "date": "2026-09-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-048",
+          "balance": 9403000
+        },
+        {
+          "date": "2026-09-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-049",
+          "balance": 9328000
+        },
+        {
+          "date": "2026-09-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-050",
+          "balance": 9178000
+        },
+        {
+          "date": "2026-09-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-051",
+          "balance": 9066000
+        },
+        {
+          "date": "2026-09-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-052",
+          "balance": 8991000
+        },
+        {
+          "date": "2026-09-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 150000,
+          "transaction_id": "saving_high-053",
+          "balance": 8841000
+        },
+        {
+          "date": "2026-09-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 112000,
+          "transaction_id": "saving_high-054",
+          "balance": 8729000
+        },
+        {
+          "date": "2026-09-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 75000,
+          "transaction_id": "saving_high-055",
+          "balance": 8654000
+        },
+        {
+          "date": "2026-09-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 154000,
+          "transaction_id": "saving_high-056",
+          "balance": 8500000
+        },
+        {
+          "date": "2026-10-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_high-057",
+          "balance": 16500000
+        },
+        {
+          "date": "2026-10-02",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-058",
+          "balance": 16375000
+        },
+        {
+          "date": "2026-10-03",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-059",
+          "balance": 16292000
+        },
+        {
+          "date": "2026-10-04",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-060",
+          "balance": 16126000
+        },
+        {
+          "date": "2026-10-05",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-061",
+          "balance": 16001000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-062",
+          "balance": 15918000
+        },
+        {
+          "date": "2026-10-06",
+          "description": "Pembayaran kartu/BNPL",
+          "category": "card_bnpl",
+          "credit": 0,
+          "debit": 600000,
+          "transaction_id": "saving_high-063",
+          "balance": 15318000
+        },
+        {
+          "date": "2026-10-07",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-064",
+          "balance": 15152000
+        },
+        {
+          "date": "2026-10-08",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-065",
+          "balance": 15027000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-066",
+          "balance": 14944000
+        },
+        {
+          "date": "2026-10-09",
+          "description": "Sewa tempat tinggal",
+          "category": "rent",
+          "credit": 0,
+          "debit": 2400000,
+          "transaction_id": "saving_high-067",
+          "balance": 12544000
+        },
+        {
+          "date": "2026-10-10",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-068",
+          "balance": 12378000
+        },
+        {
+          "date": "2026-10-11",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-069",
+          "balance": 12253000
+        },
+        {
+          "date": "2026-10-12",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-070",
+          "balance": 12170000
+        },
+        {
+          "date": "2026-10-13",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-071",
+          "balance": 12004000
+        },
+        {
+          "date": "2026-10-14",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-072",
+          "balance": 11879000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-073",
+          "balance": 11796000
+        },
+        {
+          "date": "2026-10-15",
+          "description": "Pembayaran utilitas",
+          "category": "utilities",
+          "credit": 0,
+          "debit": 500000,
+          "transaction_id": "saving_high-074",
+          "balance": 11296000
+        },
+        {
+          "date": "2026-10-16",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-075",
+          "balance": 11130000
+        },
+        {
+          "date": "2026-10-17",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-076",
+          "balance": 11005000
+        },
+        {
+          "date": "2026-10-18",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-077",
+          "balance": 10922000
+        },
+        {
+          "date": "2026-10-19",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-078",
+          "balance": 10756000
+        },
+        {
+          "date": "2026-10-20",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-079",
+          "balance": 10631000
+        },
+        {
+          "date": "2026-10-21",
+          "description": "Transportasi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-080",
+          "balance": 10548000
+        },
+        {
+          "date": "2026-10-22",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 166000,
+          "transaction_id": "saving_high-081",
+          "balance": 10382000
+        },
+        {
+          "date": "2026-10-23",
+          "description": "Makan dan minum",
+          "category": "routine",
+          "credit": 0,
+          "debit": 125000,
+          "transaction_id": "saving_high-082",
+          "balance": 10257000
+        },
+        {
+          "date": "2026-10-24",
+          "description": "Kebutuhan pribadi",
+          "category": "routine",
+          "credit": 0,
+          "debit": 83000,
+          "transaction_id": "saving_high-083",
+          "balance": 10174000
+        },
+        {
+          "date": "2026-10-25",
+          "description": "Belanja kebutuhan",
+          "category": "routine",
+          "credit": 0,
+          "debit": 174000,
+          "transaction_id": "saving_high-084",
+          "balance": 10000000
+        },
+        {
+          "date": "2026-11-01",
+          "description": "Pendapatan bulanan",
+          "category": "income",
+          "credit": 8000000,
+          "debit": 0,
+          "transaction_id": "saving_high-085",
+          "balance": 18000000
+        }
+      ],
+      "emergency_target": 12000000,
+      "certification_goal": {
+        "cost_min": 4000000,
+        "cost_max": 4500000,
+        "horizon_months": [
+          2,
+          3
+        ]
+      }
+    }
+  ]
+}

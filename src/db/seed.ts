@@ -57,38 +57,39 @@ export async function runSeed() {
     }
 
     // 2. Upsert Synthetic Profile
+    const profId = pkg.syntheticProfile.id || `prof_${pkg.scenario.id}`;
     const existingProfile = await db
       .select()
       .from(syntheticProfiles)
-      .where(eq(syntheticProfiles.id, pkg.syntheticProfile.id));
+      .where(eq(syntheticProfiles.id, profId));
 
     if (existingProfile.length === 0) {
       await db.insert(syntheticProfiles).values({
-        id: pkg.syntheticProfile.id,
+        id: profId,
         scenarioId: pkg.scenario.id,
         totalCashBalance: pkg.syntheticProfile.totalCashBalance,
         liquidBalance: pkg.syntheticProfile.liquidBalance,
-        budgets: pkg.syntheticProfile.budgets,
-        liabilities: pkg.syntheticProfile.liabilities,
-        goals: pkg.syntheticProfile.goals,
-        buffer: pkg.syntheticProfile.buffer,
-        incomeSchedule: pkg.syntheticProfile.incomeSchedule,
+        budgets: pkg.syntheticProfile.budgets as any,
+        liabilities: pkg.syntheticProfile.liabilities as any,
+        goals: pkg.syntheticProfile.goals as any,
+        buffer: pkg.syntheticProfile.buffer as any,
+        incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
       });
-      console.log(`- Inserted synthetic profile: ${pkg.syntheticProfile.id}`);
+      console.log(`- Inserted synthetic profile: ${profId}`);
     } else {
       await db
         .update(syntheticProfiles)
         .set({
           totalCashBalance: pkg.syntheticProfile.totalCashBalance,
           liquidBalance: pkg.syntheticProfile.liquidBalance,
-          budgets: pkg.syntheticProfile.budgets,
-          liabilities: pkg.syntheticProfile.liabilities,
-          goals: pkg.syntheticProfile.goals,
-          buffer: pkg.syntheticProfile.buffer,
-          incomeSchedule: pkg.syntheticProfile.incomeSchedule,
+          budgets: pkg.syntheticProfile.budgets as any,
+          liabilities: pkg.syntheticProfile.liabilities as any,
+          goals: pkg.syntheticProfile.goals as any,
+          buffer: pkg.syntheticProfile.buffer as any,
+          incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
         })
-        .where(eq(syntheticProfiles.id, pkg.syntheticProfile.id));
-      console.log(`- Updated synthetic profile: ${pkg.syntheticProfile.id}`);
+        .where(eq(syntheticProfiles.id, profId));
+      console.log(`- Updated synthetic profile: ${profId}`);
     }
   }
 

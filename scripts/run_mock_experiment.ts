@@ -146,16 +146,7 @@ async function runDialogue(
 
   let syntheticProfileContext: FinancialProfileContext | null = null;
   if (condition === "context_aware") {
-    syntheticProfileContext = {
-      totalCashBalance: pkg.syntheticProfile.totalCashBalance,
-      liquidBalance: pkg.syntheticProfile.liquidBalance,
-      budgets: pkg.syntheticProfile.budgets as any,
-      liabilities: pkg.syntheticProfile.liabilities as any,
-      goals: pkg.syntheticProfile.goals as any,
-      buffer: pkg.syntheticProfile.buffer as any,
-      incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
-      source: "synthetic_profile",
-    };
+    syntheticProfileContext = pkg.syntheticProfile;
   }
 
   let userProvidedFinances: UserProvidedFinances | null = null;
