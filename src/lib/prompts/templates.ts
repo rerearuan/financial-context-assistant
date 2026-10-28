@@ -5,7 +5,7 @@ export const PROMPT_VERSION = "v2.1.0";
 export const DEFAULT_GENERATION_PARAMS = {
   temperature: 0.1, // Strict factual adherence to deterministic calculations
   topP: 0.9,
-  maxOutputTokens: 1024,
+  maxOutputTokens: 512,
 };
 
 /**

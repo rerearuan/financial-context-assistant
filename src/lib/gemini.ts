@@ -153,6 +153,30 @@ export async function extractIntent(
   userMessage: string,
   currentAction: StructuredContextPacket["action"]
 ): Promise<ExtractedIntent> {
+  const clean = userMessage.trim().toLowerCase();
+
+  // Fast-Path 1: Pure inquiry questions without numbers, decisions, or financial amounts
+  const hasDigits = /\d/.test(clean);
+  const hasCurrencyWord = /(juta|jt|ribu|rb|rupiah|rp\.?)\b/i.test(clean);
+  const hasDecisionWord = /(lanjut|setuju|eksekusi|tunda|batal|tidak jadi|ubah|ganti|sesuaikan|kurang|tambah)/i.test(clean);
+  const hasFinancialKey = /(saldo|anggaran|tagihan|utang|cicilan|tanggungan|dana darurat|buffer)/i.test(clean);
+
+  if (!hasDigits && !hasCurrencyWord && !hasDecisionWord && !hasFinancialKey) {
+    // Pure conceptual question or standard quick reply -> resolve in 0ms without extra LLM roundtrip
+    return heuristicExtractIntent(userMessage, currentAction);
+  }
+
+  // Fast-Path 2: Clear heuristic matches (regex successfully extracted decision, amount, or finances)
+  const heuristic = heuristicExtractIntent(userMessage, currentAction);
+  if (
+    heuristic.decision !== null ||
+    (typeof heuristic.newAmount === "number" && heuristic.newAmount > 0) ||
+    heuristic.userProvidedFinances !== null
+  ) {
+    return heuristic;
+  }
+
+  // Fallback: Use Gemini for complex or ambiguous user phrasing
   try {
     const ai = getGeminiClient();
     const model = getGeminiModel();

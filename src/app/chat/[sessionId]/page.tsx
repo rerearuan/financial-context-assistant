@@ -13,6 +13,7 @@ import {
   Edit3,
   X,
   Info,
+  Clock,
 } from "lucide-react";
 import { ScenarioViewer } from "@/components/ScenarioViewer";
 
@@ -70,6 +71,16 @@ function ChatPageContent() {
   const [isSending, setIsSending] = useState(false);
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
 
+  // Asynchronous queue state (allows typing and queueing while assistant is thinking)
+  interface QueuedMessage {
+    id: string;
+    text: string;
+    createdAt: string;
+  }
+  const [queuedMessages, setQueuedMessages] = useState<QueuedMessage[]>([]);
+  const queuedMessagesRef = useRef<QueuedMessage[]>([]);
+  const isSendingRef = useRef(false);
+
   // Modals state
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isModifyModalOpen, setIsModifyModalOpen] = useState(false);
@@ -107,14 +118,15 @@ function ChatPageContent() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [session?.messages, isSending]);
+  }, [session?.messages, isSending, queuedMessages]);
 
-  const handleSendMessage = async (textToSend?: string) => {
-    const text = (textToSend || inputText).trim();
-    if (!text || isSending || !session) return;
+  const handleCancelQueue = (id: string) => {
+    queuedMessagesRef.current = queuedMessagesRef.current.filter((q) => q.id !== id);
+    setQueuedMessages([...queuedMessagesRef.current]);
+  };
 
-    setInputText("");
-    setLastFailedMessage(null);
+  const executeSendMessage = async (text: string) => {
+    isSendingRef.current = true;
     setIsSending(true);
 
     // Optimistically add user message
@@ -186,8 +198,38 @@ function ChatPageContent() {
       );
       setError(`Gagal mengirim pesan: ${errorMsg}`);
     } finally {
-      setIsSending(false);
+      // Process next queued message if available (Async Queue)
+      if (queuedMessagesRef.current.length > 0) {
+        const nextItem = queuedMessagesRef.current.shift()!;
+        setQueuedMessages([...queuedMessagesRef.current]);
+        executeSendMessage(nextItem.text);
+      } else {
+        isSendingRef.current = false;
+        setIsSending(false);
+      }
     }
+  };
+
+  const handleSendMessage = async (textToSend?: string) => {
+    const text = (textToSend || inputText).trim();
+    if (!text || !session) return;
+
+    setInputText("");
+    setLastFailedMessage(null);
+
+    // If currently generating a response, queue the next prompt asynchronously!
+    if (isSendingRef.current) {
+      const queuedItem: QueuedMessage = {
+        id: `queue_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        text,
+        createdAt: new Date().toISOString(),
+      };
+      queuedMessagesRef.current.push(queuedItem);
+      setQueuedMessages([...queuedMessagesRef.current]);
+      return;
+    }
+
+    await executeSendMessage(text);
   };
 
   const handleModifyAmount = async () => {
@@ -364,6 +406,34 @@ function ChatPageContent() {
           </div>
         ))}
 
+        {/* Queued Messages (Async Queue: messages typed while assistant is thinking) */}
+        {queuedMessages.map((q) => (
+          <div key={q.id} className="flex items-start gap-2.5 justify-end">
+            <div className="bg-slate-800 text-white rounded-2xl rounded-br-xs px-4 py-3 shadow-xs max-w-[85%] sm:max-w-[75%] border border-slate-700">
+              <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+                {q.text}
+              </div>
+              <div className="flex items-center justify-between gap-3 mt-1.5 pt-1.5 border-t border-slate-700 text-[10px] text-slate-300">
+                <span className="flex items-center gap-1.5 text-amber-300">
+                  <Clock className="w-3 h-3 animate-pulse" />
+                  Dalam antrean — otomatis dikirim berikutnya
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleCancelQueue(q.id)}
+                  className="hover:text-rose-300 underline cursor-pointer"
+                >
+                  Batalkan
+                </button>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center shrink-0">
+              <User className="w-4 h-4" />
+            </div>
+          </div>
+        ))}
+
+        {/* Active thinking indicator */}
         {isSending && (
           <div className="flex items-start gap-2.5 justify-start">
             <div className="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center shrink-0 shadow-xs animate-pulse">
@@ -395,15 +465,15 @@ function ChatPageContent() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 4. Quick Replies (Identical & Neutral for all conditions) */}
-      {!isSending && quickReplies.length > 0 && (
+      {/* 4. Quick Replies (Accessible anytime, queues if assistant is busy) */}
+      {quickReplies.length > 0 && (
         <div className="bg-white border-t border-slate-200 px-4 py-2 overflow-x-auto flex items-center gap-2 no-scrollbar">
           <span className="text-xs text-slate-400 font-medium shrink-0">Opsi Pertanyaan:</span>
           {quickReplies.map((reply, idx) => (
             <button
               key={idx}
               onClick={() => handleSendMessage(reply)}
-              className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition shrink-0"
+              className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition shrink-0 cursor-pointer"
             >
               {reply}
             </button>
@@ -424,7 +494,7 @@ function ChatPageContent() {
         </div>
       </div>
 
-      {/* 6. Chat Input Footer */}
+      {/* 6. Chat Input Footer (Always enabled for async prompt typing) */}
       <footer className="p-3 sm:p-4 bg-white border-t border-slate-200">
         <form
           onSubmit={(e) => {
@@ -437,18 +507,26 @@ function ChatPageContent() {
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Ketik pertanyaan atau tanggapan finansial Anda..."
-            disabled={isSending}
+            placeholder={
+              isSending
+                ? "Ketik prompt berikutnya (akan otomatis dikirim saat asisten selesai)..."
+                : "Ketik pertanyaan atau tanggapan finansial Anda..."
+            }
             maxLength={1000}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-xs sm:text-sm disabled:bg-slate-100"
+            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-xs sm:text-sm"
           />
           <button
             type="submit"
-            disabled={isSending || !inputText.trim()}
-            className="p-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl transition shadow-xs shrink-0"
-            title="Kirim pesan"
+            disabled={!inputText.trim()}
+            className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl transition shadow-xs shrink-0 flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+            title={isSending ? "Antrekan prompt berikutnya" : "Kirim pesan"}
           >
             <Send className="w-4 h-4" />
+            {isSending && (
+              <span className="text-xs font-medium hidden sm:inline">
+                Antrekan
+              </span>
+            )}
           </button>
         </form>
       </footer>
