@@ -470,31 +470,15 @@ function ChatPageContent() {
               </button>
             </div>
 
-            <div className="p-5 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700">
-              <div>
-                <h4 className="font-bold text-slate-900 mb-1">Situasi:</h4>
-                <p className="whitespace-pre-line bg-slate-50 p-3 rounded-xl border border-slate-200">
-                  {session.scenario.situasiText || session.scenario.descriptionText}
-                </p>
-              </div>
-
-              {session.scenario.kondisiKeuanganText && (
-                <div>
-                  <h4 className="font-bold text-slate-900 mb-1">Kondisi Keuangan:</h4>
-                  <div className="whitespace-pre-line bg-slate-50 p-3 rounded-xl border border-slate-200">
-                    {session.scenario.kondisiKeuanganText}
-                  </div>
-                </div>
-              )}
-
+            <div className="p-5 overflow-y-auto space-y-4 max-h-[75vh]">
               {session.scenario.tugasText && (
-                <div>
-                  <h4 className="font-bold text-slate-900 mb-1">Tugas Simulasi:</h4>
-                  <p className="bg-blue-50/60 text-blue-900 p-3 rounded-xl border border-blue-200">
-                    {session.scenario.tugasText}
-                  </p>
+                <div className="bg-blue-50/70 text-blue-950 p-3 rounded-xl border border-blue-200 text-xs">
+                  <span className="font-bold block mb-0.5">Tugas Simulasi:</span>
+                  <p>{session.scenario.tugasText}</p>
                 </div>
               )}
+
+              <ScenarioViewer scenario={session.scenario} compact />
             </div>
 
             <div className="px-5 py-3 border-t border-slate-200 flex justify-end">
