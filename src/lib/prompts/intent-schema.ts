@@ -46,6 +46,8 @@ export const ExtractedIntentSchema = z.object({
       liabilities: z.number().optional(),
       buffer: z.number().optional(),
       routine: z.number().optional(),
+      emergencyCurrent: z.number().optional(),
+      emergencyTarget: z.number().optional(),
       goals: z.string().optional(),
     })
     .nullable()

@@ -6,6 +6,13 @@ import {
   LiabilityItem,
 } from "../lib/financial-engine/types";
 
+export interface ComprehensionQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
 export interface ScenarioPackage {
   scenario: {
     id: string;
@@ -22,6 +29,7 @@ export interface ScenarioPackage {
     actionOptions?: Array<number | string>;
     initialAssistantMessage: string;
     quickReplies: string[];
+    comprehensionQuestions?: ComprehensionQuestion[];
     tugasQuestions: Array<{
       id: string;
       question: string;
@@ -74,22 +82,16 @@ Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.0
 Tersedia dua metode pembayaran:
 ● Tunai: Rp7.000.000 (dibayar lunas hari ini)
 ● Cicilan: Tenor 12 bulan, bunga flat 1,2% per bulan, serta biaya administrasi 1% dari harga barang`,
-      kondisiKeuanganText: `1. Saldo & Arus Kas Masuk:
-● Saldo rekening Anda saat ini (per 20 Okt 2026): Rp18.000.000.
+      kondisiKeuanganText: `● Saldo rekening Anda saat ini (per 20 Okt 2026): Rp18.000.000.
 ● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan berikutnya diperkirakan diterima dalam 12 hari (1 Nov 2026).
-
-2. Alokasi dari Total Saldo Rekening (Rp18.000.000):
-  ○ Rp5.000.000 merupakan Dana Darurat yang ingin Anda pertahankan.
-  ○ Rp6.000.000 merupakan dana yang selama beberapa bulan terakhir Anda sisihkan khusus untuk pembelian laptop (kekurangan Rp1.000.000 terhadap harga promo Rp7.000.000).
-  ○ Rp7.000.000 merupakan saldo yang masih tersedia saat ini untuk kebutuhan bulan berjalan.
-
-3. Kewajiban & Pengeluaran Rutin:
-● Pengeluaran rutin harian yang telah terpakai selama bulan berjalan (1–20 Okt): Rp2.400.000.
-● Rata-rata pengeluaran rutin 3 bulan terakhir (Juli–Sept): berkisar antara Rp3.800.000–Rp4.600.000 per bulan (di luar tagihan khusus).
-● Tagihan mendatang yang harus dibayar: Rp1.800.000 (jatuh tempo 26 Okt 2026, 6 hari ke depan).
-
-4. Catatan Tambahan:
+Alokasi dari Total Saldo Rekening (Rp18.000.000):
+○ Rp5.000.000 merupakan Dana Darurat yang ingin Anda pertahankan.
+○ Rp6.000.000 merupakan dana yang selama beberapa bulan terakhir Anda sisihkan untuk pembelian laptop.
+○ Sisanya merupakan dana yang digunakan untuk kebutuhan bulan berjalan.
+● Berdasarkan riwayat transaksi, pengeluaran rutin untuk kebutuhan sehari-hari selama bulan berjalan telah mencapai sekitar Rp2.400.000.
+● Dalam tiga bulan terakhir, pengeluaran rutin untuk kebutuhan sehari-hari Anda berkisar antara Rp3.800.000–Rp4.600.000 per bulan, di luar tagihan khusus.
+● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
       descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
@@ -109,6 +111,30 @@ Tersedia dua metode pembayaran:
         "Bagaimana jika saya memilih opsi cicilan 12 bulan?",
         "Apakah sisa kas cukup untuk tagihan dan kebutuhan sebelum gajian?",
         "Bagaimana jika mencari laptop yang lebih murah?",
+      ],
+      comprehensionQuestions: [
+        {
+          id: "comp_1",
+          question: "Bagaimana kondisi laptop Anda saat ini?",
+          options: [
+            "Sudah rusak dan tidak dapat digunakan",
+            "Masih dapat digunakan, tetapi performanya mulai menurun",
+            "Masih berfungsi dengan baik tanpa kendala",
+            "Baru dibeli beberapa minggu lalu",
+          ],
+          correctAnswer: "Masih dapat digunakan, tetapi performanya mulai menurun",
+        },
+        {
+          id: "comp_2",
+          question: "Berapa jumlah uang yang telah Anda sisihkan untuk membeli laptop?",
+          options: [
+            "Rp5.000.000",
+            "Rp6.000.000",
+            "Rp7.000.000",
+            "Rp8.000.000",
+          ],
+          correctAnswer: "Rp6.000.000",
+        },
       ],
       tugasQuestions: [
         {
@@ -250,27 +276,17 @@ Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.0
 Tersedia dua metode pembayaran:
 ● Tunai: Rp7.000.000 (dibayar lunas hari ini)
 ● Cicilan: Tenor 12 bulan, bunga flat 1,2% per bulan, serta biaya administrasi 1% dari harga barang`,
-      kondisiKeuanganText: `1. Saldo & Arus Kas Masuk:
-● Saldo rekening Anda saat ini (per 20 Okt 2026): Rp18.000.000.
+      kondisiKeuanganText: `● Saldo rekening Anda saat ini (per 20 Okt 2026): Rp18.000.000.
 ● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan berikutnya diperkirakan diterima dalam 12 hari (1 Nov 2026).
-
-2. Alokasi dari Total Saldo Rekening (Rp18.000.000):
-  ○ Rp5.000.000 merupakan Dana Darurat yang ingin Anda pertahankan.
-  ○ Rp3.000.000 merupakan dana yang disisihkan khusus untuk pembelian laptop (kekurangan Rp4.000.000 terhadap harga promo Rp7.000.000).
-  ○ Rp3.000.000 merupakan dana yang disisihkan untuk program sertifikasi profesional.
-  ○ Rp7.000.000 merupakan saldo yang masih tersedia saat ini untuk kebutuhan bulan berjalan.
-
-3. Rencana Finansial Mendatang:
-● Biaya program sertifikasi profesional: diperkirakan sebesar Rp4.000.000–Rp4.500.000.
-● Rencana pelaksanaan sertifikasi: sekitar 2–3 bulan lagi.
-
-4. Kewajiban & Pengeluaran Rutin:
-● Pengeluaran rutin harian yang telah terpakai selama bulan berjalan (1–20 Okt): Rp2.400.000.
-● Rata-rata pengeluaran rutin 3 bulan terakhir (Juli–Sept): berkisar antara Rp3.800.000–Rp4.600.000 per bulan (di luar tagihan khusus).
-● Tagihan mendatang yang harus dibayar: Rp1.800.000 (jatuh tempo 26 Okt 2026, 6 hari ke depan).
-
-5. Catatan Tambahan:
+Alokasi dari Total Saldo Rekening (Rp18.000.000):
+○ Rp5.000.000 merupakan Dana Darurat yang ingin Anda pertahankan.
+○ Rp3.000.000 merupakan dana yang disisihkan untuk pembelian laptop.
+○ Rp3.000.000 merupakan dana yang disisihkan untuk program sertifikasi profesional (biaya sertifikasi diperkirakan sekitar Rp4.000.000–Rp4.500.000 dan direncanakan dalam 2–3 bulan ke depan).
+○ Sisanya merupakan dana yang digunakan untuk kebutuhan bulan berjalan.
+● Berdasarkan riwayat transaksi, pengeluaran rutin untuk kebutuhan sehari-hari selama bulan berjalan telah mencapai sekitar Rp2.400.000.
+● Dalam tiga bulan terakhir, pengeluaran rutin untuk kebutuhan sehari-hari Anda berkisar antara Rp3.800.000–Rp4.600.000 per bulan, di luar tagihan khusus.
+● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
       descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
@@ -290,6 +306,30 @@ Tersedia dua metode pembayaran:
         "Bagaimana pengaruhnya terhadap pos dana sertifikasi saya?",
         "Bagaimana jika saya memilih opsi cicilan 12 bulan?",
         "Apakah kas operasional cukup untuk tagihan dan kebutuhan harian?",
+      ],
+      comprehensionQuestions: [
+        {
+          id: "comp_1",
+          question: "Selain membeli laptop baru, apa tujuan keuangan lain yang sedang Anda persiapkan?",
+          options: [
+            "Membeli kendaraan baru",
+            "Mengikuti program sertifikasi profesional",
+            "Membayar biaya pendidikan formal",
+            "Membeli perlengkapan rumah tangga",
+          ],
+          correctAnswer: "Mengikuti program sertifikasi profesional",
+        },
+        {
+          id: "comp_2",
+          question: "Berapa jumlah uang yang telah Anda sisihkan untuk program sertifikasi profesional?",
+          options: [
+            "Rp2.000.000",
+            "Rp3.000.000",
+            "Rp4.000.000",
+            "Rp5.000.000",
+          ],
+          correctAnswer: "Rp3.000.000",
+        },
       ],
       tugasQuestions: [
         {
@@ -432,27 +472,24 @@ Tersedia dua metode pembayaran:
       actionType: "saving",
       conflictLevel: "low",
       h0Date: "2026-11-01",
-      situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
+      situasiText: `Anda baru saja menerima pendapatan bulanan dan sedang mempertimbangkan bagaimana mengalokasikannya.
 
-Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang sedang Anda prioritaskan adalah meningkatkan Dana Darurat. Anda ingin memperkuat Dana Darurat agar lebih siap menghadapi pengeluaran tidak terduga.
+Salah satu tujuan finansial yang sedang Anda prioritaskan adalah meningkatkan Dana Darurat agar memiliki perlindungan yang lebih baik terhadap pengeluaran tidak terduga.
+
+Saat ini Anda mempertimbangkan untuk menambah tabungan Dana Darurat sebesar Rp2.000.000 dari pendapatan bulan ini.
 
 Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus sedang Anda kejar.`,
-      kondisiKeuanganText: `1. Saldo & Arus Kas Masuk:
-● Saldo rekening Anda saat ini (per 1 Nov 2026 setelah gaji masuk): Rp16.000.000.
+      kondisiKeuanganText: `● Saldo rekening Anda saat ini (per 1 Nov 2026 setelah gaji masuk): Rp16.000.000.
 ● Pendapatan bulanan: Rp8.000.000 (baru diterima hari ini, belum digunakan).
 ● Pendapatan berikutnya: diperkirakan diterima sekitar 30 hari lagi (1 Des 2026).
-
-2. Alokasi dari Total Saldo Rekening (Rp16.000.000):
-  ○ Rp8.000.000 merupakan Dana Darurat yang telah dikumpulkan sebelumnya (Target: Rp12.000.000 • Kekurangan: Rp4.000.000).
-  ○ Rp8.000.000 merupakan pendapatan yang baru diterima dan tersedia untuk dialokasikan pada bulan berjalan (belum digunakan untuk kebutuhan/kewajiban).
-
-3. Kewajiban Pembayaran & Pengeluaran Rutin:
-● Biaya sewa tempat tinggal: Rp2.400.000 (harus dibayar 10 Nov 2026, 9 hari lagi).
-● Tagihan kartu kredit / BNPL: Rp600.000 (harus dibayar 7 Nov 2026, 6 hari lagi).
-● Tagihan utilitas bulan ini: diperkirakan sebesar Rp400.000–Rp600.000 (status estimasi).
-● Kebutuhan hidup sehari-hari: rata-rata 3 bulan terakhir (Agustus–Okt) berkisar antara Rp2.400.000–Rp3.000.000 per bulan (di luar tempat tinggal, kartu, dan utilitas).
-
-4. Catatan Tambahan:
+Alokasi dari Total Saldo Rekening (Rp16.000.000):
+○ Rp8.000.000 merupakan Dana Darurat yang telah dikumpulkan sebelumnya (Target: Rp12.000.000).
+○ Rp8.000.000 merupakan pendapatan yang baru diterima dan tersedia untuk kebutuhan serta kewajiban bulan berjalan.
+● Kewajiban pembayaran yang harus dipenuhi:
+○ Biaya sewa tempat tinggal: Rp2.400.000 (harus dibayar dalam 9 hari ke depan).
+○ Tagihan kartu kredit/BNPL: Rp600.000 (harus dibayar dalam 6 hari ke depan).
+○ Tagihan utilitas bulan ini: diperkirakan sebesar Rp400.000–Rp600.000.
+● Pengeluaran rutin untuk kebutuhan sehari-hari dalam 3 bulan terakhir berkisar antara Rp2.400.000–Rp3.000.000 per bulan (di luar biaya tempat tinggal, tagihan kartu, dan utilitas).
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
@@ -472,6 +509,30 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
         "Bagaimana jika saya menyisihkan Rp 1.000.000?",
         "Berapa sisa kas setelah melunasi tagihan wajib?",
         "Apakah sisa dana cukup untuk kebutuhan rutin sebulan?",
+      ],
+      comprehensionQuestions: [
+        {
+          id: "comp_1",
+          question: "Apa tujuan finansial utama yang sedang Anda prioritaskan?",
+          options: [
+            "Melunasi seluruh tagihan kartu/BNPL",
+            "Meningkatkan Dana Darurat",
+            "Menabung untuk membeli barang baru",
+            "Mengumpulkan dana untuk investasi",
+          ],
+          correctAnswer: "Meningkatkan Dana Darurat",
+        },
+        {
+          id: "comp_2",
+          question: "Berapa target Dana Darurat yang ingin Anda capai?",
+          options: [
+            "Rp8.000.000",
+            "Rp12.000.000",
+            "Rp16.000.000",
+            "Rp18.000.000",
+          ],
+          correctAnswer: "Rp12.000.000",
+        },
       ],
       tugasQuestions: [
         {
@@ -609,28 +670,21 @@ Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang ingin
 
 Namun, pada saat yang sama, Anda juga masih mempersiapkan dana untuk mengikuti program sertifikasi profesional dalam beberapa bulan ke depan.
 
-Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama merupakan tujuan yang sangat penting.`,
-      kondisiKeuanganText: `1. Saldo & Arus Kas Masuk:
-● Saldo rekening Anda saat ini (per 1 Nov 2026 setelah gaji masuk): Rp18.000.000.
-● Pendapatan bulanan: Rp8.000.000 (baru diterima hari ini, belum digunakan).
-● Pendapatan berikutnya: diperkirakan diterima sekitar 30 hari lagi (1 Des 2026).
-
-2. Alokasi dari Total Saldo Rekening (Rp18.000.000):
-  ○ Rp8.000.000 merupakan Dana Darurat yang telah dikumpulkan sebelumnya (Target: Rp12.000.000 • Kekurangan: Rp4.000.000).
+Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama merupakan tujuan yang penting.`,
+      kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
+● Pendapatan baru diterima hari ini dan pendapatan berikutnya diperkirakan diterima sekitar 30 hari lagi.
+● Saldo rekening Anda saat ini: Rp18.000.000.
+● Dari saldo tersebut:
+  ○ Rp8.000.000 merupakan dana darurat yang telah dikumpulkan sebelumnya, dengan target Rp12.000.000.
   ○ Rp2.000.000 merupakan dana yang telah disisihkan untuk mengikuti program sertifikasi profesional.
-  ○ Rp8.000.000 merupakan pendapatan yang baru diterima dan tersedia untuk dialokasikan pada bulan berjalan (belum digunakan untuk kebutuhan/kewajiban).
-
-3. Rencana Finansial Mendatang:
-● Biaya program sertifikasi profesional: diperkirakan sebesar Rp4.000.000–Rp4.500.000.
-● Rencana pelaksanaan sertifikasi: sekitar 2–3 bulan lagi.
-
-4. Kewajiban Pembayaran & Pengeluaran Rutin:
-● Biaya sewa tempat tinggal: Rp2.400.000 (harus dibayar 10 Nov 2026, 9 hari lagi).
-● Tagihan kartu kredit / BNPL: Rp600.000 (harus dibayar 7 Nov 2026, 6 hari lagi).
-● Tagihan utilitas bulan ini: diperkirakan sebesar Rp400.000–Rp600.000 (status estimasi).
-● Kebutuhan hidup sehari-hari: rata-rata 3 bulan terakhir (Agustus–Okt) berkisar antara Rp2.400.000–Rp3.000.000 per bulan (di luar tempat tinggal, kartu, dan utilitas).
-
-5. Catatan Tambahan:
+  ○ Sisa Rp8.000.000 merupakan pendapatan yang baru diterima dan tersedia untuk dialokasikan pada bulan berjalan.
+● Biaya program sertifikasi diperkirakan sebesar Rp4.000.000–Rp4.500.000.
+● Anda berencana mengikuti program tersebut sekitar 2–3 bulan lagi.
+● Pendapatan yang baru diterima belum digunakan untuk memenuhi kebutuhan atau kewajiban bulan berjalan.
+● Dalam tiga bulan terakhir, pengeluaran rutin untuk kebutuhan sehari-hari Anda berkisar antara Rp2.400.000–Rp3.000.000 per bulan, di luar biaya tempat tinggal, tagihan kartu/BNPL, dan utilitas.
+● Biaya tempat tinggal sebesar Rp2.400.000 harus dibayar dalam 9 hari.
+● Tagihan kartu/BNPL sebesar Rp600.000 harus dibayar dalam 6 hari.
+● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
@@ -650,6 +704,30 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
         "Bagaimana pengaruhnya terhadap pos dana sertifikasi profesional?",
         "Bagaimana jika saya menyisihkan Rp 1.000.000?",
         "Berapa sisa kas setelah melunasi tagihan wajib?",
+      ],
+      comprehensionQuestions: [
+        {
+          id: "comp_1",
+          question: "Apa saja tujuan finansial yang sedang Anda persiapkan?",
+          options: [
+            "Meningkatkan Dana Darurat dan membeli laptop baru",
+            "Meningkatkan Dana Darurat dan mengikuti program sertifikasi profesional",
+            "Mengikuti program sertifikasi profesional dan membeli kendaraan",
+            "Melunasi tagihan kartu/BNPL dan membeli laptop baru",
+          ],
+          correctAnswer: "Meningkatkan Dana Darurat dan mengikuti program sertifikasi profesional",
+        },
+        {
+          id: "comp_2",
+          question: "Berapa jumlah dana yang telah Anda sisihkan untuk program sertifikasi profesional?",
+          options: [
+            "Rp1.000.000",
+            "Rp2.000.000",
+            "Rp4.000.000",
+            "Rp8.000.000",
+          ],
+          correctAnswer: "Rp2.000.000",
+        },
       ],
       tugasQuestions: [
         {
@@ -785,3 +863,11 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
     },
   },
 ];
+
+export const COMPREHENSION_QUESTIONS_BY_SCENARIO: Record<string, ComprehensionQuestion[]> = {
+  spending_low: SCENARIO_PACKAGES[0].scenario.comprehensionQuestions || [],
+  spending_high: SCENARIO_PACKAGES[1].scenario.comprehensionQuestions || [],
+  saving_low: SCENARIO_PACKAGES[2].scenario.comprehensionQuestions || [],
+  saving_high: SCENARIO_PACKAGES[3].scenario.comprehensionQuestions || [],
+};
+

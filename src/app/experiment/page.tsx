@@ -22,6 +22,7 @@ import {
   LIKERT_OPTIONS,
   DEMOGRAPHIC_OPTIONS,
 } from "@/lib/survey-questions";
+import { COMPREHENSION_QUESTIONS_BY_SCENARIO } from "@/fixtures/scenarios";
 
 interface ParticipantData {
   id: string;
@@ -46,6 +47,12 @@ interface ScenarioDetails {
   kondisiKeuanganText: string;
   tugasText: string;
   descriptionText: string;
+  comprehensionQuestions?: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+  }>;
   tugasQuestions: Array<{
     id: string;
     question: string;
@@ -82,10 +89,7 @@ function ExperimentContent() {
   const [occupationOther, setOccupationOther] = useState("");
 
   // Step 4: Comprehension Check & Early Decision
-  const [comprehension, setComprehension] = useState({
-    qAction: "",
-    qAmount: "",
-  });
+  const [comprehension, setComprehension] = useState<Record<string, string>>({});
   const [earlyDecision, setEarlyDecision] = useState({
     q1: "",
     q2: "",
@@ -267,10 +271,26 @@ function ExperimentContent() {
   // Submit Step 4: Comprehension Check & Early Decision
   const handleEarlyDecisionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!participant) return;
+    if (!participant || !scenario) return;
 
-    if (!comprehension.qAction || !comprehension.qAmount || !earlyDecision.q1 || !earlyDecision.q3.trim()) {
+    const compQuestions =
+      scenario.comprehensionQuestions && scenario.comprehensionQuestions.length > 0
+        ? scenario.comprehensionQuestions
+        : COMPREHENSION_QUESTIONS_BY_SCENARIO[scenario.id] || [];
+
+    const hasAnsweredAllComp = compQuestions.every((q) => Boolean(comprehension[q.id]));
+
+    if (!hasAnsweredAllComp || !earlyDecision.q1 || !earlyDecision.q3.trim()) {
       alert("Mohon jawab seluruh pertanyaan uji pemahaman skenario dan keputusan awal Anda.");
+      return;
+    }
+
+    if (earlyDecision.q1 === "Ya" && !earlyDecision.q2) {
+      alert(
+        scenario.actionType === "spending"
+          ? "Mohon pilih metode pembayaran jika Anda memilih Ya."
+          : "Mohon pilih jumlah penambahan jika Anda memilih Ya."
+      );
       return;
     }
 
@@ -343,9 +363,10 @@ function ExperimentContent() {
     if (!participant) return;
 
     // Check completeness
-    for (const item of POST_QUESTIONNAIRE_ITEMS) {
+    for (let i = 0; i < POST_QUESTIONNAIRE_ITEMS.length; i++) {
+      const item = POST_QUESTIONNAIRE_ITEMS[i];
       if (!postAnswers[item.code]) {
-        alert(`Harap isi penilaian untuk butir pertanyaan: "${item.statement}"`);
+        alert(`Harap isi penilaian untuk pertanyaan nomor ${i + 1}`);
         return;
       }
     }
@@ -406,34 +427,34 @@ function ExperimentContent() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Academic Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-3.5 sticky top-0 z-30">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-6 h-14 sticky top-0 z-30 flex items-center">
+        <div className="max-w-5xl w-full mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
               UI
             </div>
-            <div>
-              <h1 className="text-sm font-bold text-slate-900 leading-tight">
+            <div className="min-w-0">
+              <h1 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">
                 Penelitian Asisten Percakapan dalam Keputusan Keuangan
               </h1>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
                 Fakultas Ilmu Komputer, Universitas Indonesia
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
             {step > 1 && step < 8 && (
               <button
                 type="button"
                 onClick={() => setStep((prev) => Math.max(1, prev - 1))}
-                className="px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 transition"
+                className="px-2 sm:px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 transition"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
-                Kembali
+                <span className="hidden sm:inline">Kembali</span>
               </button>
             )}
-            <span className="text-xs bg-slate-100 px-2.5 py-1 rounded-md font-mono text-slate-600">
+            <span className="text-[11px] sm:text-xs bg-slate-100 px-2 sm:px-2.5 py-1 rounded-md font-mono text-slate-600 whitespace-nowrap">
               Tahap {step} dari 8
             </span>
           </div>
@@ -837,89 +858,46 @@ function ExperimentContent() {
                       Bagian 1: Uji Pemahaman Skenario
                     </div>
 
-                    {/* Pertanyaan A.1: Pemahaman Rencana Tindakan */}
-                    <div>
-                      <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
-                        1. Berdasarkan narasi situasi di samping, apa rencana yang sedang Anda pertimbangkan? *
-                      </label>
-                      <div className="space-y-1.5">
-                        {(scenario.actionType === "spending"
-                          ? [
-                              "Membeli laptop baru untuk menunjang pekerjaan dan aktivitas",
-                              "Mengajukan pinjaman online untuk belanja konsumtif",
-                              "Membeli kendaraan bermotor secara kredit",
-                            ]
-                          : [
-                              "Menambah alokasi Dana Darurat dari pendapatan bulanan",
-                              "Menginvestasikan seluruh tabungan ke aset kripto",
-                              "Mengajukan kartu kredit baru untuk belanja bulanan",
-                            ]
-                        ).map((opt) => (
-                          <label
-                            key={opt}
-                            className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
-                              comprehension.qAction === opt
-                                ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
-                                : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="comp_action"
-                              value={opt}
-                              checked={comprehension.qAction === opt}
-                              onChange={(e) => setComprehension({ ...comprehension, qAction: e.target.value })}
-                              className="mt-0.5 text-blue-600"
-                              required
-                            />
-                            <span>{opt}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
+                    {/* Pertanyaan Dinamis Uji Pemahaman dari PDF Instrumen */}
+                    {(() => {
+                      const compQuestions =
+                        scenario.comprehensionQuestions && scenario.comprehensionQuestions.length > 0
+                          ? scenario.comprehensionQuestions
+                          : COMPREHENSION_QUESTIONS_BY_SCENARIO[scenario.id] || [];
 
-                    {/* Pertanyaan A.2: Pemahaman Angka/Batasan Skenario */}
-                    <div>
-                      <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
-                        2. {scenario.actionType === "spending"
-                          ? scenario.id === "spending_low"
-                            ? "Berapa harga promosi laptop yang berlaku sampai hari ini?"
-                            : "Berapa estimasi biaya sertifikasi profesional yang sedang Anda siapkan?"
-                          : scenario.id === "saving_low"
-                          ? "Berapa target total Dana Darurat yang ingin Anda capai?"
-                          : "Berapa kekurangan dana untuk mencapai target Dana Darurat?"} *
-                      </label>
-                      <div className="space-y-1.5">
-                        {(scenario.actionType === "spending"
-                          ? scenario.id === "spending_low"
-                            ? ["Rp7.000.000", "Rp8.500.000", "Rp10.000.000"]
-                            : ["Rp4.000.000 – Rp4.500.000", "Rp1.000.000 – Rp1.500.000", "Rp8.000.000"]
-                          : scenario.id === "saving_low"
-                          ? ["Rp12.000.000", "Rp8.000.000", "Rp15.000.000"]
-                          : ["Kurang Rp4.000.000", "Kurang Rp1.000.000", "Kurang Rp8.000.000"]
-                        ).map((opt) => (
-                          <label
-                            key={opt}
-                            className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
-                              comprehension.qAmount === opt
-                                ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
-                                : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
-                            }`}
-                          >
-                            <input
-                              type="radio"
-                              name="comp_amount"
-                              value={opt}
-                              checked={comprehension.qAmount === opt}
-                              onChange={(e) => setComprehension({ ...comprehension, qAmount: e.target.value })}
-                              className="mt-0.5 text-blue-600"
-                              required
-                            />
-                            <span>{opt}</span>
+                      return compQuestions.map((q, idx) => (
+                        <div key={q.id}>
+                          <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
+                            {idx + 1}. {q.question} *
                           </label>
-                        ))}
-                      </div>
-                    </div>
+                          <div className="space-y-1.5">
+                            {q.options.map((opt) => (
+                              <label
+                                key={opt}
+                                className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                                  comprehension[q.id] === opt
+                                    ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                                    : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
+                                }`}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`comp_${q.id}`}
+                                  value={opt}
+                                  checked={comprehension[q.id] === opt}
+                                  onChange={(e) =>
+                                    setComprehension((prev) => ({ ...prev, [q.id]: e.target.value }))
+                                  }
+                                  className="mt-0.5 text-blue-600"
+                                  required
+                                />
+                                <span>{opt}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
 
                   {/* Bagian B: Pertimbangan Keputusan Awal */}
@@ -1207,81 +1185,105 @@ function ExperimentContent() {
         {/* TAHAP 7: KUESIONER AKHIR / INTI (ALAT UKUR PASCAINTERAKSI)     */}
         {/* ============================================================== */}
         {step === 7 && (
-          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <div className="border-b border-slate-100 pb-4 mb-6">
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-4 sm:p-8 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-4 sm:mb-6">
               <h2 className="text-lg font-bold text-slate-900">
                 Alat Ukur Pascainteraksi
               </h2>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 Pilihlah tingkat persetujuan Anda terhadap setiap pernyataan di bawah ini berdasarkan pengalaman Anda berdiskusi dengan chatbot dan mengambil keputusan keuangan.
-                <br />
-                Skala: <strong>1 = Sangat Tidak Setuju (STS)</strong> hingga <strong>5 = Sangat Setuju (SS)</strong>.
               </p>
             </div>
 
-            <form onSubmit={handlePostQuestionnaireSubmit} className="space-y-8">
-              {/* Group items by category */}
-              {Array.from(new Set(POST_QUESTIONNAIRE_ITEMS.map((item) => item.category))).map(
-                (category) => {
-                  const categoryItems = POST_QUESTIONNAIRE_ITEMS.filter(
-                    (it) => it.category === category
-                  );
+            {/* STICKY SCALE LEGEND (Tetap terlihat saat scroll di mobile & desktop) */}
+            <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md py-2.5 px-3 rounded-xl border border-slate-200 shadow-sm mb-5 transition-all">
+              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1.5 px-0.5">
+                <span className="flex items-center gap-1.5 text-slate-700 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                  Keterangan Pilihan:
+                </span>
+                <span className="text-[10px] text-slate-500 font-normal">
+                  Terisi: <strong className="font-semibold text-blue-600">{Object.keys(postAnswers).length}</strong>/{POST_QUESTIONNAIRE_ITEMS.length}
+                </span>
+              </div>
+              <div className="grid grid-cols-5 gap-1 sm:gap-2 text-center">
+                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">1</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Sangat Tidak Setuju</span>
+                </div>
+                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">2</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Tidak Setuju</span>
+                </div>
+                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">3</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Netral</span>
+                </div>
+                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">4</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Setuju</span>
+                </div>
+                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-slate-800">5</span>
+                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Sangat Setuju</span>
+                </div>
+              </div>
+            </div>
 
-                  return (
-                    <div key={category} className="space-y-4">
-                      <h3 className="font-bold text-slate-900 text-sm pb-1.5 border-b border-slate-200 flex items-center gap-2">
-                        <Award className="w-4 h-4 text-blue-600" />
-                        {category}
-                      </h3>
-
-                      <div className="space-y-4">
-                        {categoryItems.map((item, idx) => (
-                          <div
-                            key={item.code}
-                            className="p-4 rounded-xl bg-slate-50 border border-slate-200"
-                          >
-                            <p className="text-xs sm:text-sm font-medium text-slate-800 mb-3">
-                              <span className="font-bold font-mono text-blue-700 mr-2">
-                                {item.code}
-                              </span>
-                              {item.statement}
-                            </p>
-
-                            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                              {LIKERT_OPTIONS.map((opt) => (
-                                <label
-                                  key={opt.value}
-                                  className={`p-2 sm:p-2.5 rounded-lg border text-center cursor-pointer transition flex flex-col items-center justify-center ${
-                                    postAnswers[item.code] === opt.value
-                                      ? "bg-blue-600 border-blue-600 text-white font-bold"
-                                      : "bg-white border-slate-200 hover:bg-slate-100 text-slate-700"
-                                  }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={item.code}
-                                    value={opt.value}
-                                    checked={postAnswers[item.code] === opt.value}
-                                    onChange={() =>
-                                      setPostAnswers({ ...postAnswers, [item.code]: opt.value })
-                                    }
-                                    className="sr-only"
-                                    required
-                                  />
-                                  <span className="text-xs sm:text-sm font-bold">{opt.value}</span>
-                                  <span className="text-[10px] sm:text-[11px] leading-tight mt-0.5 truncate max-w-full">
-                                    {opt.label}
-                                  </span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+            <form onSubmit={handlePostQuestionnaireSubmit} className="space-y-4 sm:space-y-5">
+              {/* Tanpa nama variabel / kategori untuk menghindari bias */}
+              {POST_QUESTIONNAIRE_ITEMS.map((item, idx) => {
+                const selectedVal = postAnswers[item.code];
+                return (
+                  <div
+                    key={item.code}
+                    className={`p-3.5 sm:p-4 rounded-xl border transition-all ${
+                      selectedVal
+                        ? "bg-white border-slate-200"
+                        : "bg-slate-50/70 border-slate-200"
+                    }`}
+                  >
+                    <div className="flex items-start gap-2.5 mb-3">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center mt-0.5">
+                        {idx + 1}
+                      </span>
+                      <p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed pt-0.5">
+                        {item.statement}
+                      </p>
                     </div>
-                  );
-                }
-              )}
+
+                    {/* Tombol pilihan hanya angka agar tidak terpotong di layar HP */}
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5">
+                      {LIKERT_OPTIONS.map((opt) => {
+                        const isSelected = selectedVal === opt.value;
+                        return (
+                          <label
+                            key={opt.value}
+                            className={`py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-center cursor-pointer transition-all flex items-center justify-center select-none ${
+                              isSelected
+                                ? "bg-blue-600 border-blue-600 text-white font-bold shadow-sm shadow-blue-500/20 scale-[1.02]"
+                                : "bg-white border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-semibold"
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={item.code}
+                              value={opt.value}
+                              checked={isSelected}
+                              onChange={() =>
+                                setPostAnswers({ ...postAnswers, [item.code]: opt.value })
+                              }
+                              className="sr-only"
+                              required
+                            />
+                            <span className="text-sm sm:text-base font-bold">{opt.value}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
 
               <div className="flex items-center gap-3 pt-2">
                 <button

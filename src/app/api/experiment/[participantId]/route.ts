@@ -26,7 +26,13 @@ export async function GET(
           .select()
           .from(scenarios)
           .where(eq(scenarios.id, part.scenarioId));
-        scenarioData = sc;
+        if (sc) {
+          const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === part.scenarioId);
+          scenarioData = {
+            ...sc,
+            comprehensionQuestions: sc.comprehensionQuestions || pkg?.scenario.comprehensionQuestions || [],
+          };
+        }
       }
 
       let sessionData = null;

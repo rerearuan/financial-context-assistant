@@ -35,6 +35,7 @@ export async function runMigration() {
       ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS kondisi_keuangan_text TEXT;
       ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS tugas_text TEXT;
       ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS tugas_questions JSONB;
+      ALTER TABLE scenarios ADD COLUMN IF NOT EXISTS comprehension_questions JSONB;
     `);
 
     // 2. Synthetic Profiles table

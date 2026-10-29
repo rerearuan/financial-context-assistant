@@ -224,6 +224,7 @@ export async function POST(req: NextRequest) {
             tugasText: scenario.tugasText,
             descriptionText: scenario.descriptionText,
             tugasQuestions: scenario.tugasQuestions,
+            comprehensionQuestions: scenario.comprehensionQuestions || scenarioFallback?.comprehensionQuestions || [],
           },
         });
       } catch (dbErr) {
@@ -281,6 +282,7 @@ export async function POST(req: NextRequest) {
             tugasText: scenarioFallback.tugasText,
             descriptionText: scenarioFallback.descriptionText,
             tugasQuestions: scenarioFallback.tugasQuestions,
+            comprehensionQuestions: scenarioFallback.comprehensionQuestions,
           },
         });
       }

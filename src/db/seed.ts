@@ -32,6 +32,7 @@ export async function runSeed() {
         initialAction: pkg.scenario.initialAction,
         initialAssistantMessage: pkg.scenario.initialAssistantMessage,
         quickReplies: pkg.scenario.quickReplies,
+        comprehensionQuestions: pkg.scenario.comprehensionQuestions,
         tugasQuestions: pkg.scenario.tugasQuestions,
       });
       console.log(`- Inserted scenario: ${pkg.scenario.id}`);
@@ -50,6 +51,7 @@ export async function runSeed() {
           initialAction: pkg.scenario.initialAction,
           initialAssistantMessage: pkg.scenario.initialAssistantMessage,
           quickReplies: pkg.scenario.quickReplies,
+          comprehensionQuestions: pkg.scenario.comprehensionQuestions,
           tugasQuestions: pkg.scenario.tugasQuestions,
         })
         .where(eq(scenarios.id, pkg.scenario.id));

@@ -20,6 +20,12 @@ export const scenarios = pgTable("scenarios", {
   }>(),
   initialAssistantMessage: text("initial_assistant_message").notNull(),
   quickReplies: jsonb("quick_replies").notNull().$type<string[]>(),
+  comprehensionQuestions: jsonb("comprehension_questions").$type<Array<{
+    id: string;
+    question: string;
+    options: string[];
+    correctAnswer: string;
+  }>>(),
   tugasQuestions: jsonb("tugas_questions").$type<Array<{
     id: string;
     question: string;

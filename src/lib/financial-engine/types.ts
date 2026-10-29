@@ -126,6 +126,8 @@ export interface UserProvidedFinances {
   liabilities?: number;
   buffer?: number;
   routine?: number;
+  emergencyCurrent?: number;
+  emergencyTarget?: number;
   goals?: string;
   source?: "user_message";
 }
