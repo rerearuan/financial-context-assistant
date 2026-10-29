@@ -474,13 +474,26 @@ export function calculateFinancialConsequences(
   // Case B: Basic Condition (No initial profile; uses userProvided data if given)
   // =========================================================================
   const isSpending = action.type === "spending";
+  const isSaving = action.type === "saving";
   const userBalance = userProvided?.balance ?? null;
   const userBudget = userProvided?.budget ?? null;
   const userLiabilities = userProvided?.liabilities ?? null;
   const userBuffer = userProvided?.buffer ?? null;
   const userRoutine = userProvided?.routine ?? null;
+  const userIncome = userProvided?.income ?? null;
+  const userEmergencyCurrent = userProvided?.emergencyCurrent ?? userBuffer ?? null;
+  const userEmergencyTarget = userProvided?.emergencyTarget ?? null;
 
-  if (userBalance === null && userBudget === null && userLiabilities === null) {
+  const hasUserData =
+    userBalance !== null ||
+    userBudget !== null ||
+    userLiabilities !== null ||
+    userIncome !== null ||
+    userRoutine !== null ||
+    userBuffer !== null ||
+    userEmergencyTarget !== null;
+
+  if (!hasUserData) {
     // Zero user data yet
     const initialBalance = null;
     const balanceAfterAction = null;
@@ -555,7 +568,7 @@ export function calculateFinancialConsequences(
   }
 
   // Partial or full user provided finances
-  const initialBalance = userBalance;
+  const initialBalance = userBalance !== null ? userBalance : userIncome;
   const balanceAfterAction =
     initialBalance !== null ? (isSpending ? initialBalance - action.amount : initialBalance) : null;
   const canPayAction: AssessmentStatus =
@@ -569,14 +582,23 @@ export function calculateFinancialConsequences(
   }
 
   const totalLiabilitiesBeforeIncome = userLiabilities ?? 0;
-  const remainingCashAfterImmediateObligations =
-    balanceAfterAction !== null ? balanceAfterAction - totalLiabilitiesBeforeIncome : null;
-  const canCoverObligations: AssessmentStatus =
-    remainingCashAfterImmediateObligations !== null
-      ? remainingCashAfterImmediateObligations >= 0
-      : "unknown";
-  const isLiquidityThreatened = canCoverObligations === false;
-  const deficitAmount =
+  let remainingCashAfterImmediateObligations: number | null = null;
+  if (isSaving) {
+    const cashBase = userIncome !== null ? userIncome : userBalance;
+    remainingCashAfterImmediateObligations =
+      cashBase !== null ? cashBase - totalLiabilitiesBeforeIncome - action.amount : null;
+  } else {
+    remainingCashAfterImmediateObligations =
+      balanceAfterAction !== null ? balanceAfterAction - totalLiabilitiesBeforeIncome : null;
+  }
+
+  let canCoverObligations: AssessmentStatus = "unknown";
+  if (remainingCashAfterImmediateObligations !== null) {
+    canCoverObligations = remainingCashAfterImmediateObligations >= 0;
+  }
+
+  let isLiquidityThreatened = canCoverObligations === false;
+  let deficitAmount =
     remainingCashAfterImmediateObligations !== null && remainingCashAfterImmediateObligations < 0
       ? Math.abs(remainingCashAfterImmediateObligations)
       : 0;
@@ -594,6 +616,10 @@ export function calculateFinancialConsequences(
   if (userRoutine !== null && remainingCashAfterImmediateObligations !== null) {
     const rem = remainingCashAfterImmediateObligations - userRoutine;
     canCoverEssentialExpenses = rem >= 0;
+    if (rem < 0) {
+      isLiquidityThreatened = true;
+      deficitAmount = Math.abs(rem);
+    }
     routineResult = {
       estimatedRemaining: userRoutine,
       isCovered: canCoverEssentialExpenses,
@@ -605,10 +631,22 @@ export function calculateFinancialConsequences(
     `Kondisi: Basic Information Assistant dengan data yang disampaikan pengguna.`,
   ];
 
-  if (initialBalance !== null && balanceAfterAction !== null) {
+  if (userIncome !== null) {
     deterministicFacts.push(
-      `Berdasarkan data pengguna, saldo kas saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah tindakan ${isSpending ? "pengeluaran" : "penyisihan"} Rp ${action.amount.toLocaleString("id-ID")}, saldo kas menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+      `Pendapatan bulanan pengguna: Rp ${userIncome.toLocaleString("id-ID")}.`
     );
+  }
+
+  if (initialBalance !== null && balanceAfterAction !== null) {
+    if (isSpending) {
+      deterministicFacts.push(
+        `Berdasarkan data pengguna, saldo kas saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah pengeluaran Rp ${action.amount.toLocaleString("id-ID")}, saldo kas menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+      );
+    } else {
+      deterministicFacts.push(
+        `Total saldo rekening bank tetap Rp ${initialBalance.toLocaleString("id-ID")} karena penambahan tabungan merupakan pemindahan alokasi pos internal rekening.`
+      );
+    }
   }
 
   if (budgetVariance !== null) {
@@ -623,6 +661,31 @@ export function calculateFinancialConsequences(
     );
   }
 
+  if (userRoutine !== null && routineResult) {
+    deterministicFacts.push(
+      `Kebutuhan pengeluaran rutin bulanan: Rp ${userRoutine.toLocaleString("id-ID")}.`
+    );
+    if ((routineResult.remainingCashAfterRoutine || 0) < 0) {
+      deterministicFacts.push(
+        `Setelah menyisihkan Rp ${action.amount.toLocaleString("id-ID")} dan memperhitungkan kebutuhan rutin Rp ${userRoutine.toLocaleString("id-ID")}, arus kas bulanan mengalami defisit sebesar Rp ${Math.abs(routineResult.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}.`
+      );
+      if (isSaving && userIncome !== null) {
+        const netCashBeforeSaving = userIncome - totalLiabilitiesBeforeIncome - userRoutine;
+        const altSaving = 1000000;
+        const surplusWithAlt = netCashBeforeSaving - altSaving;
+        if (surplusWithAlt >= 0) {
+          deterministicFacts.push(
+            `Opsi alternatif: Jika penyisihan tabungan disesuaikan menjadi Rp ${altSaving.toLocaleString("id-ID")}, kebutuhan bulanan Rp ${userRoutine.toLocaleString("id-ID")} tetap terpenuhi dengan sisa cadangan kas Rp ${surplusWithAlt.toLocaleString("id-ID")}.`
+          );
+        }
+      }
+    } else {
+      deterministicFacts.push(
+        `Setelah penyisihan Rp ${action.amount.toLocaleString("id-ID")}, sisa kas operasional bulanan masih surplus Rp ${(routineResult.remainingCashAfterRoutine || 0).toLocaleString("id-ID")} di atas kebutuhan bulanan.`
+      );
+    }
+  }
+
   if (minBuffer > 0) {
     if (isBufferMaintained === true) {
       deterministicFacts.push(
@@ -635,6 +698,22 @@ export function calculateFinancialConsequences(
     }
   }
 
+  let emergencyFundEvaluation: FinancialCalculationResult["emergencyFundEvaluation"] = null;
+  if (userEmergencyTarget && userEmergencyCurrent) {
+    const newAccum = userEmergencyCurrent + (isSaving ? action.amount : 0);
+    const shortfall = Math.max(0, userEmergencyTarget - newAccum);
+    emergencyFundEvaluation = {
+      currentAccumulated: userEmergencyCurrent,
+      targetAmount: userEmergencyTarget,
+      newAccumulated: newAccum,
+      remainingShortfall: shortfall,
+      percentageOfTarget: Math.round((newAccum / userEmergencyTarget) * 100),
+    };
+    deterministicFacts.push(
+      `Akumulasi dana darurat saat ini: Rp ${userEmergencyCurrent.toLocaleString("id-ID")} (target Rp ${userEmergencyTarget.toLocaleString("id-ID")}, kekurangan Rp ${(userEmergencyTarget - userEmergencyCurrent).toLocaleString("id-ID")}). Setelah penambahan Rp ${action.amount.toLocaleString("id-ID")}, dana darurat menjadi Rp ${newAccum.toLocaleString("id-ID")} (kekurangan Rp ${shortfall.toLocaleString("id-ID")}).`
+    );
+  }
+
   return {
     status: "valid",
     actionAmount: action.amount,
@@ -644,8 +723,8 @@ export function calculateFinancialConsequences(
     netCashFlowImpact: isSpending ? action.amount : 0,
     virtualAllocationsBefore: {},
     virtualAllocationsAfter: {},
-    operatingCashBefore: null,
-    operatingCashAfterAction: null,
+    operatingCashBefore: userIncome,
+    operatingCashAfterAction: remainingCashAfterImmediateObligations,
     relevantBudget: userBudget ? { category: "Anggaran Pengguna", allocated: userBudget, spentSoFar: 0, remaining: userBudget, source: "user_message" } : null,
     budgetVariance,
     isBudgetExceeded,
@@ -659,6 +738,7 @@ export function calculateFinancialConsequences(
     isLiquidityThreatened,
     deficitAmount,
     routineExpenses: routineResult,
+    emergencyFundEvaluation,
     installmentDetails: isSpending && action.amount === 7000000 ? calculateInstallmentDetails(7000000) : null,
     canPayAction,
     canCoverObligations,
@@ -677,7 +757,7 @@ export function calculateFinancialConsequences(
       "Perhitungan didasarkan pada angka yang disampaikan secara sukarela oleh pengguna dalam sesi ini.",
     ],
     unknownVariables: [
-      ...(userBalance === null ? ["saldo kas"] : []),
+      ...(userBalance === null && userIncome === null ? ["saldo kas / pemasukan"] : []),
       ...(userLiabilities === null ? ["total tagihan"] : []),
       ...(userRoutine === null ? ["kebutuhan rutin"] : []),
     ],

@@ -162,6 +162,31 @@ describe("AI Architecture Harness & Evaluation (Uji Berpasangan & Workflow)", ()
       const res4 = heuristicExtractIntent("Saldo saya saat ini ada 15 jt", currentAction);
       expect(res4.intentType).toBe("clarify_info");
       expect(res4.userProvidedFinances?.balance).toBe(15000000);
+
+      // User case from audit: "bulanan kurang lebih 6,6 juta"
+      const savingAction: FinancialAction = {
+        type: "saving",
+        amount: 2000000,
+        timing: "Bulan ini",
+        targetCategory: "Penambahan Tabungan Dana Darurat",
+        description: "Menabung 2 juta",
+        source: "scenario",
+      };
+      const res5 = heuristicExtractIntent("bulanan kurang lebih 6,6 juta", savingAction);
+      expect(res5.intentType).toBe("clarify_info");
+      expect(res5.userProvidedFinances?.routine).toBe(6600000);
+      expect(res5.newAmount).toBeNull(); // Must NOT change plan amount to 6.6M!
+      expect(res5.relativeDelta).toBeNull(); // "kurang lebih" is NOT a relative reduction!
+
+      // User provides income and emergency fund target in saving scenario
+      const res6 = heuristicExtractIntent(
+        "gajiku 8 juta. emergency fund yang aku punya juga 8 juta tapi target aku 12 juta",
+        savingAction
+      );
+      expect(res6.userProvidedFinances?.income).toBe(8000000);
+      expect(res6.userProvidedFinances?.buffer).toBe(8000000);
+      expect(res6.userProvidedFinances?.emergencyTarget).toBe(12000000);
+      expect(res6.newAmount).toBeNull();
     });
   });
 
@@ -244,6 +269,45 @@ describe("AI Architecture Harness & Evaluation (Uji Berpasangan & Workflow)", ()
   });
 
   describe("6. Prompt Layering & Experiment Boundary Isolation", () => {
+    it("calculates exact deficit and surplus for user-provided income & routine in Basic saving scenario without cross-scenario leak", () => {
+      const savingAction: FinancialAction = {
+        type: "saving",
+        amount: 2000000,
+        timing: "Bulan ini",
+        targetCategory: "Penambahan Tabungan Dana Darurat",
+        description: "Penyisihan tabungan ke Dana Darurat",
+        source: "scenario",
+      };
+
+      const userProvided = {
+        income: 8000000,
+        buffer: 8000000,
+        emergencyTarget: 12000000,
+        routine: 6600000,
+        source: "user_message" as const,
+      };
+
+      const packet = buildStructuredContextPacket({
+        condition: "basic",
+        action: savingAction,
+        syntheticProfile: null,
+        userProvidedFinances: userProvided,
+      });
+
+      expect(packet.calculation.status).toBe("valid");
+      expect(packet.calculation.operatingCashBefore).toBe(8000000);
+      expect(packet.calculation.isLiquidityThreatened).toBe(true);
+      // Income (8M) - Routine (6.6M) = 1.4M sisa pendapatan. Rencana nabung 2M -> defisit 600.000
+      expect(packet.calculation.deficitAmount).toBe(600000);
+
+      const fallback = generateSafeFallbackResponse(packet, "bulanan kurang lebih 6,6 juta");
+      // Must NOT leak other scenario names or numbers
+      expect(fallback).not.toContain("Sertifikasi");
+      expect(fallback).not.toContain("Laptop");
+      expect(fallback).not.toContain("3.500.000");
+      expect(fallback).not.toContain("2.700.000");
+    });
+
     it("ensures prompt templates do not contain research variables or internal labels", () => {
       const caPacket = buildStructuredContextPacket({
         condition: "context_aware",

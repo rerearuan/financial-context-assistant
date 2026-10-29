@@ -84,7 +84,13 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       label: `Modifikasi relatif (${intent.relativeDelta > 0 ? "+" : ""}${intent.relativeDelta})`,
       timestamp: new Date().toISOString(),
     });
-  } else if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== actionBefore.amount) {
+  } else if (
+    intent.intentType === "modify_action" &&
+    intent.newAmount &&
+    intent.newAmount > 0 &&
+    intent.newAmount !== actionBefore.amount &&
+    !intent.isAlternativeOnly
+  ) {
     targetAmount = intent.newAmount;
     updatedAction.amount = targetAmount;
     updatedAction.modifiedByUser = true;
@@ -117,6 +123,8 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
       buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
       routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
+      emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
+      emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
       goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
       source: "user_message",
     };
@@ -133,6 +141,8 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       liabilities: existingDetails.liabilities as number | undefined,
       buffer: existingDetails.buffer as number | undefined,
       routine: existingDetails.routine as number | undefined,
+      emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
+      emergencyTarget: existingDetails.emergencyTarget as number | undefined,
       goals: existingDetails.goals as string | undefined,
       source: "user_message",
     };
@@ -386,7 +396,13 @@ export async function POST(
         label: `Modifikasi relatif (${intent.relativeDelta > 0 ? "+" : ""}${intent.relativeDelta})`,
         timestamp: new Date().toISOString(),
       });
-    } else if (intent.newAmount && intent.newAmount > 0 && intent.newAmount !== actionBefore.amount) {
+    } else if (
+      intent.intentType === "modify_action" &&
+      intent.newAmount &&
+      intent.newAmount > 0 &&
+      intent.newAmount !== actionBefore.amount &&
+      !intent.isAlternativeOnly
+    ) {
       updatedAction.amount = intent.newAmount;
       updatedAction.modifiedByUser = true;
       convState.exploredAlternatives.push({
@@ -414,6 +430,8 @@ export async function POST(
         liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
         buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
         routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
+        emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
+        emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
         goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
         source: "user_message",
       };
@@ -430,6 +448,8 @@ export async function POST(
         liabilities: existingDetails.liabilities as number | undefined,
         buffer: existingDetails.buffer as number | undefined,
         routine: existingDetails.routine as number | undefined,
+        emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
+        emergencyTarget: existingDetails.emergencyTarget as number | undefined,
         goals: existingDetails.goals as string | undefined,
         source: "user_message",
       };

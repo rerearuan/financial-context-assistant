@@ -161,30 +161,26 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     }
   }
 
-  // Common benchmark figures grounded in the research scenarios:
-  allowed.add(8500000);  // Normal price of laptop
-  allowed.add(7000000);  // Cash price of laptop / Operating cash in spending
-  allowed.add(6000000);  // Low laptop allocation / Remaining cash after 2M saving
-  allowed.add(5000000);  // Spending buffer / Alt laptop price
-  allowed.add(4500000);  // Cert target max
-  allowed.add(4000000);  // Cert target min
-  allowed.add(3500000);  // Saving total liabilities
-  allowed.add(3000000);  // High laptop allocation / High cert allocation / Alt saving 3M
-  allowed.add(2700000);  // Saving routine midpoint
-  allowed.add(2500000);  // Saving cash after bills / Cert shortfall
-  allowed.add(2400000);  // Spending spent so far / Saving rent bill / Saving routine min
-  allowed.add(2000000);  // Saving plan / Cert current accumulated
-  allowed.add(1800000);  // Spending bill / Spending routine remaining
-  allowed.add(1078000);  // Installment excess cost over cash
-  allowed.add(1000000);  // Alt saving 1M / Spending laptop shortfall in Low
-  allowed.add(667333);   // Monthly installment (rounded)
-  allowed.add(667334);
-  allowed.add(600000);   // Credit card bill in saving
-  allowed.add(500000);   // Utility bill estimate / Delta 500k
-  allowed.add(400000);   // Utility bill min
-  allowed.add(200000);   // Deficit amount in saving
-  allowed.add(84000);    // Installment flat interest
-  allowed.add(70000);    // Installment admin fee
+  // Action-type appropriate common alternatives & benchmarks
+  if (action.type === "spending") {
+    allowed.add(8500000);  // Normal price of laptop
+    allowed.add(7000000);  // Promo cash price
+    allowed.add(6000000);  // Alt price / Laptop allocation in Low
+    allowed.add(5000000);  // Spending buffer / Alt laptop price
+    allowed.add(1800000);  // Spending bill / Spending routine remaining
+    allowed.add(1078000);  // Installment excess cost over cash
+    allowed.add(1000000);  // Shortfall in Low
+    allowed.add(667333);   // Monthly installment (rounded)
+    allowed.add(667334);
+    allowed.add(84000);    // Installment flat interest
+    allowed.add(70000);    // Installment admin fee
+  } else if (action.type === "saving") {
+    allowed.add(8000000);  // Monthly salary / Current emergency fund
+    allowed.add(12000000); // Emergency fund target
+    allowed.add(3000000);  // Alt saving 3M
+    allowed.add(2000000);  // Baseline saving 2M
+    allowed.add(1000000);  // Alt saving 1M
+  }
 
   // Profile if present
   if (availableProfile?.totalCashBalance) allowed.add(availableProfile.totalCashBalance);
@@ -205,14 +201,24 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
   }
 
   // User provided finances
-  if (availableProfile?.userProvidedFinances) {
-    const uf = availableProfile.userProvidedFinances;
+  const uf = availableProfile?.userProvidedFinances || conversationState?.userProvidedFacts;
+  if (uf) {
     if (uf.balance) allowed.add(uf.balance);
     if (uf.budget) allowed.add(uf.budget);
     if (uf.income) allowed.add(uf.income);
     if (uf.liabilities) allowed.add(uf.liabilities);
     if (uf.buffer) allowed.add(uf.buffer);
     if (uf.routine) allowed.add(uf.routine);
+    if (uf.emergencyCurrent) allowed.add(uf.emergencyCurrent);
+    if (uf.emergencyTarget) allowed.add(uf.emergencyTarget);
+  }
+
+  // All numbers present in deterministic facts computed by engine
+  for (const fact of calculation.deterministicFacts) {
+    const extractedFactAmounts = extractMentionedAmounts(fact);
+    for (const fa of extractedFactAmounts) {
+      allowed.add(fa);
+    }
   }
 
   return allowed;
