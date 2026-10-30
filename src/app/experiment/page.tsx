@@ -477,26 +477,32 @@ function ExperimentContent() {
           <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
               <h2 className="text-lg font-bold text-slate-900">
-                Informasi dan Persetujuan Partisipasi Penelitian
+                A.1. Informasi dan Persetujuan Partisipasi Penelitian
               </h2>
+              <p className="text-sm font-bold text-slate-800 mt-1">
+                Penelitian Penggunaan <em>Chatbot AI</em> dalam Pengambilan Keputusan Keuangan
+              </p>
             </div>
 
             <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed mb-6">
               <p>Kepada responden yang terhormat,</p>
               <p>
-                Kami, <strong>Alfian Bassam Firjatullah</strong> dan <strong>Regina Meilani Aruan</strong>, mahasiswa Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas Indonesia, sedang melakukan penelitian tugas akhir mengenai penggunaan asisten percakapan berbasis kecerdasan buatan (AI) dalam pengambilan keputusan keuangan.
+                Kami, Alfian Bassam Firjatullah dan Regina Meilani Aruan, mahasiswa Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas Indonesia, sedang melakukan penelitian tugas akhir mengenai penggunaan asisten percakapan berbasis kecerdasan buatan (AI) dalam pengambilan keputusan keuangan.
               </p>
               <p>
-                Penelitian ini ditujukan kepada individu yang <strong>telah memiliki pendapatan pribadi</strong>. Dalam penelitian ini, Anda akan dihadapkan pada sebuah skenario keuangan yang mengharuskan Anda berdiskusi dengan chatbot yang disediakan untuk menjawab sejumlah pertanyaan.
+                Penelitian ini ditujukan kepada individu yang telah memiliki pendapatan pribadi. Dalam penelitian ini, Anda akan dihadapkan pada sebuah skenario keuangan yang mengharuskan Anda berdiskusi dengan chatbot yang disediakan untuk menjawab sejumlah pertanyaan.
               </p>
               <p>
                 Partisipasi Anda bersifat sukarela dan Anda dapat menghentikannya kapan saja tanpa konsekuensi. Jawaban kuesioner dan riwayat percakapan Anda dengan chatbot akan disimpan selama penelitian berlangsung untuk keperluan analisis. Data tersebut akan dijaga kerahasiaannya, hanya dapat diakses oleh tim peneliti, dan digunakan untuk kepentingan akademis. Seluruh data yang dikumpulkan akan dihapus setelah penelitian selesai dan laporan akhir disahkan.
               </p>
+              <p>
+                Sebagai bentuk apresiasi, tersedia hadiah dengan total nilai Rp500.000 yang akan dibagikan kepada 10 responden beruntung melalui undian.
+              </p>
               <p>Terima kasih atas waktu dan kesediaan Anda untuk berpartisipasi.</p>
-              <div className="pt-2 text-xs text-slate-500 font-medium">
+              <div className="pt-2 text-xs sm:text-sm text-slate-600 font-medium">
                 Hormat kami,
                 <br />
-                Alfian Bassam Firjatullah & Regina Meilani Aruan
+                Alfian Bassam Firjatullah &amp; Regina Meilani Aruan
               </div>
             </div>
 
