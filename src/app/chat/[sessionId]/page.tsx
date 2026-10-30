@@ -450,7 +450,7 @@ function ChatPageContent() {
             </div>
             <div className="bg-white text-slate-600 border border-slate-200 rounded-2xl rounded-bl-xs px-4 py-3 shadow-xs flex items-center gap-2 text-xs sm:text-sm">
               <RefreshCw className="w-3.5 h-3.5 animate-spin text-slate-700" />
-              <span>Asisten sedang mengevaluasi konsekuensi finansial...</span>
+              <span>Loading...</span>
             </div>
           </div>
         )}
