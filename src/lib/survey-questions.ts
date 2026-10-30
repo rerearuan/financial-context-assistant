@@ -140,9 +140,11 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
 export const LIKERT_OPTIONS = [
   { value: 1, label: "Sangat Tidak Setuju" },
   { value: 2, label: "Tidak Setuju" },
-  { value: 3, label: "Netral" },
-  { value: 4, label: "Setuju" },
-  { value: 5, label: "Sangat Setuju" },
+  { value: 3, label: "Agak Tidak Setuju" },
+  { value: 4, label: "Netral" },
+  { value: 5, label: "Agak Setuju" },
+  { value: 6, label: "Setuju" },
+  { value: 7, label: "Sangat Setuju" },
 ];
 
 export const DEMOGRAPHIC_OPTIONS = {
