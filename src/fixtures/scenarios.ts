@@ -71,11 +71,11 @@ export const SCENARIO_PACKAGES: ScenarioPackage[] = [
       actionType: "spending",
       conflictLevel: "low",
       h0Date: "2026-10-20",
-      situasiText: `Anda sedang mempertimbangkan untuk membeli laptop baru untuk mendukung pekerjaan dan aktivitas sehari-hari.
+      situasiText: `Anda sedang mempertimbangkan untuk **membeli laptop baru** untuk mendukung pekerjaan dan aktivitas sehari-hari.
 
 Laptop yang Anda gunakan saat ini masih dapat digunakan, tetapi performanya mulai menurun. Dalam beberapa minggu terakhir, laptop tersebut beberapa kali mengalami lag ketika menjalankan aplikasi yang Anda gunakan untuk bekerja dan beraktivitas sehari-hari.
 
-Karena kondisi tersebut, selama beberapa bulan terakhir Anda memang telah merencanakan untuk mengganti laptop dan mulai menyisihkan uang untuk kebutuhan tersebut.
+**Karena kondisi tersebut**, selama beberapa bulan terakhir Anda memang telah merencanakan untuk mengganti laptop dan mulai menyisihkan uang untuk kebutuhan tersebut.
 
 Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.
 
@@ -93,7 +93,7 @@ Tersedia dua metode pembayaran:
 ● Dalam tiga bulan terakhir, pengeluaran rutin untuk kebutuhan sehari-hari Anda berkisar antara Rp3.800.000–Rp4.600.000 per bulan, di luar tagihan khusus.
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan **Pembelian Laptop**.`,
       descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
       initialAction: {
         type: "spending",
@@ -258,15 +258,15 @@ Tersedia dua metode pembayaran:
       actionType: "spending",
       conflictLevel: "high",
       h0Date: "2026-10-20",
-      situasiText: `Anda sedang mempertimbangkan untuk membeli laptop baru untuk mendukung pekerjaan dan aktivitas sehari-hari.
+      situasiText: `Anda sedang mempertimbangkan untuk **membeli laptop baru** untuk mendukung pekerjaan dan aktivitas sehari-hari.
 
 Laptop yang Anda gunakan saat ini masih dapat digunakan, tetapi performanya mulai menurun. Dalam beberapa minggu terakhir, laptop tersebut beberapa kali mengalami lag ketika menjalankan aplikasi yang Anda gunakan untuk bekerja dan beraktivitas sehari-hari.
 
 Karena kondisi tersebut, selama beberapa bulan terakhir Anda telah merencanakan untuk mengganti laptop dan mulai menyisihkan uang untuk kebutuhan tersebut.
 
-Pada saat yang sama, Anda juga sedang mempersiapkan dana untuk mengikuti program sertifikasi profesional yang ingin Anda ambil dalam beberapa bulan ke depan. Program tersebut menurut Anda penting karena dapat mendukung pengembangan kemampuan dan pekerjaan Anda.
+**Pada saat yang sama**, Anda juga sedang mempersiapkan dana untuk **mengikuti program sertifikasi profesional** yang ingin Anda ambil dalam beberapa bulan ke depan. Program tersebut menurut Anda penting karena dapat mendukung pengembangan kemampuan dan pekerjaan Anda.
 
-Bagi Anda, mengganti laptop dan mengikuti program sertifikasi sama-sama merupakan tujuan yang penting.
+Bagi Anda, **mengganti laptop** dan **mengikuti program sertifikasi** sama-sama merupakan tujuan yang penting.
 
 Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.
 
@@ -287,7 +287,7 @@ Tersedia dua metode pembayaran:
 ● Dalam tiga bulan terakhir, pengeluaran rutin untuk kebutuhan sehari-hari Anda berkisar antara Rp3.800.000–Rp4.600.000 per bulan, di luar tagihan khusus.
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan Pembelian Laptop.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan **Pembelian Laptop**.`,
       descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
       initialAction: {
         type: "spending",
@@ -470,7 +470,7 @@ Tersedia dua metode pembayaran:
       h0Date: "2026-11-01",
       situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
 
-Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang sedang Anda prioritaskan adalah meningkatkan Dana Darurat. Anda ingin memperkuat Dana Darurat agar lebih siap menghadapi pengeluaran tidak terduga.
+Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang sedang Anda prioritaskan adalah **meningkatkan Dana Darurat**. Anda ingin memperkuat Dana Darurat agar lebih siap menghadapi pengeluaran tidak terduga.
 
 Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus sedang Anda kejar.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
@@ -486,7 +486,7 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
@@ -657,11 +657,11 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
       h0Date: "2026-11-01",
       situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
 
-Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang ingin Anda capai adalah meningkatkan Dana Darurat agar lebih siap menghadapi kebutuhan tidak terduga.
+Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang ingin Anda capai adalah **meningkatkan Dana Darurat** agar lebih siap menghadapi kebutuhan tidak terduga.
 
-Namun, pada saat yang sama, Anda juga masih mempersiapkan dana untuk mengikuti program sertifikasi profesional dalam beberapa bulan ke depan.
+Namun, **pada saat yang sama**, Anda juga masih mempersiapkan dana untuk **mengikuti program sertifikasi profesional** dalam beberapa bulan ke depan.
 
-Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama merupakan tujuan yang penting.`,
+Bagi Anda, **meningkatkan Dana Darurat** dan **mengikuti program sertifikasi** sama-sama merupakan tujuan yang penting.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan baru diterima hari ini dan pendapatan berikutnya diperkirakan diterima sekitar 30 hari lagi.
 ● Saldo rekening Anda saat ini: Rp18.000.000.
@@ -678,7 +678,7 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana pendapatan bulan ini sebaiknya dialokasikan.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",

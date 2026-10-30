@@ -26,6 +26,21 @@ interface TableRowItem {
   isSubItem?: boolean;
 }
 
+export function formatBoldText(text?: string | null): React.ReactNode {
+  if (!text) return "";
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-bold text-slate-900">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProps) {
   const id = scenario.id || "";
   const isSpendingLow = id === "spending_low";
@@ -278,7 +293,7 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
           Situasi
         </h4>
         <div className="whitespace-pre-line text-slate-800 leading-relaxed font-normal">
-          {scenario.situasiText || scenario.descriptionText}
+          {formatBoldText(scenario.situasiText || scenario.descriptionText || "")}
         </div>
       </div>
 
@@ -346,6 +361,20 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
           </table>
         </div>
       </div>
+
+      {/* -------------------------------------------------------------
+          BAGIAN TUGAS (Sesuai PDF Instrumen Penelitian)
+      ------------------------------------------------------------- */}
+      {scenario.tugasText && (
+        <div className="bg-white rounded-xl border border-slate-300 p-4 sm:p-5 shadow-2xs">
+          <h4 className="font-bold text-slate-900 text-sm mb-2.5 pb-1.5 border-b border-slate-200">
+            Tugas
+          </h4>
+          <div className="text-slate-800 leading-relaxed font-normal">
+            {formatBoldText(scenario.tugasText)}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

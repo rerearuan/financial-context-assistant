@@ -379,13 +379,6 @@ function ChatPageContent() {
             </p>
           </div>
 
-          {session.scenario.tugasText && (
-            <div className="bg-blue-50/70 text-blue-950 p-3 rounded-xl border border-blue-200 text-xs">
-              <span className="font-bold block mb-0.5">Tugas Simulasi:</span>
-              <p>{session.scenario.tugasText}</p>
-            </div>
-          )}
-
           <ScenarioViewer scenario={session.scenario} compact />
         </div>
       </div>
