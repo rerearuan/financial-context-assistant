@@ -468,11 +468,11 @@ Tersedia dua metode pembayaran:
       actionType: "saving",
       conflictLevel: "low",
       h0Date: "2026-11-01",
-      situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
+      situasiText: `Anda ingin **mengevaluasi** bagaimana **pendapatan bulanan sebaiknya dialokasikan**.
 
-Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang sedang Anda prioritaskan adalah **meningkatkan Dana Darurat**. Anda ingin memperkuat Dana Darurat agar lebih siap menghadapi pengeluaran tidak terduga.
+Anda baru menerima pendapatan bulanan dan salah satu **tujuan finansial** yang sedang Anda **prioritaskan** adalah **meningkatkan Dana Darurat**. Anda ingin memperkuat Dana Darurat agar lebih siap menghadapi pengeluaran tidak terduga.
 
-Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus sedang Anda kejar.`,
+Pada periode ini, **tidak terdapat tujuan finansial besar lain** yang secara khusus sedang Anda kejar.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan baru diterima hari ini dan pendapatan berikutnya diperkirakan diterima sekitar 30 hari lagi.
 ● Saldo rekening Anda saat ini: Rp16.000.000.
@@ -486,7 +486,7 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini** sebaiknya **dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
@@ -655,13 +655,13 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
       actionType: "saving",
       conflictLevel: "high",
       h0Date: "2026-11-01",
-      situasiText: `Anda ingin mengevaluasi bagaimana pendapatan bulanan sebaiknya dialokasikan.
+      situasiText: `Anda ingin **mengevaluasi** bagaimana **pendapatan bulanan sebaiknya dialokasikan**.
 
-Anda baru menerima pendapatan bulanan dan salah satu tujuan finansial yang ingin Anda capai adalah **meningkatkan Dana Darurat** agar lebih siap menghadapi kebutuhan tidak terduga.
+Anda baru menerima pendapatan bulanan dan salah satu **tujuan finansial** yang ingin Anda capai adalah **meningkatkan Dana Darurat** agar lebih siap menghadapi kebutuhan tidak terduga.
 
-Namun, **pada saat yang sama**, Anda juga masih mempersiapkan dana untuk **mengikuti program sertifikasi profesional** dalam beberapa bulan ke depan.
+Namun, pada saat yang sama, Anda juga masih mempersiapkan dana untuk mengikuti program sertifikasi profesional dalam beberapa bulan ke depan.
 
-Bagi Anda, **meningkatkan Dana Darurat** dan **mengikuti program sertifikasi** sama-sama merupakan tujuan yang penting.`,
+Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama merupakan tujuan yang penting.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan baru diterima hari ini dan pendapatan berikutnya diperkirakan diterima sekitar 30 hari lagi.
 ● Saldo rekening Anda saat ini: Rp18.000.000.
@@ -678,7 +678,7 @@ Bagi Anda, **meningkatkan Dana Darurat** dan **mengikuti program sertifikasi** s
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini** sebaiknya **dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
