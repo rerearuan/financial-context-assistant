@@ -71,6 +71,7 @@ function ChatPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [hasClickedQuickReply, setHasClickedQuickReply] = useState(false);
 
   const [inputText, setInputText] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -215,6 +216,7 @@ function ChatPageContent() {
     const text = (textToSend || inputText).trim();
     if (!text || !session) return;
 
+    setHasClickedQuickReply(true);
     setInputText("");
     setLastFailedMessage(null);
 
@@ -270,12 +272,20 @@ function ChatPageContent() {
 
   if (!session) return null;
 
-  const quickReplies = session.scenario.quickReplies || [
-    "Apa dampaknya terhadap kondisi keuangan saya?",
-    "Bagaimana jika nominalnya dikurangi?",
-    "Bagaimana pengaruhnya terhadap kewajiban pembayaran terdekat?",
-    "Apakah sisa saldo masih mencukupi untuk kebutuhan?",
-  ];
+  const defaultReply =
+    session.scenario.actionType === "saving"
+      ? ["Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?"]
+      : ["Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?"];
+
+  const quickReplies =
+    session.scenario.quickReplies && session.scenario.quickReplies.length > 0
+      ? session.scenario.quickReplies
+      : defaultReply;
+
+  const hasUserSentMessage = Boolean(
+    session.messages && session.messages.some((m) => m.role === "user")
+  );
+  const showQuickReplies = !hasClickedQuickReply && !hasUserSentMessage && quickReplies.length > 0;
 
   return (
     <div className="flex flex-col h-screen max-w-4xl mx-auto bg-white shadow-sm border-x border-slate-200 overflow-hidden">
@@ -474,15 +484,18 @@ function ChatPageContent() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 4. Quick Replies (Accessible anytime, queues if assistant is busy) */}
-      {quickReplies.length > 0 && (
-        <div className="bg-white border-t border-slate-200 px-4 py-2 overflow-x-auto flex items-center gap-2 no-scrollbar">
+      {/* 4. Quick Replies (Single option, disappears permanently after first click or message) */}
+      {showQuickReplies && (
+        <div className="bg-white border-t border-slate-200 px-4 py-2.5 overflow-x-auto flex items-center gap-2 no-scrollbar animate-in fade-in duration-200">
           <span className="text-xs text-slate-400 font-medium shrink-0">Opsi Pertanyaan:</span>
           {quickReplies.map((reply, idx) => (
             <button
               key={idx}
-              onClick={() => handleSendMessage(reply)}
-              className="whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200 hover:border-blue-300 transition shrink-0 cursor-pointer"
+              onClick={() => {
+                setHasClickedQuickReply(true);
+                handleSendMessage(reply);
+              }}
+              className="whitespace-normal text-left px-3.5 py-1.5 rounded-full text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 hover:border-blue-300 transition shrink-0 cursor-pointer shadow-2xs"
             >
               {reply}
             </button>

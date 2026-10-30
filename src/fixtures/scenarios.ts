@@ -107,10 +107,7 @@ Tersedia dua metode pembayaran:
       actionOptions: ["cash", "installment"],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana kondisi keuangan dan saldo saya saat ini?",
-        "Apakah ada tagihan yang harus dibayar dalam waktu dekat?",
-        "Berapa perkiraan sisa uang belanja sebelum pemasukan berikutnya?",
-        "Berapa batas dana darurat yang harus saya pertahankan?",
+        "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?",
       ],
       comprehensionQuestions: [
         {
@@ -304,10 +301,7 @@ Tersedia dua metode pembayaran:
       actionOptions: ["cash", "installment"],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana kondisi keuangan dan saldo saya saat ini?",
-        "Apakah ada tagihan yang harus dibayar dalam waktu dekat?",
-        "Berapa perkiraan sisa uang belanja sebelum pemasukan berikutnya?",
-        "Berapa batas dana darurat yang harus saya pertahankan?",
+        "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?",
       ],
       comprehensionQuestions: [
         {
@@ -505,10 +499,7 @@ Pada periode ini, tidak terdapat tujuan finansial besar lain yang secara khusus 
       actionOptions: [1000000, 2000000, 3000000],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana kondisi keuangan dan saldo saya saat ini?",
-        "Apakah ada tagihan yang harus dibayar dalam waktu dekat?",
-        "Berapa perkiraan sisa uang belanja sebelum pemasukan berikutnya?",
-        "Berapa batas dana darurat yang harus saya pertahankan?",
+        "Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?",
       ],
       comprehensionQuestions: [
         {
@@ -700,10 +691,7 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
       actionOptions: [1000000, 2000000, 3000000],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana kondisi keuangan dan saldo saya saat ini?",
-        "Apakah ada tagihan yang harus dibayar dalam waktu dekat?",
-        "Berapa perkiraan sisa uang belanja sebelum pemasukan berikutnya?",
-        "Berapa batas dana darurat yang harus saya pertahankan?",
+        "Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?",
       ],
       comprehensionQuestions: [
         {

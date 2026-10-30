@@ -313,7 +313,7 @@ export function calculateFinancialConsequences(
     // Horizon fact
     const daysToNextIncome = profile.scenarioId?.startsWith("spending") ? 12 : 30;
     deterministicFacts.push(
-      `Tanggal snapshot H0: ${profile.h0Date}. Siklus pendapatan berikutnya: ${profile.incomeSchedule.nextDate} (${daysToNextIncome} hari lagi).`
+      `Siklus pendapatan/gaji berikutnya diperkirakan diterima dalam ${daysToNextIncome} hari.`
     );
 
     // Balance fact
@@ -344,7 +344,20 @@ export function calculateFinancialConsequences(
     // Liabilities fact
     if (liabilitiesDueBeforeIncome.length > 0) {
       const billDetails = liabilitiesDueBeforeIncome
-        .map((l) => `${l.title} (Rp ${l.amount.toLocaleString("id-ID")}${l.dueDate ? `, tempo ${l.dueDate}` : ""})`)
+        .map((l) => {
+          let timingText = "dalam waktu dekat";
+          if (l.dueDate && profile.h0Date) {
+            const due = new Date(l.dueDate);
+            const h0 = new Date(profile.h0Date);
+            const diffDays = Math.round((due.getTime() - h0.getTime()) / (1000 * 60 * 60 * 24));
+            if (diffDays > 0) {
+              timingText = `dalam ${diffDays} hari ke depan`;
+            } else if (diffDays === 0) {
+              timingText = "hari ini";
+            }
+          }
+          return `${l.title} (Rp ${l.amount.toLocaleString("id-ID")}, harus dibayar ${timingText})`;
+        })
         .join(", ");
       deterministicFacts.push(
         `Kewajiban tagihan wajib sebelum pemasukan berikutnya: total Rp ${totalLiabilitiesBeforeIncome.toLocaleString("id-ID")} [${billDetails}].`

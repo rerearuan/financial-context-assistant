@@ -8,7 +8,7 @@ import {
 } from "./prompts/templates";
 import { ExtractedIntent, ExtractedIntentSchema } from "./prompts/intent-schema";
 import { StructuredContextPacket } from "./financial-engine/types";
-import { sanitizeAmount } from "./financial-engine/validator";
+import { sanitizeAmount, hasUserDisclosedAction } from "./financial-engine/validator";
 import {
   validateAssistantOutput,
   OutputValidationResult,
@@ -410,11 +410,41 @@ export function generateSafeFallbackResponse(
   const cleanMsg = (userMessage || "").trim().toLowerCase();
   const isFollowup = Boolean(chatHistory && chatHistory.length > 1);
 
-  // 1. Sapaan / Tes
-  if (responsePlan.intentType === "greeting_or_ping") {
-    return (
-      "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan atau tanyakan hari ini?"
-    );
+  const isDisclosed =
+    contextPacket.hasUserDisclosedAction ??
+    responsePlan?.hasUserDisclosedAction ??
+    (chatHistory ? hasUserDisclosedAction(chatHistory, action) : true);
+
+  // 1. Sapaan / Tes ATAU Pengguna belum mengungkapkan rencana belanja/tabungan
+  if (responsePlan.intentType === "greeting_or_ping" || !isDisclosed) {
+    if (condition === "basic") {
+      if (cleanMsg.includes("saldo") || cleanMsg.includes("kondisi")) {
+        return (
+          "Untuk mengetahui kondisi keuangan dan sisa saldo Anda secara pasti saat ini, sistem belum mencatat informasi mengenai jumlah saldo kas maupun pengeluaran rutin Anda. " +
+          "Berapa perkiraan saldo kas rekening yang Anda miliki saat ini, atau ada rencana transaksi yang ingin Anda evaluasi?"
+        );
+      }
+      return (
+        "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan atau tanyakan hari ini?"
+      );
+    } else {
+      if (cleanMsg.includes("tagihan") || cleanMsg.includes("kewajiban")) {
+        return (
+          `Kewajiban tagihan wajib terdekat Anda sebelum pemasukan berikutnya adalah sebesar Rp ${(calculation.totalLiabilitiesBeforeIncome || 1800000).toLocaleString("id-ID")}. ` +
+          `Ada rencana pengeluaran atau tabungan tertentu yang sedang Anda pertimbangkan?`
+        );
+      }
+      if (cleanMsg.includes("saldo") || cleanMsg.includes("kondisi")) {
+        return (
+          `Saldo rekening kas Anda saat ini adalah Rp ${(calculation.initialBalance || 18000000).toLocaleString("id-ID")}. ` +
+          `Dari saldo tersebut, terdapat tagihan wajib terdekat Rp ${(calculation.totalLiabilitiesBeforeIncome || 1800000).toLocaleString("id-ID")}. ` +
+          `Ada rencana transaksi atau keputusan belanja yang ingin Anda diskusikan?`
+        );
+      }
+      return (
+        "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan atau tanyakan hari ini?"
+      );
+    }
   }
 
   // 2. Penolakan Diskusi
@@ -642,6 +672,17 @@ export async function generateAssistantResponse(
   const model = getGeminiModel();
   const systemInstruction = buildSystemInstruction(contextPacket.condition);
 
+  // Determine whether user has introduced/disclosed the action
+  const isDisclosed =
+    contextPacket.hasUserDisclosedAction ??
+    contextPacket.responsePlan?.hasUserDisclosedAction ??
+    hasUserDisclosedAction(chatHistory, contextPacket.action);
+
+  contextPacket.hasUserDisclosedAction = isDisclosed;
+  if (contextPacket.responsePlan) {
+    contextPacket.responsePlan.hasUserDisclosedAction = isDisclosed;
+  }
+
   const priorHistory = chatHistory.filter(
     (m, idx) => !(idx === chatHistory.length - 1 && m.role === "user" && m.content === userMessage)
   );
@@ -650,7 +691,7 @@ export async function generateAssistantResponse(
     .map((m) => `${m.role === "user" ? "Pengguna" : "Asisten"}: ${m.content}`)
     .join("\n\n");
 
-  const baseUserPrompt = buildUserPrompt(contextPacket, userMessage, historySummary);
+  const baseUserPrompt = buildUserPrompt(contextPacket, userMessage, historySummary, isDisclosed);
 
   let retryCount = 0;
   let lastValidationResult: OutputValidationResult | undefined;

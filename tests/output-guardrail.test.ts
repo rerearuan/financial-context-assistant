@@ -133,4 +133,55 @@ describe("AI Architecture Guardrails - Output Guardrail", () => {
     expect(result.isValid).toBe(true);
     expect(result.violations.length).toBe(0);
   });
+
+  it("flags responses leaking undisclosed scenario details when user has only greeted or pinged", () => {
+    const undisclosedPacket: StructuredContextPacket = {
+      ...contextAwarePacket,
+      hasUserDisclosedAction: false,
+      responsePlan: {
+        ...contextAwarePacket.responsePlan,
+        hasUserDisclosedAction: false,
+      },
+    };
+
+    // The assistant tries to mention "laptop" and "Rp 7.000.000" and "cicilan 12 bulan" before user discloses it
+    const leakingText =
+      "Halo! Saya siap membantu Anda mengevaluasi rencana pembelian laptop seharga Rp 7.000.000 ini, baik untuk opsi tunai maupun cicilan 12 bulan.";
+    const result = validateAssistantOutput(leakingText, undisclosedPacket);
+
+    expect(result.isValid).toBe(false);
+    expect(result.violations.some((v) => v.includes("rencana belanja"))).toBe(true);
+    expect(result.violations.some((v) => v.includes("nominal belanja"))).toBe(true);
+    expect(result.violations.some((v) => v.includes("opsi pembayaran"))).toBe(true);
+  });
+
+  it("passes safe non-leaking responses when user has not yet disclosed action", () => {
+    const undisclosedPacket: StructuredContextPacket = {
+      ...contextAwarePacket,
+      hasUserDisclosedAction: false,
+      responsePlan: {
+        ...contextAwarePacket.responsePlan,
+        hasUserDisclosedAction: false,
+      },
+    };
+
+    const safeGreeting =
+      "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan atau tanyakan hari ini?";
+    const resultGreeting = validateAssistantOutput(safeGreeting, undisclosedPacket);
+    expect(resultGreeting.isValid).toBe(true);
+
+    const safeBalanceAnswer =
+      "Saldo rekening kas Anda saat ini adalah Rp 18.000.000. Dari saldo tersebut, terdapat tagihan wajib terdekat Rp 1.800.000 dalam 6 hari ke depan. Ada rencana pengeluaran atau keputusan belanja tertentu yang sedang Anda pertimbangkan?";
+    const resultBalance = validateAssistantOutput(safeBalanceAnswer, undisclosedPacket);
+    expect(resultBalance.isValid).toBe(true);
+  });
+
+  it("flags responses containing static calendar dates instead of relative time", () => {
+    const calendarDateText =
+      "Setelah Anda melakukan pembelian tunai dan melunasi tagihan sebesar Rp 1.800.000 yang jatuh tempo pada 26 Oktober 2026, sisa kas Anda Rp 9.200.000.";
+    const result = validateAssistantOutput(calendarDateText, contextAwarePacket);
+
+    expect(result.isValid).toBe(false);
+    expect(result.violations.some((v) => v.includes("tanggal kalender"))).toBe(true);
+  });
 });

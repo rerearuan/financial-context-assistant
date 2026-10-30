@@ -18,6 +18,7 @@ export interface PackageContextParams {
   userConstraints?: UserConstraints | null;
   conversationState?: ConversationState | null;
   responsePlan?: ResponsePlan | null;
+  hasUserDisclosedAction?: boolean;
 }
 
 /**
@@ -35,6 +36,7 @@ export function buildStructuredContextPacket(
     userConstraints,
     conversationState,
     responsePlan,
+    hasUserDisclosedAction,
   } = params;
 
   const resolvedState: ConversationState = conversationState || {
@@ -52,7 +54,11 @@ export function buildStructuredContextPacket(
     isAlternativeOnly: false,
     simplifyExplanation: (resolvedState.confusionCount || 0) > 0,
     avoidQuestionnaireRepeat: false,
+    hasUserDisclosedAction: hasUserDisclosedAction,
   };
+  if (hasUserDisclosedAction !== undefined) {
+    resolvedPlan.hasUserDisclosedAction = hasUserDisclosedAction;
+  }
 
   if (condition === "basic") {
     // Basic Assistant: STRICT ISOLATION. syntheticProfile is ignored completely.
@@ -77,6 +83,7 @@ export function buildStructuredContextPacket(
       calculation,
       conversationState: resolvedState,
       responsePlan: resolvedPlan,
+      hasUserDisclosedAction,
       availableProfile: userProvidedFinances ? { userProvidedFinances } : null,
       dataSources,
     };
@@ -107,6 +114,7 @@ export function buildStructuredContextPacket(
     calculation,
     conversationState: resolvedState,
     responsePlan: resolvedPlan,
+    hasUserDisclosedAction,
     availableProfile: syntheticProfile
       ? {
           h0Date: syntheticProfile.h0Date,

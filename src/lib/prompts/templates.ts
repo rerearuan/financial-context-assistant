@@ -58,6 +58,10 @@ ATURAN UTAMA PENYUSUNAN RESPONS:
    - DILARANG KERAS berinisiatif menyebut nama barang (seperti 'laptop') atau nominal tertentu (seperti 'Rp 7.000.000' atau 'Rp 2.000.000') jika pengguna BELUM pernah menyebutkannya di riwayat obrolan!
    - Jika pengguna baru menyapa, menguji bot, atau bertanya umum ("halo", "gimana kondisi keuangan saya?", "apakah kondisi kas saya aman?"), jawablah dengan menyapa ramah atau menjelaskan profil keuangan yang diketahui (saldo, tagihan terdekat, dana darurat), lalu tanyakan dengan santai apa barang atau berapa nominal rencana pengeluaran/tabungan yang sedang ingin dipertimbangkan.
    - HANYA SETELAH pengguna menyebutkan rencana belanja/nominalnya di chat, barulah Anda mengaitkan rencana tersebut dengan fakta perhitungan profil keuangan secara presisi.
+
+7. PENGGUNAAN FORMAT WAKTU RELATIF (DILARANG MENGARANG/MENYEBUT TANGGAL KALENDER):
+   - Gunakan SELALU format waktu relatif sesuai skenario yang dibaca pengguna (misal: "dalam 6 hari ke depan", "dalam 9 hari", "dalam 12 hari ke depan", atau "sebelum pendapatan berikutnya tiba").
+   - DILARANG KERAS menyebutkan tanggal kalender spesifik seperti "26 Oktober", "20 Oktober", atau "1 November". Teks skenario menggunakan waktu relatif agar valid kapan saja, sehingga Anda wajib menyebut waktu secara relatif ("dalam 6 hari ke depan").
 `.trim();
 
 /**
@@ -73,6 +77,7 @@ KONFIGURASI SISTEM: CONTEXT-AWARE (Sistem Berbasis Profil Keuangan Terverifikasi
   3. Jika pengguna bertanya apakah suatu rencana aman tetapi belum menyebutkan nominalnya, tanyakan berapa estimasi nominal yang direncanakan.
   4. Begitu pengguna menyebutkan nominal rencana tindakannya, hubungkan langsung dengan fakta perhitungan terverifikasi secara proporsional dan santai.
   5. Sebutkan angka nominal secara alami dan lengkap dalam format Rupiah standar (misal: Rp 2.000.000). DILARANG menggunakan kata meta seperti "berdasarkan data sintetis" atau "menurut fakta internal".
+  6. Gunakan format waktu relatif ("dalam 6 hari ke depan", "dalam 12 hari"), JANGAN menyebut tanggal kalender seperti "26 Oktober".
 `.trim();
 
 /**
@@ -212,12 +217,39 @@ export function buildSystemInstruction(condition: "basic" | "context_aware"): st
 export function buildUserPrompt(
   contextPacket: StructuredContextPacket,
   userMessage: string,
-  chatHistorySummary: string
+  chatHistorySummary: string,
+  hasDisclosedActionOverride?: boolean
 ): string {
   const { condition, action, calculation, conversationState, responsePlan } = contextPacket;
 
-  let factsText = calculation.deterministicFacts.map((f) => `- ${f}`).join("\n");
-  if (calculation.goalImpactNotes && calculation.goalImpactNotes.length > 0) {
+  const isDisclosed =
+    hasDisclosedActionOverride !== undefined
+      ? hasDisclosedActionOverride
+      : contextPacket.hasUserDisclosedAction ?? responsePlan.hasUserDisclosedAction ?? true;
+
+  let rawFacts = calculation.deterministicFacts;
+  if (!isDisclosed) {
+    // Exclude facts that prematurely disclose the user's private shopping/saving decision
+    rawFacts = rawFacts.filter((f) => {
+      const lower = f.toLowerCase();
+      if (
+        lower.includes("laptop") ||
+        lower.includes("7.000.000") ||
+        lower.includes("opsi cicilan") ||
+        lower.includes("cicilan 12 bulan") ||
+        lower.includes("menyetor tabungan rp 2.000.000") ||
+        lower.includes("penambahan tabungan dana darurat") ||
+        lower.includes("sebesar rp 7.000.000") ||
+        lower.includes("sebesar rp 2.000.000")
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  let factsText = rawFacts.map((f) => `- ${f}`).join("\n");
+  if (isDisclosed && calculation.goalImpactNotes && calculation.goalImpactNotes.length > 0) {
     factsText +=
       "\nCatatan Dampak Pos Tujuan/Komitmen:\n" +
       calculation.goalImpactNotes.map((g) => `- ${g}`).join("\n");
@@ -228,6 +260,7 @@ export function buildUserPrompt(
   // Format Conversation State Details
   const stateSummary = [
     `- Sesi Giliran Ke: ${isFollowup ? "Lanjutan" : "Awal"}`,
+    `- Status Pengungkapan Rencana Pengguna: ${isDisclosed ? "Sudah Diungkapkan oleh Pengguna" : "BELUM DIUNGKAPKAN OLEH PENGGUNA (JANGAN MEMBOCORKAN BARANG / HARGA!)"}`,
     `- Status Kebingungan: ${conversationState.confusionCount > 0 ? `Pengguna sedang bingung (${conversationState.confusionCount}x berturut-turut)` : "Normal"}`,
     `- Batasan Pengguna Tercatat: ${
       conversationState.userConstraints?.prohibitCertificationFunds
@@ -250,6 +283,30 @@ export function buildUserPrompt(
       : "- Pertanyaan yang Dianjurkan: Tidak perlu mengajukan pertanyaan data.",
   ].join("\n");
 
+  const actionBlock = isDisclosed
+    ? `<konteks_tindakan_saat_ini>
+- Jenis Tindakan: ${action.type === "spending" ? "Pengeluaran (Spending)" : "Penyisihan Tabungan (Saving)"}
+- Nominal Rencana Acuan: Rp ${action.amount.toLocaleString("id-ID")}
+- Target Pos/Kategori: ${action.targetCategory}
+- Waktu Pelaksanaan: ${action.timing}
+- Status: Pengguna sudah mendiskusikan rencana nominal/item ini di chat.
+</konteks_tindakan_saat_ini>`
+    : `<status_pengungkapan_rencana>
+PERINGATAN KERAHASIAAN TERTINGGI:
+Pengguna BELUM pernah menyebutkan barang ("laptop") maupun nominal rencana belanja/tabungan di dalam obrolan sesi ini!
+
+ATURAN ANTI-BOCOR SKENARIO (PATUHI SECARA MUTLAK):
+1. DILARANG KERAS berinisiatif menyebut nama barang ("laptop"), nominal rencana acuan ("Rp 7.000.000" atau "Rp 2.000.000"), maupun skema cicilan ("cicilan 12 bulan")! Logikanya, Anda sebagai asisten cerdas perbankan tidak mungkin tahu apa yang ingin dibeli pengguna sebelum pengguna sendiri yang mengatakannya di obrolan.
+2. JIKA pengguna baru menyapa, menguji bot, atau mengirim pesan singkat ("hi", "halo", "tes", "p"):
+   Sambut dengan ramah, dan tanyakan santai: ada rencana pengeluaran, tabungan, atau keputusan keuangan apa yang ingin Anda diskusikan hari ini.
+3. JIKA pengguna menanyakan kondisi keuangannya secara umum (misal "bagaimana kondisi keuangan saya?", "ada tagihan apa?"):
+   ${
+     condition === "context_aware"
+       ? "- Jelaskan data profil rekening yang diketahui dari fakta di bawah (misal saldo rekening Rp 18.000.000, tagihan Rp 1.800.000 yang jatuh tempo dalam 6 hari, dan batas dana darurat Rp 5.000.000).\n- Setelah itu, tanyakan apakah ada rencana pengeluaran atau tabungan yang sedang ingin dipertimbangkan."
+       : "- Sampaikan bahwa sistem belum mencatat informasi mengenai jumlah saldo kas maupun pengeluaran rutin Anda.\n- Tanyakan berapa perkiraan saldo rekening Anda atau rencana pengeluaran apa yang ingin Anda evaluasi."
+   }
+</status_pengungkapan_rencana>`;
+
   return `
 <status_state_percakapan>
 ${stateSummary}
@@ -263,18 +320,12 @@ ${planDirectives}
 ${chatHistorySummary || "(Sesi baru dimulai, belum ada riwayat)"}
 </riwayat_percakapan_sesi>
 
-<konteks_tindakan_saat_ini>
-- Jenis Tindakan: ${action.type === "spending" ? "Pengeluaran (Spending)" : "Penyisihan Tabungan (Saving)"}
-- Nominal Rencana Acuan: Rp ${action.amount.toLocaleString("id-ID")}
-- Target Pos/Kategori: ${action.targetCategory}
-- Waktu Pelaksanaan: ${action.timing}
-- PANDUAN PENTING (ANTI-BOCOR): Anda mengetahui profil keuangan rekening pengguna, tetapi Anda TIDAK TAHU rencana belanja privat pengguna. JIKA pengguna belum menyebutkan nominal Rp ${action.amount.toLocaleString("id-ID")} atau nama barang/rencana di obrolan, DILARANG KERAS mendahului menyebutkan nominal Rp ${action.amount.toLocaleString("id-ID")} atau nama barang!
-</konteks_tindakan_saat_ini>
+${actionBlock}
 
 <fakta_perhitungan_terverifikasi>
 Status Perhitungan: ${calculation.status.toUpperCase()}
 ${calculation.status === "needs_clarification" ? `Keterangan: ${calculation.clarificationReason}` : ""}
-${factsText}
+${factsText || "- Data rekening belum dibagikan oleh pengguna."}
 </fakta_perhitungan_terverifikasi>
 
 <pesan_pengguna>
@@ -288,7 +339,9 @@ Patuhi kontrak berikut secara mutlak:
    - Jawab langsung apa yang ditanyakan atau ditanggapi pengguna di kalimat pertama.
    - Bersikaplah luwes dan alami seperti konsultan keuangan pribadi. JANGAN menyajikan daftar checklist pos keuangan yang kaku atau memaksakan skenario jika pengguna hanya menanyakan hal sederhana.
    ${
-     isFollowup
+     !isDisclosed
+       ? "- PENTING: Pengguna BELUM menyebutkan rencana barang/nominal belanja. DILARANG KERAS berinisiatif menyebut nama barang ('laptop') atau nominal ('Rp 7.000.000' / 'Rp 2.000.000')!"
+       : isFollowup
        ? "- Ini adalah pertanyaan lanjutan: DILARANG mengulang sapaan ('Halo', dll) dan DILARANG mengulang ringkasan awal skenario yang tidak relevan dengan pertanyaan terbaru."
        : "- Awali secara santun, empatik, dan langsung ke inti evaluasi."
    }

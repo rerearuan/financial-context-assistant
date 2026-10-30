@@ -74,3 +74,87 @@ export function sanitizeAmount(val: unknown): number | null {
   }
   return null;
 }
+
+/**
+ * Checks whether the user has introduced or disclosed their intended purchase,
+ * saving plan, or action nominal in the conversation history.
+ *
+ * If the user has NOT mentioned the item or amount (e.g. only said "hi", "tes",
+ * or asked general questions like "bagaimana kondisi keuangan saya?"), the chatbot
+ * MUST NOT preemptively leak the scenario (e.g. "laptop", "Rp 7.000.000", "cicilan 12 bulan").
+ */
+export function hasUserDisclosedAction(
+  chatHistory: Array<{ role: string; content: string }>,
+  action: Partial<FinancialAction>
+): boolean {
+  // If the conversation already has an assistant response evaluating the action, it's already in progress
+  const hasPriorEvaluation = chatHistory.some(
+    (m) =>
+      m.role === "assistant" &&
+      (m.content.includes("Setelah pembelian") ||
+        m.content.includes("Setelah penyisihan") ||
+        m.content.includes("Berdasarkan evaluasi terhadap rencana") ||
+        m.content.includes("skema cicilan 12 bulan"))
+  );
+  if (hasPriorEvaluation) return true;
+
+  const userTexts = chatHistory
+    .filter((m) => m.role === "user")
+    .map((m) => m.content.toLowerCase())
+    .join(" ");
+
+  if (!userTexts.trim()) return false;
+
+  // 1. Check if user asked about the impact / consequence of the decision/action
+  if (
+    /(?:apa dampaknya|bagaimana dampaknya|pengaruhnya terhadap|konsekuensi|dampak finansial|akibatnya terhadap|kelayakan rencana)/i.test(
+      userTexts
+    )
+  ) {
+    return true;
+  }
+
+  // 2. Check if user asked about nominal reduction / modification
+  if (/(?:kurangi|dikurangi|turunkan|nominalnya|diubah|opsi lain)/i.test(userTexts)) {
+    return true;
+  }
+
+  // 3. Check if user mentioned the nominal of the action
+  const actionAmount = action.amount;
+  if (actionAmount && actionAmount > 0) {
+    const formattedAmount = actionAmount.toLocaleString("id-ID"); // e.g. "7.000.000" or "2.000.000"
+    const unformattedAmount = String(actionAmount); // "7000000"
+    const inMillions = actionAmount / 1_000_000;
+    const millionRegex = new RegExp(`\\b${inMillions}\\s*(?:juta|jt)\\b`, "i");
+
+    if (
+      userTexts.includes(formattedAmount) ||
+      userTexts.includes(unformattedAmount) ||
+      millionRegex.test(userTexts)
+    ) {
+      return true;
+    }
+  }
+
+  // 4. Check if user mentioned the specific target category / item or action
+  if (action.type === "spending") {
+    // Check for "laptop", "komputer", "pc", "gadget", "perangkat"
+    if (/(?:laptop|komputer|notebook|macbook|pc\b|gadget|perangkat)/i.test(userTexts)) {
+      return true;
+    }
+    // Check for payment options mentioned by user: "cicil", "cicilan", "kredit", "tunai", "cash"
+    if (/(?:cicil|cicilan|angsuran|kredit|bayar tunai|beli tunai|opsi tunai)/i.test(userTexts)) {
+      return true;
+    }
+    // Check for explicit purchase inquiry e.g. "beli seharga", "mau beli", "rencana beli"
+    if (/(?:mau beli|ingin beli|rencana beli|pembelian seharga|beli seharga)/i.test(userTexts)) {
+      return true;
+    }
+  } else if (action.type === "saving") {
+    if (/(?:nabung|menabung|tabungan|simpan uang|deposito|setor|tambah.*dana darurat)/i.test(userTexts)) {
+      return true;
+    }
+  }
+
+  return false;
+}

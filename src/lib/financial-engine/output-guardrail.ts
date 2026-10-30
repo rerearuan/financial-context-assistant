@@ -344,6 +344,50 @@ export function validateAssistantOutput(
     );
   }
 
+  // 7. Check for premature leakage of undisclosed action/scenario details
+  const isDisclosed =
+    contextPacket.hasUserDisclosedAction ?? contextPacket.responsePlan?.hasUserDisclosedAction ?? true;
+
+  if (!isDisclosed) {
+    if (contextPacket.action.type === "spending") {
+      if (/(?:laptop|komputer|notebook|macbook)/i.test(lower)) {
+        violations.push(
+          "Pembocoran rencana belanja terdeteksi: Asisten menyebutkan barang ('laptop') sebelum pengguna sendiri yang mengungkapkannya di percakapan."
+        );
+      }
+      if (
+        contextPacket.action.amount === 7000000 &&
+        /(?:7\.000\.000|7000000|7\s*juta|7\s*jt)/i.test(lower)
+      ) {
+        violations.push(
+          "Pembocoran nominal belanja terdeteksi: Asisten menyebutkan nominal ('Rp 7.000.000') sebelum pengguna sendiri yang mengungkapkannya di percakapan."
+        );
+      }
+      if (/(?:cicilan 12 bulan|bunga flat 1,2%|opsi cicilan|skema cicilan)/i.test(lower)) {
+        violations.push(
+          "Pembocoran opsi pembayaran terdeteksi: Asisten menyebutkan opsi cicilan 12 bulan sebelum pengguna menanyakan metode pembayaran."
+        );
+      }
+    } else if (contextPacket.action.type === "saving") {
+      if (
+        contextPacket.action.amount === 2000000 &&
+        /(?:2\.000\.000|2000000|2\s*juta|2\s*jt)/i.test(lower)
+      ) {
+        violations.push(
+          "Pembocoran nominal tabungan terdeteksi: Asisten menyebutkan nominal ('Rp 2.000.000') sebelum pengguna sendiri yang mengungkapkannya di percakapan."
+        );
+      }
+    }
+  }
+
+  // 8. Check for static calendar dates (e.g. "26 Oktober", "20 Oktober", "1 November", etc.)
+  const staticCalendarRegex = /(?:\b(?:2[0-9]|1[0-9]|[1-9]|3[01])\s+(?:januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember)(?:\s+\d{4})?\b)/i;
+  if (staticCalendarRegex.test(content)) {
+    violations.push(
+      "Penggunaan tanggal kalender statis terdeteksi: Asisten dilarang menyebutkan tanggal kalender tertentu (seperti '26 Oktober 2026'). Gunakan waktu relatif ('dalam 6 hari ke depan' atau 'dalam 12 hari') sesuai narasi skenario."
+    );
+  }
+
   const isValid = violations.length === 0;
 
   return {

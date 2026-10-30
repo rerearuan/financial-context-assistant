@@ -16,7 +16,7 @@ import {
 } from "@/lib/financial-engine/types";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
-import { sanitizeAmount } from "@/lib/financial-engine/validator";
+import { sanitizeAmount, hasUserDisclosedAction } from "@/lib/financial-engine/validator";
 
 export const dynamic = "force-dynamic";
 
@@ -148,6 +148,13 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     };
   }
 
+  const existingMsgs = demoMessages.get(sessionId) || [];
+  const fullChatHistory = [
+    ...existingMsgs.map((m) => ({ role: m.role, content: m.content })),
+    { role: "user" as const, content: messageText },
+  ];
+  const hasDisclosed = hasUserDisclosedAction(fullChatHistory, convState.activePlan);
+
   // Response Plan
   const responsePlan: ResponsePlan = {
     intentType: intent.intentType,
@@ -155,6 +162,7 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     isAlternativeOnly: Boolean(intent.isAlternativeOnly),
     simplifyExplanation: convState.confusionCount > 0 || intent.intentType === "confusion",
     avoidQuestionnaireRepeat: demoSess.condition === "basic" && demoSess.followupCount > 0,
+    hasUserDisclosedAction: hasDisclosed,
     honoredConstraints: convState.userConstraints.prohibitCertificationFunds
       ? ["prohibitCertificationFunds"]
       : [],
@@ -190,9 +198,9 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     conversationState: convState,
     userConstraints: convState.userConstraints,
     responsePlan,
+    hasUserDisclosedAction: hasDisclosed,
   });
 
-  const existingMsgs = demoMessages.get(sessionId) || [];
   existingMsgs.push({
     id: userMsgId,
     sessionId,
@@ -457,6 +465,23 @@ export async function POST(
 
     (updatedAction as any).conversationState = convState;
 
+    // Fetch strictly session-scoped chat history
+    const allSessionMessages = await db
+      .select()
+      .from(messages)
+      .where(eq(messages.sessionId, sessionId))
+      .orderBy(asc(messages.createdAt));
+
+    const chatHistory = allSessionMessages.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+    const fullChatHistory = [
+      ...chatHistory,
+      { role: "user" as const, content: message.trim() },
+    ];
+    const hasDisclosed = hasUserDisclosedAction(fullChatHistory, convState.activePlan);
+
     // Response Plan
     const responsePlan: ResponsePlan = {
       intentType: intent.intentType,
@@ -464,6 +489,7 @@ export async function POST(
       isAlternativeOnly: Boolean(intent.isAlternativeOnly),
       simplifyExplanation: convState.confusionCount > 0 || intent.intentType === "confusion",
       avoidQuestionnaireRepeat: session.condition === "basic" && session.followupCount > 0,
+      hasUserDisclosedAction: hasDisclosed,
       honoredConstraints: convState.userConstraints.prohibitCertificationFunds
         ? ["prohibitCertificationFunds"]
         : [],
@@ -511,19 +537,8 @@ export async function POST(
       conversationState: convState,
       userConstraints: convState.userConstraints,
       responsePlan,
+      hasUserDisclosedAction: hasDisclosed,
     });
-
-    // 7. Fetch strictly session-scoped chat history
-    const allSessionMessages = await db
-      .select()
-      .from(messages)
-      .where(eq(messages.sessionId, sessionId))
-      .orderBy(asc(messages.createdAt));
-
-    const chatHistory = allSessionMessages.map((m) => ({
-      role: m.role as "user" | "assistant",
-      content: m.content,
-    }));
 
     // 8. Generate Grounded Explanation with Output Guardrail & Retry Harness
     const assistantResult = await generateAssistantResponse(

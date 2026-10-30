@@ -304,6 +304,7 @@ export interface ResponsePlan {
   avoidQuestionnaireRepeat: boolean;
   honoredConstraints?: string[];
   clarificationToAsk?: string | null;
+  hasUserDisclosedAction?: boolean;
 }
 
 export interface StructuredContextPacket {
@@ -312,6 +313,7 @@ export interface StructuredContextPacket {
   calculation: FinancialCalculationResult;
   conversationState: ConversationState;
   responsePlan: ResponsePlan;
+  hasUserDisclosedAction?: boolean;
   availableProfile: {
     h0Date?: string;
     totalCashBalance?: number;
