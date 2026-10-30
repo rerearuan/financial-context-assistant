@@ -1351,27 +1351,18 @@ function ExperimentContent() {
                   Terisi: <strong className="font-semibold text-blue-600">{Object.keys(postAnswers).length}</strong>/{POST_QUESTIONNAIRE_ITEMS.length}
                 </span>
               </div>
-              <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5 text-center">
-                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-sm sm:text-base font-bold text-slate-800">1</span>
-                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Sangat Tidak Setuju</span>
-                </div>
-                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-sm sm:text-base font-bold text-slate-800">2</span>
-                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Tidak Setuju</span>
-                </div>
-                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-sm sm:text-base font-bold text-slate-800">3</span>
-                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Netral</span>
-                </div>
-                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-sm sm:text-base font-bold text-slate-800">4</span>
-                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Setuju</span>
-                </div>
-                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-sm sm:text-base font-bold text-slate-800">5</span>
-                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Sangat Setuju</span>
-                </div>
+              <div className="grid grid-cols-7 gap-1 sm:gap-2 text-center">
+                {LIKERT_OPTIONS.map((opt) => (
+                  <div
+                    key={opt.value}
+                    className="py-1.5 px-0.5 sm:px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center min-h-[52px] sm:min-h-[58px]"
+                  >
+                    <span className="text-xs sm:text-base font-bold text-slate-800">{opt.value}</span>
+                    <span className="text-[8px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5 text-center">
+                      {opt.label}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -1397,14 +1388,15 @@ function ExperimentContent() {
                       </p>
                     </div>
 
-                    {/* Tombol pilihan hanya angka agar tidak terpotong di layar HP */}
-                    <div className="grid grid-cols-5 gap-2 sm:gap-3">
+                    {/* Tombol pilihan skala 1 - 7 */}
+                    <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
                       {LIKERT_OPTIONS.map((opt) => {
                         const isSelected = selectedVal === opt.value;
                         return (
                           <label
                             key={opt.value}
-                            className={`py-3 sm:py-3.5 rounded-xl border text-center cursor-pointer transition-all flex items-center justify-center select-none ${
+                            title={`${opt.value} - ${opt.label}`}
+                            className={`py-2.5 sm:py-3.5 px-1 rounded-xl border text-center cursor-pointer transition-all flex flex-col items-center justify-center select-none ${
                               isSelected
                                 ? "bg-blue-600 border-blue-600 text-white font-bold shadow-sm shadow-blue-500/25 scale-[1.02]"
                                 : "bg-white border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-semibold"
@@ -1421,10 +1413,30 @@ function ExperimentContent() {
                               className="sr-only"
                               required
                             />
-                            <span className="text-base sm:text-lg font-bold">{opt.value}</span>
+                            <span className="text-sm sm:text-lg font-bold">{opt.value}</span>
+                            <span
+                              className={`hidden md:block text-[9px] sm:text-[10px] leading-tight mt-0.5 line-clamp-1 max-w-full ${
+                                isSelected ? "text-blue-100" : "text-slate-500"
+                              }`}
+                            >
+                              {opt.label}
+                            </span>
                           </label>
                         );
                       })}
+                    </div>
+
+                    {/* Keterangan nilai skala & indikator pilihan aktif */}
+                    <div className="flex items-center justify-between text-[11px] sm:text-xs text-slate-400 mt-2.5 px-0.5">
+                      <span>1 (Sangat Tidak Setuju)</span>
+                      {selectedVal ? (
+                        <span className="font-semibold text-blue-700 bg-blue-50 border border-blue-200/60 rounded-md py-0.5 px-2">
+                          Dipilih: {selectedVal} – {LIKERT_OPTIONS.find((o) => o.value === selectedVal)?.label}
+                        </span>
+                      ) : (
+                        <span className="italic text-slate-400 text-[10px] sm:text-xs">Skala 1 – 7</span>
+                      )}
+                      <span>7 (Sangat Setuju)</span>
                     </div>
                   </div>
                 );
