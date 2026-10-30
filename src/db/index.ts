@@ -13,6 +13,14 @@ const pool = new Pool({
     !connectionString.includes("localhost")
       ? { rejectUnauthorized: false }
       : false,
+  max: 10,
+  idleTimeoutMillis: 10000, // close idle clients after 10s to prevent stale sockets in serverless
+  connectionTimeoutMillis: 5000, // fast failover if cloud database is sleeping
+});
+
+// Prevent unhandled error crashes on idle clients in serverless environments
+pool.on("error", (err) => {
+  console.warn("PostgreSQL Pool idle client warning:", err?.message || err);
 });
 
 export const db = drizzle(pool, { schema });

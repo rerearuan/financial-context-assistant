@@ -8,6 +8,7 @@ import { PROMPT_VERSION } from "@/lib/prompts/templates";
 import { EXPERIMENT_CELLS } from "@/lib/randomizer";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
+import { generateSessionId } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -83,8 +84,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Generate secure unguessable session ID
-    const sessionId = `ses_${crypto.randomBytes(16).toString("hex")}`;
+    // 3. Generate self-healing session ID
+    const sessionId = generateSessionId(cellNumber, scenarioId, condition);
     const code =
       participantCode || `P-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
     const modelId = getGeminiModel();

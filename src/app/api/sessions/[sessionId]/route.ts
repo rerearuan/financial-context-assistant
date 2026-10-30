@@ -4,6 +4,7 @@ import { sessions, scenarios, messages, syntheticProfiles } from "@/db/schema";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { eq, asc } from "drizzle-orm";
 import { demoSessions, demoMessages } from "@/lib/demo-store";
+import { getOrRestoreSession } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,15 @@ export async function GET(
 
       const fallback = getDevFallbackSession(sessionId);
       if (fallback) return NextResponse.json(fallback);
+
+      // Self-healing recovery for idle / sleep / cold-start
+      const fallbackCell =
+        req.nextUrl.searchParams.get("cell") || req.headers.get("x-session-cell");
+      const restored = await getOrRestoreSession(sessionId, fallbackCell);
+      if (restored) {
+        const restoredResponse = getDemoSessionResponse(sessionId);
+        if (restoredResponse) return NextResponse.json(restoredResponse);
+      }
 
       return NextResponse.json(
         { error: "Sesi tidak ditemukan." },

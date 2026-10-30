@@ -97,11 +97,42 @@ function ChatPageContent() {
 
   const fetchSession = async () => {
     try {
-      const res = await fetch(`/api/sessions/${sessionId}`);
+      const storedCell = typeof window !== "undefined" ? localStorage.getItem(`session_cell_${sessionId}`) : null;
+      const effectiveCell = cellParam || storedCell;
+      const cellQuery = effectiveCell ? `?cell=${effectiveCell}` : "";
+
+      const res = await fetch(`/api/sessions/${sessionId}${cellQuery}`, {
+        headers: effectiveCell ? { "x-session-cell": String(effectiveCell) } : {},
+      });
+
       if (!res.ok) {
         throw new Error("Gagal memuat sesi percakapan. Sesi mungkin tidak ditemukan.");
       }
       const data = await res.json();
+
+      if (effectiveCell && typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`session_cell_${sessionId}`, String(effectiveCell));
+        } catch {
+          // ignore
+        }
+      }
+
+      // Check if localStorage has existing chat history
+      if (typeof window !== "undefined") {
+        try {
+          const cached = localStorage.getItem(`chat_history_${sessionId}`);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (Array.isArray(parsed) && parsed.length > (data.messages?.length || 0)) {
+              data.messages = parsed;
+            }
+          }
+        } catch {
+          // ignore
+        }
+      }
+
       setSession(data);
       setError(null);
     } catch (err: unknown) {
@@ -116,6 +147,17 @@ function ChatPageContent() {
       fetchSession();
     }
   }, [sessionId]);
+
+  // Persist messages in localStorage on change
+  useEffect(() => {
+    if (session?.messages && session.messages.length > 0 && typeof window !== "undefined") {
+      try {
+        localStorage.setItem(`chat_history_${sessionId}`, JSON.stringify(session.messages));
+      } catch {
+        // ignore
+      }
+    }
+  }, [session?.messages, sessionId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -148,10 +190,20 @@ function ChatPageContent() {
     );
 
     try {
-      const res = await fetch(`/api/sessions/${sessionId}/chat`, {
+      const storedCell = typeof window !== "undefined" ? localStorage.getItem(`session_cell_${sessionId}`) : null;
+      const effectiveCell = cellParam || storedCell;
+      const cellQuery = effectiveCell ? `?cell=${effectiveCell}` : "";
+
+      const res = await fetch(`/api/sessions/${sessionId}/chat${cellQuery}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(effectiveCell ? { "x-session-cell": String(effectiveCell) } : {}),
+        },
+        body: JSON.stringify({
+          message: text,
+          chatHistory: session?.messages || [],
+        }),
       });
 
       if (!res.ok) {

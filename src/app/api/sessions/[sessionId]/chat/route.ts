@@ -17,6 +17,7 @@ import {
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
 import { sanitizeAmount, hasUserDisclosedAction } from "@/lib/financial-engine/validator";
+import { getOrRestoreSession, restoreChatHistory } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -273,7 +274,7 @@ export async function POST(
   try {
     const { sessionId } = await params;
     const body = await req.json();
-    const { message } = body;
+    const { message, chatHistory: clientChatHistory } = body;
 
     // 1. Input Validation Guardrail
     if (!message || typeof message !== "string" || message.trim().length === 0) {
@@ -303,8 +304,17 @@ export async function POST(
     }
 
     if (!session) {
-      const demoSess = demoSessions.get(sessionId);
+      let demoSess = demoSessions.get(sessionId);
+      if (!demoSess) {
+        const fallbackCell =
+          req.nextUrl.searchParams.get("cell") || req.headers.get("x-session-cell");
+        demoSess = (await getOrRestoreSession(sessionId, fallbackCell)) || undefined;
+      }
+
       if (demoSess) {
+        if (clientChatHistory && Array.isArray(clientChatHistory)) {
+          restoreChatHistory(sessionId, clientChatHistory);
+        }
         return handleDemoChat(demoSess, sessionId, message.trim());
       }
 
@@ -324,6 +334,9 @@ export async function POST(
             promptVersion: "v2.2.0",
             modelId: getGeminiModel(),
           };
+          if (clientChatHistory && Array.isArray(clientChatHistory)) {
+            restoreChatHistory(sessionId, clientChatHistory);
+          }
           return handleDemoChat(fakeDevSess, sessionId, message.trim());
         }
       }

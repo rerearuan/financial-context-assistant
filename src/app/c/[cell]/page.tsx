@@ -39,7 +39,14 @@ function DirectCellLoader() {
 
         const data = await res.json();
         if (isMounted && data.sessionId) {
-          // Immediately redirect to chat without leaking cell number in the URL
+          if (typeof window !== "undefined") {
+            try {
+              localStorage.setItem(`session_cell_${data.sessionId}`, String(cellNum));
+            } catch {
+              // ignore localStorage errors
+            }
+          }
+          // Redirect to chat
           router.replace(`/chat/${data.sessionId}?source=form`);
         }
       } catch (err: unknown) {

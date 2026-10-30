@@ -8,6 +8,7 @@ import { FinancialProfileContext } from "@/lib/financial-engine/types";
 import { sanitizeAmount } from "@/lib/financial-engine/validator";
 import { demoSessions, demoMessages } from "@/lib/demo-store";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
+import { getOrRestoreSession } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
 
@@ -38,9 +39,14 @@ export async function POST(
       // DB not reachable, will check demoSessions
     }
 
-    // Demo store fallback
+    // Demo store / Self-healing fallback
     if (!session) {
-      const demoSess = demoSessions.get(sessionId);
+      let demoSess = demoSessions.get(sessionId);
+      if (!demoSess) {
+        const fallbackCell =
+          req.nextUrl.searchParams.get("cell") || req.headers.get("x-session-cell");
+        demoSess = (await getOrRestoreSession(sessionId, fallbackCell)) || undefined;
+      }
       if (demoSess) {
         let updatedAction = { ...demoSess.currentAction };
         if (decision === "modify") {
