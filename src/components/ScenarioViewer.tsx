@@ -306,12 +306,12 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
         </h4>
 
         {/* TABEL KEUANGAN */}
-        <div className="overflow-x-auto rounded-xl border border-slate-300">
-          <table className="w-full text-left border-collapse">
+        <div className="rounded-xl border border-slate-300 overflow-hidden">
+          <table className="w-full text-left border-collapse table-auto">
             <thead>
               <tr className="bg-slate-100/90 border-b border-slate-300 text-slate-800 text-xs sm:text-sm font-bold uppercase tracking-wider">
                 <th className="py-3 px-4 sm:px-5">Keterangan</th>
-                <th className="py-3 px-4 sm:px-5 text-right whitespace-nowrap w-44 sm:w-56">
+                <th className="py-3 px-4 sm:px-5 text-right w-1/3 sm:w-2/5">
                   Jumlah / Waktu
                 </th>
               </tr>
@@ -351,7 +351,7 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
                       </span>
                       {row.label}
                     </td>
-                    <td className="py-2.5 px-4 sm:px-5 align-top text-right font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="py-2.5 px-4 sm:px-5 align-top text-right font-semibold text-slate-900 break-words">
                       {row.value}
                     </td>
                   </tr>

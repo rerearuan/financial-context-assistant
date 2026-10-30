@@ -339,7 +339,7 @@ function ChatPageContent() {
   const showQuickReplies = !hasClickedQuickReply && !hasUserSentMessage && quickReplies.length > 0;
 
   return (
-    <div className="flex flex-col h-screen max-w-5xl mx-auto bg-white shadow-sm border-x border-slate-200 overflow-hidden">
+    <div className="flex flex-col h-screen max-w-6xl xl:max-w-7xl mx-auto bg-white shadow-sm border-x border-slate-200 overflow-hidden">
       {/* 1. Header */}
       <header className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shadow-xs">
         <div>

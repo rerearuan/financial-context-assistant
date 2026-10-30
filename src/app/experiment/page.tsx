@@ -428,7 +428,7 @@ function ExperimentContent() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Academic Header */}
       <header className="bg-white border-b border-slate-200 px-4 sm:px-8 h-16 sticky top-0 z-30 flex items-center shadow-2xs">
-        <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
+        <div className="max-w-[1536px] w-full mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm shrink-0">
               UI
@@ -462,7 +462,7 @@ function ExperimentContent() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 lg:p-10">
+      <main className="flex-1 max-w-[1536px] w-full mx-auto p-4 sm:p-6 md:p-8 lg:p-10">
         {errorMessage && (
           <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-sm mb-6 flex items-center gap-2.5 shadow-2xs">
             <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
@@ -911,7 +911,7 @@ function ExperimentContent() {
             <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-start">
               {/* Kolom Kiri: Skenario + Profil Keuangan */}
               <div
-                className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm select-none relative"
+                className="lg:col-span-7 xl:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 lg:p-9 shadow-sm select-none relative"
                 style={{
                   userSelect: "none",
                   WebkitUserSelect: "none",
@@ -931,7 +931,7 @@ function ExperimentContent() {
               </div>
 
               {/* Kolom Kanan: Comprehension Check / Tugas Keputusan Awal */}
-              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm sticky top-20">
+              <div className="lg:col-span-5 xl:col-span-4 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm sticky top-20">
                 <div className="pb-3 mb-5 border-b border-slate-100">
                   <h3 className="font-bold text-slate-900 text-base sm:text-lg">
                     Uji Pemahaman & Keputusan Awal
