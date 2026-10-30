@@ -227,7 +227,21 @@ export function buildUserPrompt(
       ? hasDisclosedActionOverride
       : contextPacket.hasUserDisclosedAction ?? responsePlan.hasUserDisclosedAction ?? true;
 
+  const isAskingInstallments =
+    responsePlan.intentType === "alternative_exploration" ||
+    userMessage.toLowerCase().includes("cicil") ||
+    userMessage.toLowerCase().includes("angsuran") ||
+    userMessage.toLowerCase().includes("kredit");
+
   let rawFacts = calculation.deterministicFacts;
+  if (!isAskingInstallments) {
+    // Anti-info-dumping: saring fakta cicilan jika pengguna TIDAK menanyakan cicilan/kredit
+    rawFacts = rawFacts.filter((f) => {
+      const lower = f.toLowerCase();
+      return !lower.includes("opsi cicilan") && !lower.includes("ketentuan opsi cicilan");
+    });
+  }
+
   if (!isDisclosed) {
     // Exclude facts that prematurely disclose the user's private shopping/saving decision
     rawFacts = rawFacts.filter((f) => {
@@ -355,11 +369,13 @@ Patuhi kontrak berikut secara mutlak:
    - Sebutkan angka PERSIS dari <fakta_perhitungan_terverifikasi> (hasil financial calculator engine). DILARANG melakukan hitungan matematika sendiri di luar data engine.
    - DILARANG KERAS menyebutkan nama pos tujuan lain (seperti Program Sertifikasi) atau barang (seperti laptop) jika tidak ada dalam <fakta_perhitungan_terverifikasi> sesi ini.
    - DILARANG menyebut transaksi telah dieksekusi bank.
-5. BATASAN KONDISI BASIC:
+5. PERILAKU KONDISI:
    ${
-     condition === "basic" && calculation.status === "needs_clarification"
-       ? "- Sampaikan konsekuensi pasti yang logis (misal pengeluaran memotong saldo kas).\n- DILARANG KERAS menanyakan rentetan daftar pertanyaan data (saldo, tagihan, kebutuhan, buffer) berulang-ulang!\n- Jika sangat membutuhkan data, tanyakan MAKSIMAL SATU pertanyaan paling penting secara santai dan natural."
-       : "- Jawab berdasarkan fakta perhitungan terverifikasi di atas secara objektif dan mengalir."
+     condition === "basic"
+       ? calculation.status === "needs_clarification"
+         ? "- Kondisi Basic (data profil belum tersedia): Tanggapi langsung maksud pengguna secara luwes dan bersahabat: Awali dengan menyampaikan bahwa kita bisa mengecek dari uang yang tersedia dan kebutuhan yang harus dibayar, lalu tanyakan: 'Berapa saldo rekening Anda sekarang? Apakah sebagian sudah disisihkan untuk keperluan tertentu?'. JANGAN membuka dengan rumus formal bahwa transaksi memotong saldo rekening, dan JANGAN menggunakan pembuka robotik 'saya tidak mengetahui kondisi Anda'."
+         : "- Kondisi Basic (data lengkap): Berikan kesimpulan tegas dan jelas langsung berdasarkan data yang telah dibagikan pengguna. JANGAN terus meminta data atau mengulang penjelasan umum."
+       : "- Kondisi Context-Aware: Berikan kesimpulan tegas langsung di kalimat pertama ('Secara saldo rekening, Anda bisa membeli ...') berdasarkan profil terotorisasi secara mengalir dan manusiawi tanpa meminta pengguna mengulangi informasi. Hubungkan langsung dengan sisa uang setelah pembelian dan tagihan terdekat dalam waktu relatif, perlindungan dana darurat, dan kebutuhan harian sampai gajian berikutnya."
    }
 </kontrak_respons>
 `.trim();

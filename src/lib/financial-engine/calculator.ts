@@ -513,11 +513,11 @@ export function calculateFinancialConsequences(
     const netCashFlowImpact = isSpending ? action.amount : 0;
 
     const deterministicFacts: string[] = [
-      `Kondisi: Basic Information Assistant (Sesi tanpa profil keuangan awal).`,
+      `Kondisi: Asisten Keuangan (Sesi tanpa profil keuangan awal).`,
       `Rencana yang sedang dipertimbangkan: ${isSpending ? "Pengeluaran" : "Penyisihan Tabungan"} sebesar Rp ${action.amount.toLocaleString("id-ID")} untuk ${action.targetCategory}.`,
       isSpending && action.amount > 0
-        ? `Jika dieksekusi secara tunai, saldo kas rekening akan langsung berkurang sebesar Rp ${action.amount.toLocaleString("id-ID")}.`
-        : `Jika dilakukan penambahan tabungan di rekening yang sama, total saldo bank tidak berubah, melainkan memindahkan alokasi dari kas operasional ke tabungan.`,
+        ? `Kelayakan pembelian tunai Rp ${action.amount.toLocaleString("id-ID")} bergantung pada saldo rekening yang tersedia dan kewajiban kebutuhan yang harus dibayar.`
+        : `Kelayakan penyisihan tabungan bergantung pada pendapatan dan kebutuhan bulanan yang harus dipenuhi.`,
     ];
 
     if (isSpending && action.amount === 7000000) {
