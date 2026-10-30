@@ -126,9 +126,12 @@ export interface UserProvidedFinances {
   liabilities?: number;
   buffer?: number;
   routine?: number;
+  historicalRoutine?: number;
+  spentSoFar?: number;
   emergencyCurrent?: number;
   emergencyTarget?: number;
   goals?: string;
+  rawUserFigures?: number[];
   source?: "user_message";
 }
 
@@ -161,6 +164,21 @@ export interface ConversationState {
     label?: string;
   };
   openClarifications: string[];
+  askedClarifications?: string[];
+  ignoredClarificationsCount?: number;
+  preferBriefResponse?: boolean;
+  lengthPreference?: "brief" | "detailed" | "normal";
+  localFormatInstruction?:
+    | "one_line"
+    | "yes_no_amount"
+    | "nominal_only"
+    | "few_numbers"
+    | "no_numbers"
+    | "specific_part_only"
+    | "detailed"
+    | "compare"
+    | null;
+  userThanked?: boolean;
   confusionCount: number;
   declinedDiscussion: boolean;
 }
@@ -263,6 +281,24 @@ export interface FinancialCalculationResult {
     isBufferIntact: AssessmentStatus;
   };
 
+  // Protected Commitments (e.g., Emergency Buffer + Certification Goal)
+  totalProtectedCommitments?: number | null;
+  commitmentsShortfall?: number | null;
+  isFullyCoveredIncludingAllCommitments?: AssessmentStatus;
+
+  // Baseline & Alternatives (e.g. for saving before deciding amount)
+  baselineSurplusBeforeAction?: number | null;
+  baselineSurplusRange?: { min: number; max: number } | null;
+  alternativesEvaluation?: Array<{
+    amount: number;
+    label: string;
+    remainingCash: number;
+    canCoverRoutine: boolean;
+    notes: string;
+  }>;
+  recommendedAmount?: number | null;
+  recommendedAmountReason?: string | null;
+
   // Goals space evaluation
   goalsEvaluation: GoalAllocationCalculation[];
   goalImpactNotes: string[];
@@ -281,6 +317,7 @@ export type IntentType =
   | "ask_impact"
   | "clarify_info"
   | "greeting_or_ping"
+  | "thank_you"
   | "decline_discussion"
   | "general_impact_query"
   | "specific_aspect_query"
@@ -289,6 +326,8 @@ export type IntentType =
   | "relative_modification"
   | "constraint_setting"
   | "advice_request"
+  | "request_nominal_calculation"
+  | "conceptual_question"
   | "confusion"
   | "fact_provision_or_correction"
   | "final_decision"
@@ -305,6 +344,22 @@ export interface ResponsePlan {
   honoredConstraints?: string[];
   clarificationToAsk?: string | null;
   hasUserDisclosedAction?: boolean;
+  preferBriefResponse?: boolean;
+  lengthPreference?: "brief" | "detailed" | "normal";
+  localFormatInstruction?:
+    | "one_line"
+    | "yes_no_amount"
+    | "nominal_only"
+    | "few_numbers"
+    | "no_numbers"
+    | "specific_part_only"
+    | "detailed"
+    | "compare"
+    | null;
+  requestingNominalRecommendation?: boolean;
+  shouldCloseConversation?: boolean;
+  isThankYouWithNewQuestion?: boolean;
+  isConceptualQuestion?: boolean;
 }
 
 export interface StructuredContextPacket {

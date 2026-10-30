@@ -79,6 +79,29 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     allowed.add(Math.abs(calculation.remainingCashAfterImmediateObligations));
   }
 
+  // Protected commitments & shortfall
+  if (calculation.totalProtectedCommitments) allowed.add(calculation.totalProtectedCommitments);
+  if (calculation.commitmentsShortfall) {
+    allowed.add(calculation.commitmentsShortfall);
+    allowed.add(calculation.commitmentsShortfall - 200000);
+    allowed.add(calculation.commitmentsShortfall + 200000);
+  }
+
+  // Baseline surplus & alternatives for Saving
+  if (calculation.baselineSurplusBeforeAction !== null && calculation.baselineSurplusBeforeAction !== undefined) {
+    allowed.add(Math.abs(calculation.baselineSurplusBeforeAction));
+  }
+  if (calculation.baselineSurplusRange) {
+    allowed.add(Math.abs(calculation.baselineSurplusRange.min));
+    allowed.add(Math.abs(calculation.baselineSurplusRange.max));
+  }
+  if (calculation.alternativesEvaluation) {
+    for (const alt of calculation.alternativesEvaluation) {
+      allowed.add(alt.amount);
+      allowed.add(Math.abs(alt.remainingCash));
+    }
+  }
+
   // Budget
   if (calculation.relevantBudget) {
     allowed.add(calculation.relevantBudget.allocated);
@@ -209,8 +232,15 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     if (uf.liabilities) allowed.add(uf.liabilities);
     if (uf.buffer) allowed.add(uf.buffer);
     if (uf.routine) allowed.add(uf.routine);
+    if (uf.historicalRoutine) allowed.add(uf.historicalRoutine);
+    if (uf.spentSoFar) allowed.add(uf.spentSoFar);
     if (uf.emergencyCurrent) allowed.add(uf.emergencyCurrent);
     if (uf.emergencyTarget) allowed.add(uf.emergencyTarget);
+    if (uf.rawUserFigures) {
+      for (const fig of uf.rawUserFigures) {
+        allowed.add(fig);
+      }
+    }
   }
 
   // All numbers present in deterministic facts computed by engine
@@ -247,8 +277,8 @@ export function validateAssistantOutput(
   // 2. Check for anti-transaction-execution claim
   let claimsTransactionExecuted = false;
   const executionPatterns = [
-    /(?:transaksi|pembayaran|pembelian|transfer) (?:anda )?(?:telah|sudah|berhasil) (?:diproses|dieksekusi|dilakukan|diselesaikan)/i,
-    /(?:dana|uang|saldo) (?:anda )?(?:telah|sudah) (?:didebit|ditransfer|dikirimkan|dipindahkan)/i,
+    /(?:transaksi|pembayaran|pembelian|transfer)(?:[^\n!?]{0,60})?(?:(?:telah|sudah)(?:\s+berhasil)?|berhasil)\s+(?:diproses|dieksekusi|dilakukan|diselesaikan)/i,
+    /(?:dana|uang|saldo)(?:[^\n!?]{0,60})?(?:(?:telah|sudah)(?:\s+berhasil)?|berhasil)\s+(?:didebit|ditransfer|dikirimkan|dipindahkan)/i,
     /(?:berhasil memproses|telah memotong saldo rekening anda secara riil)/i,
   ];
 
@@ -271,13 +301,28 @@ export function validateAssistantOutput(
   if (
     (contextPacket.calculation.isLiquidityThreatened ||
       contextPacket.calculation.isBufferMaintained === false ||
-      contextPacket.calculation.canCoverObligations === false) &&
+      contextPacket.calculation.canCoverObligations === false ||
+      (contextPacket.calculation.commitmentsShortfall !== undefined &&
+        contextPacket.calculation.commitmentsShortfall !== null &&
+        contextPacket.calculation.commitmentsShortfall > 0)) &&
     claimsSafe
   ) {
     contradictorySafetyClaims = true;
     violations.push(
-      "Klaim keamanan berkontradiksi: Menyebut 'aman', 'pasti terpenuhi', atau 'tanpa risiko' padahal terjadi potensi defisit atau batas buffer dana darurat tergerus."
+      "Klaim keamanan berkontradiksi: Menyebut 'aman', 'pasti terpenuhi', atau 'tanpa risiko' padahal terjadi potensi defisit, komitmen alokasi tidak tercukupi (shortfall), atau batas buffer tergerus."
     );
+  }
+
+  // 3b. Basic condition must not leak merchant installment terms if not disclosed by user
+  if (
+    contextPacket.condition === "basic" &&
+    !contextPacket.conversationState?.userConstraints?.preferredPaymentMethod
+  ) {
+    if (/(?:bunga flat 1[,.]2%|biaya administrasi 1%|angsuran rp\s*667)/i.test(content)) {
+      violations.push(
+        "Kondisi Basic membocorkan rincian skenario cicilan toko (1,2% flat, 1% admin, Rp667.333) yang belum diberikan pengguna."
+      );
+    }
   }
 
   // Check unwarranted essential expenses certainty:

@@ -427,34 +427,34 @@ function ExperimentContent() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Top Academic Header */}
-      <header className="bg-white border-b border-slate-200 px-4 sm:px-6 h-14 sticky top-0 z-30 flex items-center">
-        <div className="max-w-5xl w-full mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+      <header className="bg-white border-b border-slate-200 px-4 sm:px-8 h-16 sticky top-0 z-30 flex items-center shadow-2xs">
+        <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm shrink-0">
               UI
             </div>
             <div className="min-w-0">
-              <h1 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight truncate">
+              <h1 className="text-sm sm:text-base font-bold text-slate-900 leading-tight truncate">
                 Penelitian Asisten Percakapan dalam Keputusan Keuangan
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 truncate">
+              <p className="text-xs text-slate-500 truncate">
                 Fakultas Ilmu Komputer, Universitas Indonesia
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 ml-2">
             {step > 1 && step < 8 && (
               <button
                 type="button"
                 onClick={() => setStep((prev) => Math.max(1, prev - 1))}
-                className="px-2 sm:px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1 transition"
+                className="px-3 py-1.5 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1.5 transition cursor-pointer"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span className="hidden sm:inline">Kembali</span>
               </button>
             )}
-            <span className="text-[11px] sm:text-xs bg-slate-100 px-2 sm:px-2.5 py-1 rounded-md font-mono text-slate-600 whitespace-nowrap">
+            <span className="text-xs sm:text-sm bg-slate-100 px-3 py-1.5 rounded-lg font-mono font-medium text-slate-700 whitespace-nowrap">
               Tahap {step} dari 8
             </span>
           </div>
@@ -462,11 +462,11 @@ function ExperimentContent() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 md:p-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 md:p-8 lg:p-10">
         {errorMessage && (
-          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-xs mb-6 flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
-            <span>{errorMessage}</span>
+          <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-sm mb-6 flex items-center gap-2.5 shadow-2xs">
+            <AlertTriangle className="w-5 h-5 shrink-0 text-rose-600" />
+            <span className="font-medium">{errorMessage}</span>
           </div>
         )}
 
@@ -474,17 +474,17 @@ function ExperimentContent() {
         {/* TAHAP 1: INFORMASI & PERSETUJUAN PARTISIPASI (INFORMED CONSENT) */}
         {/* ============================================================== */}
         {step === 1 && (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+          <div className="max-w-3xl sm:max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 A.1. Informasi dan Persetujuan Partisipasi Penelitian
               </h2>
-              <p className="text-sm font-bold text-slate-800 mt-1">
+              <p className="text-base sm:text-lg font-bold text-slate-800 mt-1">
                 Penelitian Penggunaan <em>Chatbot AI</em> dalam Pengambilan Keputusan Keuangan
               </p>
             </div>
 
-            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed mb-6">
+            <div className="text-sm sm:text-base text-slate-700 space-y-4 leading-relaxed mb-8">
               <p>Kepada responden yang terhormat,</p>
               <p>
                 Kami, Alfian Bassam Firjatullah dan Regina Meilani Aruan, mahasiswa Program Studi Sistem Informasi, Fakultas Ilmu Komputer, Universitas Indonesia, sedang melakukan penelitian tugas akhir mengenai penggunaan asisten percakapan berbasis kecerdasan buatan (AI) dalam pengambilan keputusan keuangan.
@@ -499,21 +499,21 @@ function ExperimentContent() {
                 Sebagai bentuk apresiasi, tersedia hadiah dengan total nilai Rp500.000 yang akan dibagikan kepada 10 responden beruntung melalui undian.
               </p>
               <p>Terima kasih atas waktu dan kesediaan Anda untuk berpartisipasi.</p>
-              <div className="pt-2 text-xs sm:text-sm text-slate-600 font-medium">
+              <div className="pt-2 text-sm sm:text-base text-slate-600 font-medium">
                 Hormat kami,
                 <br />
                 Alfian Bassam Firjatullah &amp; Regina Meilani Aruan
               </div>
             </div>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-6">
-              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide mb-2">
+            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-8">
+              <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide mb-2.5">
                 Persetujuan Partisipasi (Informed Consent)
               </h3>
-              <p className="text-xs text-slate-600 mb-3 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 mb-3 leading-relaxed">
                 Dengan memilih <strong>&quot;Ya, saya bersedia&quot;</strong>, Anda menyatakan bahwa:
               </p>
-              <ol className="text-xs text-slate-600 list-decimal list-inside space-y-1 leading-relaxed">
+              <ol className="text-xs sm:text-sm text-slate-600 list-decimal list-inside space-y-1.5 leading-relaxed">
                 <li>Anda telah membaca dan memahami informasi mengenai tujuan serta prosedur penelitian.</li>
                 <li>Anda bersedia berpartisipasi secara sukarela dan memahami bahwa partisipasi dapat dihentikan kapan saja tanpa konsekuensi.</li>
                 <li>Anda memahami bahwa jawaban kuesioner dan riwayat percakapan dengan chatbot akan disimpan dan digunakan untuk keperluan analisis penelitian.</li>
@@ -523,30 +523,30 @@ function ExperimentContent() {
 
             <form onSubmit={handleConsentSubmit} className="space-y-6">
               <div>
-                <label className="block text-xs font-bold text-slate-800 mb-2">
+                <label className="block text-sm sm:text-base font-bold text-slate-800 mb-3">
                   Apakah Anda bersedia berpartisipasi dalam penelitian ini? *
                 </label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm">
+                <div className="space-y-2.5">
+                  <label className="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-sm sm:text-base transition">
                     <input
                       type="radio"
                       name="consent"
                       value="yes"
                       checked={consentChoice === "yes"}
                       onChange={(e) => setConsentChoice(e.target.value)}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-5 h-5 text-blue-600 cursor-pointer"
                       required
                     />
                     <span className="font-medium text-slate-800">Ya, saya bersedia.</span>
                   </label>
-                  <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm">
+                  <label className="flex items-center gap-3.5 p-4 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-sm sm:text-base transition">
                     <input
                       type="radio"
                       name="consent"
                       value="no"
                       checked={consentChoice === "no"}
                       onChange={(e) => setConsentChoice(e.target.value)}
-                      className="w-4 h-4 text-blue-600"
+                      className="w-5 h-5 text-blue-600 cursor-pointer"
                       required
                     />
                     <span className="font-medium text-slate-800">Tidak, saya tidak bersedia.</span>
@@ -557,10 +557,10 @@ function ExperimentContent() {
               <button
                 type="submit"
                 disabled={submitting || !consentChoice}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-6 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
                 {submitting ? "Memproses..." : "Lanjutkan ke Karakteristik Responden"}
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </button>
             </form>
           </div>
@@ -570,12 +570,12 @@ function ExperimentContent() {
         {/* TAHAP 2: KARAKTERISTIK RESPONDEN (DEMOGRAFI) */}
         {/* ============================================================== */}
         {step === 2 && (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 Karakteristik Responden
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Mohon lengkapi profil diri Anda di bawah ini secara jujur. Seluruh pertanyaan bertanda bintang (*) wajib diisi.
               </p>
             </div>
@@ -783,11 +783,11 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-4 pt-3">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                  className="px-6 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Kembali
@@ -795,7 +795,7 @@ function ExperimentContent() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
                   {submitting ? "Menyimpan..." : "Lanjut ke Petunjuk Eksperimen"}
                   <ArrowRight className="w-4 h-4" />
@@ -809,14 +809,14 @@ function ExperimentContent() {
         {/* TAHAP 3: PETUNJUK EKSPERIMEN                                    */}
         {/* ============================================================== */}
         {step === 3 && (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div className="max-w-3xl sm:max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm space-y-6">
             <div className="border-b border-slate-100 pb-4">
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 Petunjuk Eksperimen
               </h2>
             </div>
 
-            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed">
+            <div className="text-sm sm:text-base text-slate-700 space-y-4 leading-relaxed">
               <p>
                 Pada bagian ini, Anda akan dihadapkan pada sebuah skenario pengambilan keputusan keuangan dalam kehidupan sehari-hari.
               </p>
@@ -829,11 +829,11 @@ function ExperimentContent() {
                 Untuk membantu Anda mempertimbangkan keputusan, tersedia sebuah chatbot yang dapat Anda ajak berdiskusi.
               </p>
 
-              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                <p className="font-semibold text-slate-800">
+              <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 space-y-2.5">
+                <p className="font-semibold text-slate-800 text-sm sm:text-base">
                   Selama berdiskusi dengan chatbot, Anda bebas untuk:
                 </p>
-                <ul className="space-y-1.5 pl-5 list-disc text-slate-700">
+                <ul className="space-y-2 pl-5 list-disc text-slate-700 text-sm sm:text-base">
                   <li>mengajukan pertanyaan;</li>
                   <li>meminta perhitungan;</li>
                   <li>meminta assistant membandingkan beberapa pilihan;</li>
@@ -842,8 +842,8 @@ function ExperimentContent() {
                 </ul>
               </div>
 
-              <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-3.5 rounded-xl text-xs sm:text-sm flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-4 rounded-xl text-sm sm:text-base flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <span>
                   <strong>Perhatian:</strong> Anda tidak diperbolehkan copy-paste teks skenario ke dalam percakapan dengan chatbot.
                 </span>
@@ -853,18 +853,18 @@ function ExperimentContent() {
                 Setelah selesai berdiskusi dengan chatbot, Anda akan diminta untuk menjawab beberapa pertanyaan mengenai keputusan yang Anda ambil serta alasan di balik keputusan tersebut.
               </p>
 
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-slate-600 text-xs sm:text-sm">
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-slate-600 text-sm sm:text-base">
                 <p>
                   <strong>Tidak ada jawaban benar atau salah.</strong> Pilihlah keputusan yang menurut Anda paling sesuai dengan kondisi keuangan, kebutuhan, dan tujuan yang dijelaskan dalam skenario.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-4 pt-3">
               <button
                 type="button"
                 onClick={() => setStep(2)}
-                className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                className="px-6 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Kembali
@@ -872,7 +872,7 @@ function ExperimentContent() {
               <button
                 type="button"
                 onClick={() => setStep(4)}
-                className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm"
+                className="flex-1 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
               >
                 Lanjut ke Skenario Penelitian
                 <ArrowRight className="w-4 h-4" />
@@ -888,30 +888,30 @@ function ExperimentContent() {
         {step === 4 && scenario && (
           <div className="space-y-6">
             {/* Petunjuk Singkat & Tombol Baca Ulang */}
-            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 text-sm sm:text-base text-slate-700 leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
               <div>
-                <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-1">
-                  <HelpCircle className="w-4 h-4 text-slate-700" />
+                <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-1.5 text-base sm:text-lg">
+                  <HelpCircle className="w-5 h-5 text-slate-700 shrink-0" />
                   Skenario Pengambilan Keputusan Keuangan
                 </h3>
-                <p className="text-slate-600 text-xs">
+                <p className="text-slate-600 text-xs sm:text-sm">
                   Bayangkan Anda sedang berada dalam situasi berikut dan anggap seluruh informasi sebagai kondisi keuangan Anda sendiri. Anda tidak diperbolehkan copy-paste teks skenario ke chatbot.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setStep(3)}
-                className="self-start sm:self-auto px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg shrink-0 transition"
+                className="self-start sm:self-auto px-4 py-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl shrink-0 transition cursor-pointer shadow-2xs"
               >
                 Baca Petunjuk Lengkap
               </button>
             </div>
 
             {/* Side by Side Layout: Skenario & Profil (Kiri) vs Comprehension Check (Kanan) */}
-            <div className="grid lg:grid-cols-12 gap-6 items-start">
+            <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 items-start">
               {/* Kolom Kiri: Skenario + Profil Keuangan */}
               <div
-                className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm select-none relative"
+                className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm select-none relative"
                 style={{
                   userSelect: "none",
                   WebkitUserSelect: "none",
@@ -921,8 +921,8 @@ function ExperimentContent() {
                 onCut={handlePreventCopy}
                 onContextMenu={(e) => e.preventDefault()}
               >
-                <div className="pb-3 mb-4 border-b border-slate-100">
-                  <h3 className="text-sm font-bold text-slate-900">
+                <div className="pb-3 mb-5 border-b border-slate-100">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900">
                     Materi Skenario Penelitian
                   </h3>
                 </div>
@@ -931,21 +931,21 @@ function ExperimentContent() {
               </div>
 
               {/* Kolom Kanan: Comprehension Check / Tugas Keputusan Awal */}
-              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-sm sticky top-20">
-                <div className="pb-3 mb-4 border-b border-slate-100">
-                  <h3 className="font-bold text-slate-900 text-sm">
+              <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm sticky top-20">
+                <div className="pb-3 mb-5 border-b border-slate-100">
+                  <h3 className="font-bold text-slate-900 text-base sm:text-lg">
                     Uji Pemahaman & Keputusan Awal
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs sm:text-sm text-slate-500 mt-1 leading-relaxed">
                     Silakan jawab pertanyaan pemahaman skenario dan tentukan pertimbangan awal Anda sebelum berdiskusi dengan chatbot.
                   </p>
                 </div>
 
-                <form onSubmit={handleEarlyDecisionSubmit} className="space-y-4 text-xs sm:text-sm">
+                <form onSubmit={handleEarlyDecisionSubmit} className="space-y-5 text-sm sm:text-base">
                   {/* Bagian A: Comprehension Check (Uji Pemahaman Skenario) */}
-                  <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3.5">
-                    <div className="font-bold text-[11px] text-blue-900 uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-1.5">
-                      <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
+                  <div className="bg-slate-50 p-4 sm:p-5 rounded-xl border border-slate-200 space-y-4">
+                    <div className="font-bold text-xs sm:text-sm text-blue-900 uppercase tracking-wider pb-1.5 border-b border-slate-200 flex items-center gap-2">
+                      <HelpCircle className="w-4 h-4 text-blue-600" />
                       Bagian 1: Uji Pemahaman Skenario
                     </div>
 
@@ -958,16 +958,16 @@ function ExperimentContent() {
 
                       return compQuestions.map((q, idx) => (
                         <div key={q.id}>
-                          <label className="block font-semibold text-slate-800 mb-1.5 leading-snug">
+                          <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
                             {idx + 1}. {q.question} *
                           </label>
-                          <div className="space-y-1.5">
+                          <div className="space-y-2">
                             {q.options.map((opt) => (
                               <label
                                 key={opt}
-                                className={`flex items-start gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                                className={`flex items-start gap-2.5 p-3 rounded-xl border cursor-pointer text-xs sm:text-sm transition ${
                                   comprehension[q.id] === opt
-                                    ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                                    ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold shadow-2xs"
                                     : "bg-white border-slate-200 hover:bg-slate-50 text-slate-700"
                                 }`}
                               >
@@ -979,7 +979,7 @@ function ExperimentContent() {
                                   onChange={(e) =>
                                     setComprehension((prev) => ({ ...prev, [q.id]: e.target.value }))
                                   }
-                                  className="mt-0.5 text-blue-600"
+                                  className="mt-0.5 text-blue-600 cursor-pointer"
                                   required
                                 />
                                 <span>{opt}</span>
@@ -992,24 +992,24 @@ function ExperimentContent() {
                   </div>
 
                   {/* Bagian B: Pertimbangan Keputusan Awal */}
-                  <div className="space-y-3 pt-2">
-                    <div className="font-bold text-[11px] text-slate-800 uppercase tracking-wider pb-1 border-b border-slate-200">
+                  <div className="space-y-4 pt-2">
+                    <div className="font-bold text-xs sm:text-sm text-slate-800 uppercase tracking-wider pb-1.5 border-b border-slate-200">
                       Bagian 2: Pertimbangan Keputusan Awal
                     </div>
 
                     {/* Pertanyaan 3 */}
                     <div>
-                      <label className="block font-semibold text-slate-800 mb-1.5">
+                      <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
                         3. Sebelum berdiskusi dengan chatbot, apakah Anda berencana melakukan {scenario.actionType === "spending" ? "pembelian laptop tersebut?" : "penambahan Dana Darurat dari pendapatan bulan ini?"} *
                       </label>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-3">
                         {["Ya", "Tidak"].map((opt) => (
                           <label
                             key={opt}
-                            className={`p-2.5 rounded-lg border text-center cursor-pointer text-xs font-medium transition ${
+                            className={`p-3 sm:p-3.5 rounded-xl border text-center cursor-pointer text-sm font-semibold transition ${
                               earlyDecision.q1 === opt
-                                ? "bg-blue-50 border-blue-600 text-blue-700 font-bold"
-                                : "border-slate-200 hover:bg-slate-50"
+                                ? "bg-blue-50 border-blue-600 text-blue-700 font-bold shadow-2xs"
+                                : "border-slate-200 hover:bg-slate-50 text-slate-700"
                             }`}
                           >
                             <input
@@ -1030,22 +1030,22 @@ function ExperimentContent() {
                     {/* Pertanyaan 4 */}
                     {earlyDecision.q1 === "Ya" && (
                       <div>
-                        <label className="block font-semibold text-slate-800 mb-1.5">
+                        <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
                           4. {scenario.actionType === "spending"
                             ? "Metode pembayaran apa yang Anda rencanakan?"
                             : "Berapa jumlah yang rencananya akan Anda tambahkan?"} *
                         </label>
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           {(scenario.actionType === "spending"
                             ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
                             : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
                           ).map((opt) => (
                             <label
                               key={opt}
-                              className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer text-xs transition ${
+                              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer text-xs sm:text-sm transition ${
                                 earlyDecision.q2 === opt
-                                  ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
-                                  : "border-slate-200 hover:bg-slate-50"
+                                  ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold shadow-2xs"
+                                  : "border-slate-200 hover:bg-slate-50 text-slate-700"
                               }`}
                             >
                               <input
@@ -1054,7 +1054,7 @@ function ExperimentContent() {
                                 value={opt}
                                 checked={earlyDecision.q2 === opt}
                                 onChange={(e) => setEarlyDecision({ ...earlyDecision, q2: e.target.value })}
-                                className="w-3.5 h-3.5 text-blue-600"
+                                className="w-4 h-4 text-blue-600 cursor-pointer"
                                 required={earlyDecision.q1 === "Ya"}
                               />
                               <span>{opt}</span>
@@ -1066,7 +1066,7 @@ function ExperimentContent() {
 
                     {/* Pertanyaan 5 */}
                     <div>
-                      <label className="block font-semibold text-slate-800 mb-1.5">
+                      <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
                         5. Jelaskan alasan pertimbangan keputusan awal Anda! *
                       </label>
                       <textarea
@@ -1074,25 +1074,25 @@ function ExperimentContent() {
                         value={earlyDecision.q3}
                         onChange={(e) => setEarlyDecision({ ...earlyDecision, q3: e.target.value })}
                         placeholder="Tuliskan alasan pertimbangan Anda berdasarkan kondisi keuangan di samping..."
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs"
+                        className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-1">
+                  <div className="flex items-center gap-3 pt-2">
                     <button
                       type="button"
                       onClick={() => setStep(3)}
-                      className="px-3.5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1"
+                      className="px-4 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <ArrowLeft className="w-4 h-4" />
                       Kembali ke Petunjuk
                     </button>
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm"
+                      className="flex-1 py-3 px-5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                     >
                       {submitting ? "Menyimpan..." : "Simpan & Lanjut ke Chatbot"}
                       <ArrowRight className="w-4 h-4" />
@@ -1108,20 +1108,20 @@ function ExperimentContent() {
         {/* TAHAP 5: PENGANTAR MASUK KE CHATBOT                             */}
         {/* ============================================================== */}
         {step === 5 && participant && (
-          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mb-3">
               Diskusi dengan Chatbot
             </h2>
 
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed mb-6">
               Untuk membantu Anda mempertimbangkan keputusan, tersedia sebuah chatbot yang dapat Anda ajak berdiskusi mengenai skenario keuangan yang telah Anda pelajari.
             </p>
 
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 text-xs sm:text-sm">
-              <p className="font-semibold text-slate-800 mb-2">
+            <div className="bg-slate-50 p-5 rounded-xl border border-slate-200 mb-5 text-sm sm:text-base">
+              <p className="font-semibold text-slate-800 mb-2.5">
                 Selama berdiskusi dengan chatbot, Anda bebas untuk:
               </p>
-              <ul className="space-y-1.5 pl-5 list-disc text-slate-700">
+              <ul className="space-y-2 pl-5 list-disc text-slate-700">
                 <li>mengajukan pertanyaan;</li>
                 <li>meminta perhitungan;</li>
                 <li>meminta assistant membandingkan beberapa pilihan;</li>
@@ -1130,40 +1130,40 @@ function ExperimentContent() {
               </ul>
             </div>
 
-            <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-3 rounded-xl text-xs mb-6 flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-4 rounded-xl text-xs sm:text-sm mb-8 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <span>
                 <strong>Pengingat:</strong> Anda tidak diperbolehkan copy-paste teks skenario ke dalam percakapan dengan chatbot.
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               <a
                 href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-center shadow-sm"
+                className="w-full py-4 px-6 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm sm:text-base font-bold transition flex items-center justify-center gap-2.5 text-center shadow-sm cursor-pointer"
               >
                 Buka Chatbot Finansial
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-5 h-5" />
               </a>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setStep(4)}
-                  className="text-xs text-slate-500 hover:text-slate-800 transition flex items-center gap-1"
+                  className="text-xs sm:text-sm text-slate-500 hover:text-slate-800 transition flex items-center gap-1.5 cursor-pointer font-medium"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <ArrowLeft className="w-4 h-4" />
                   Kembali ke Skenario
                 </button>
                 <button
                   type="button"
                   onClick={() => setStep(6)}
-                  className="text-xs font-semibold text-slate-700 hover:text-slate-900 transition flex items-center gap-1"
+                  className="text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 transition flex items-center gap-1.5 cursor-pointer"
                 >
                   Lanjut ke Keputusan Akhir
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1174,30 +1174,30 @@ function ExperimentContent() {
         {/* TAHAP 6: KEPUTUSAN AKHIR (INDEPENDENT, BEDA SLIDE) */}
         {/* ============================================================== */}
         {step === 6 && scenario && (
-          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+              <span className="text-xs sm:text-sm font-semibold text-emerald-600 uppercase tracking-wider">
                 Tahap 6
               </span>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
                 Pertanyaan Keputusan Akhir
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Setelah berdiskusi dengan chatbot, mohon tetapkan keputusan akhir Anda mengenai tindakan pada skenario.
               </p>
             </div>
 
-            <form onSubmit={handleFinalDecisionSubmit} className="space-y-6 text-xs sm:text-sm">
+            <form onSubmit={handleFinalDecisionSubmit} className="space-y-6 text-sm sm:text-base">
               {/* 1. Keputusan Akhir */}
               <div>
-                <label className="block font-semibold text-slate-800 mb-2">
+                <label className="block font-semibold text-slate-800 mb-2.5 text-sm sm:text-base">
                   1. Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan {scenario.actionType === "spending" ? "pembelian laptop tersebut?" : "penambahan Dana Darurat dari pendapatan bulan ini?"} *
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3.5">
                   {["Ya", "Tidak"].map((opt) => (
                     <label
                       key={opt}
-                      className={`p-3 rounded-xl border text-center cursor-pointer font-bold text-sm transition ${
+                      className={`p-3.5 sm:p-4 rounded-xl border text-center cursor-pointer font-bold text-sm sm:text-base transition ${
                         finalDecision.q1 === opt
                           ? "bg-blue-50 border-blue-600 text-blue-700 shadow-sm"
                           : "border-slate-200 hover:bg-slate-50 text-slate-700"
@@ -1221,21 +1221,21 @@ function ExperimentContent() {
               {/* 2. Metode Pembayaran / Jumlah Tambahan */}
               {finalDecision.q1 === "Ya" && (
                 <div>
-                  <label className="block font-semibold text-slate-800 mb-2">
+                  <label className="block font-semibold text-slate-800 mb-2.5 text-sm sm:text-base">
                     2. {scenario.actionType === "spending"
                       ? "Jika Ya, metode pembayaran apa yang Anda gunakan? mengapa?"
                       : "Jika Ya, berapa jumlah yang akan Anda tambahkan?"} *
                   </label>
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {(scenario.actionType === "spending"
                       ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
                       : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
                     ).map((opt) => (
                       <label
                         key={opt}
-                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition ${
+                        className={`flex items-center gap-3.5 p-3.5 rounded-xl border cursor-pointer transition text-sm sm:text-base ${
                           finalDecision.q2 === opt
-                            ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                            ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold shadow-2xs"
                             : "border-slate-200 hover:bg-slate-50 text-slate-700"
                         }`}
                       >
@@ -1245,7 +1245,7 @@ function ExperimentContent() {
                           value={opt}
                           checked={finalDecision.q2 === opt}
                           onChange={(e) => setFinalDecision({ ...finalDecision, q2: e.target.value })}
-                          className="w-4 h-4 text-blue-600"
+                          className="w-4 h-4 text-blue-600 cursor-pointer"
                           required={finalDecision.q1 === "Ya"}
                         />
                         <span>{opt}</span>
@@ -1257,7 +1257,7 @@ function ExperimentContent() {
 
               {/* 3. Alasan Keputusan Akhir */}
               <div>
-                <label className="block font-semibold text-slate-800 mb-1.5">
+                <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base">
                   3. Jelaskan alasan keputusan akhir Anda! *
                 </label>
                 <textarea
@@ -1265,16 +1265,16 @@ function ExperimentContent() {
                   value={finalDecision.q3}
                   onChange={(e) => setFinalDecision({ ...finalDecision, q3: e.target.value })}
                   placeholder="Jelaskan secara lengkap pertimbangan dan alasan di balik keputusan akhir Anda setelah berdiskusi dengan chatbot..."
-                  className="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs sm:text-sm"
+                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm sm:text-base"
                   required
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-4 pt-3">
                 <button
                   type="button"
                   onClick={() => setStep(5)}
-                  className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                  className="px-6 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Buka Chatbot Lagi
@@ -1282,7 +1282,7 @@ function ExperimentContent() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
+                  className="flex-1 py-3.5 px-6 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                 >
                   {submitting ? "Menyimpan..." : "Lanjut ke Kuesioner Akhir (Alat Ukur)"}
                   <ArrowRight className="w-4 h-4" />
@@ -1296,47 +1296,47 @@ function ExperimentContent() {
         {/* TAHAP 7: KUESIONER AKHIR / INTI (ALAT UKUR PASCAINTERAKSI)     */}
         {/* ============================================================== */}
         {step === 7 && (
-          <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-4 sm:p-8 shadow-sm">
-            <div className="border-b border-slate-100 pb-4 mb-4 sm:mb-6">
-              <h2 className="text-lg font-bold text-slate-900">
+          <div className="max-w-4xl sm:max-w-5xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
+            <div className="border-b border-slate-100 pb-4 mb-5 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                 Alat Ukur Pascainteraksi
               </h2>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-500 mt-1.5 leading-relaxed">
                 Pilihlah tingkat persetujuan Anda terhadap setiap pernyataan di bawah ini berdasarkan pengalaman Anda berdiskusi dengan chatbot dan mengambil keputusan keuangan.
               </p>
             </div>
 
             {/* STICKY SCALE LEGEND (Tetap terlihat saat scroll di mobile & desktop) */}
-            <div className="sticky top-14 z-20 bg-white/95 backdrop-blur-md py-2.5 px-3 rounded-xl border border-slate-200 shadow-sm mb-5 transition-all">
-              <div className="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1.5 px-0.5">
-                <span className="flex items-center gap-1.5 text-slate-700 font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+            <div className="sticky top-16 z-20 bg-white/95 backdrop-blur-md py-3 px-4 rounded-xl border border-slate-200 shadow-sm mb-6 transition-all">
+              <div className="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-600 mb-2 px-0.5">
+                <span className="flex items-center gap-2 text-slate-700 font-bold">
+                  <span className="w-2 h-2 rounded-full bg-blue-600"></span>
                   Keterangan Pilihan:
                 </span>
-                <span className="text-[10px] text-slate-500 font-normal">
+                <span className="text-xs text-slate-500 font-normal">
                   Terisi: <strong className="font-semibold text-blue-600">{Object.keys(postAnswers).length}</strong>/{POST_QUESTIONNAIRE_ITEMS.length}
                 </span>
               </div>
-              <div className="grid grid-cols-5 gap-1 sm:gap-2 text-center">
-                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-800">1</span>
-                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Sangat Tidak Setuju</span>
+              <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5 text-center">
+                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-sm sm:text-base font-bold text-slate-800">1</span>
+                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Sangat Tidak Setuju</span>
                 </div>
-                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-800">2</span>
-                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Tidak Setuju</span>
+                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-sm sm:text-base font-bold text-slate-800">2</span>
+                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Tidak Setuju</span>
                 </div>
-                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-800">3</span>
-                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Netral</span>
+                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-sm sm:text-base font-bold text-slate-800">3</span>
+                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Netral</span>
                 </div>
-                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-800">4</span>
-                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Setuju</span>
+                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-sm sm:text-base font-bold text-slate-800">4</span>
+                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Setuju</span>
                 </div>
-                <div className="py-1 px-0.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-800">5</span>
-                  <span className="text-[9px] sm:text-[11px] text-slate-600 font-medium leading-tight mt-0.5">Sangat Setuju</span>
+                <div className="py-1.5 px-1 rounded-lg bg-slate-50 border border-slate-100 flex flex-col items-center justify-center">
+                  <span className="text-sm sm:text-base font-bold text-slate-800">5</span>
+                  <span className="text-[10px] sm:text-xs text-slate-600 font-medium leading-tight mt-0.5">Sangat Setuju</span>
                 </div>
               </div>
             </div>
@@ -1348,31 +1348,31 @@ function ExperimentContent() {
                 return (
                   <div
                     key={item.code}
-                    className={`p-3.5 sm:p-4 rounded-xl border transition-all ${
+                    className={`p-4 sm:p-5 rounded-xl border transition-all ${
                       selectedVal
-                        ? "bg-white border-slate-200"
+                        ? "bg-white border-slate-300 shadow-2xs"
                         : "bg-slate-50/70 border-slate-200"
                     }`}
                   >
-                    <div className="flex items-start gap-2.5 mb-3">
-                      <span className="shrink-0 w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-xs font-bold flex items-center justify-center mt-0.5">
+                    <div className="flex items-start gap-3 mb-3.5">
+                      <span className="shrink-0 w-7 h-7 rounded-full bg-slate-200 text-slate-800 text-xs sm:text-sm font-bold flex items-center justify-center mt-0.5">
                         {idx + 1}
                       </span>
-                      <p className="text-xs sm:text-sm font-medium text-slate-800 leading-relaxed pt-0.5">
+                      <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed pt-0.5">
                         {item.statement}
                       </p>
                     </div>
 
                     {/* Tombol pilihan hanya angka agar tidak terpotong di layar HP */}
-                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5">
+                    <div className="grid grid-cols-5 gap-2 sm:gap-3">
                       {LIKERT_OPTIONS.map((opt) => {
                         const isSelected = selectedVal === opt.value;
                         return (
                           <label
                             key={opt.value}
-                            className={`py-2.5 sm:py-3 rounded-lg sm:rounded-xl border text-center cursor-pointer transition-all flex items-center justify-center select-none ${
+                            className={`py-3 sm:py-3.5 rounded-xl border text-center cursor-pointer transition-all flex items-center justify-center select-none ${
                               isSelected
-                                ? "bg-blue-600 border-blue-600 text-white font-bold shadow-sm shadow-blue-500/20 scale-[1.02]"
+                                ? "bg-blue-600 border-blue-600 text-white font-bold shadow-sm shadow-blue-500/25 scale-[1.02]"
                                 : "bg-white border-slate-200 hover:bg-slate-100 hover:border-slate-300 text-slate-700 font-semibold"
                             }`}
                           >
@@ -1387,7 +1387,7 @@ function ExperimentContent() {
                               className="sr-only"
                               required
                             />
-                            <span className="text-sm sm:text-base font-bold">{opt.value}</span>
+                            <span className="text-base sm:text-lg font-bold">{opt.value}</span>
                           </label>
                         );
                       })}
@@ -1396,11 +1396,11 @@ function ExperimentContent() {
                 );
               })}
 
-              <div className="flex items-center gap-3 pt-2">
+              <div className="flex items-center gap-4 pt-3">
                 <button
                   type="button"
                   onClick={() => setStep(6)}
-                  className="px-5 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+                  className="px-6 py-3.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-sm sm:text-base font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Kembali
@@ -1408,10 +1408,10 @@ function ExperimentContent() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 py-3.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm font-semibold shadow-sm transition flex items-center justify-center gap-2"
+                  className="flex-1 py-4 px-6 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-sm sm:text-base font-bold shadow-sm transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {submitting ? "Menyimpan Jawaban..." : "Selesaikan Penelitian & Lihat Penutup"}
-                  <CheckCircle className="w-4 h-4" />
+                  <CheckCircle className="w-5 h-5" />
                 </button>
               </div>
             </form>
@@ -1422,16 +1422,16 @@ function ExperimentContent() {
         {/* TAHAP 8: PENUTUP (DEBRIEFING) - PDF PAGE 10                     */}
         {/* ============================================================== */}
         {step === 8 && participant && (
-          <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 shadow-sm text-center">
-            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-8 sm:p-12 shadow-sm text-center">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-5">
               <CheckCircle className="w-9 h-9" />
             </div>
 
-            <h2 className="text-xl font-bold text-slate-900 mb-4">
+            <h2 className="text-2xl font-bold text-slate-900 mb-4">
               Penutup
             </h2>
 
-            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed mb-6 text-left">
+            <div className="text-sm sm:text-base text-slate-700 space-y-4 leading-relaxed mb-8 text-left">
               <p>Anda telah menyelesaikan seluruh rangkaian penelitian.</p>
               <p>
                 Terima kasih telah meluangkan waktu untuk berpartisipasi dalam penelitian ini.

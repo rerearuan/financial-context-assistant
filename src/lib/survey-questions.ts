@@ -36,19 +36,25 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
   {
     code: "MAC1",
     category: "Mental Account Conflict (MAC)",
-    statement: "Dalam situasi ini, menggunakan uang untuk satu tujuan keuangan dapat mengurangi uang yang tersedia untuk tujuan lainnya.",
+    statement: "Pada skenario yang saya dapatkan, saya perlu mempertimbangkan dua tujuan keuangan yang sama-sama penting.",
     source: "Mayer & Freund (2022)",
   },
   {
     code: "MAC2",
     category: "Mental Account Conflict (MAC)",
-    statement: "Dalam situasi ini, memprioritaskan satu tujuan keuangan dapat membuat tujuan lainnya terabaikan.",
-    source: "Mayer & Freund (2022)",
+    statement: "Pada skenario yang saya dapatkan, dana yang tersedia harus dibagi untuk mencapai dua tujuan keuangan yang berbeda.",
+    source: "self-developed",
   },
   {
     code: "MAC3",
     category: "Mental Account Conflict (MAC)",
-    statement: "Dalam situasi ini, memprioritaskan satu tujuan keuangan dapat menghambat pemenuhan tujuan lainnya.",
+    statement: "Pada skenario yang saya dapatkan, saya bisa fokus pada satu tujuan keuangan tanpa harus mempertimbangkan tujuan lainnya.",
+    source: "Mayer & Freund (2022)",
+  },
+  {
+    code: "MAC4",
+    category: "Mental Account Conflict (MAC)",
+    statement: "Pada skenario yang saya dapatkan, saya dapat memenuhi satu tujuan keuangan tanpa harus mengurangi alokasi dana untuk tujuan lain yang sama penting.",
     source: "Mayer & Freund (2022)",
   },
 

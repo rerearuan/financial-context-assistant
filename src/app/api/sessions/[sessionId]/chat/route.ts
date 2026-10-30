@@ -124,9 +124,17 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
       buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
       routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
+      historicalRoutine: intent.userProvidedFinances.historicalRoutine ?? (existingDetails?.historicalRoutine as number | undefined),
+      spentSoFar: intent.userProvidedFinances.spentSoFar ?? (existingDetails?.spentSoFar as number | undefined),
       emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
       emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
       goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
+      rawUserFigures: [
+        ...new Set([
+          ...((existingDetails?.rawUserFigures as number[]) || []),
+          ...((intent.userProvidedFinances.rawUserFigures as number[]) || []),
+        ]),
+      ],
       source: "user_message",
     };
     convState.userProvidedFacts = { ...convState.userProvidedFacts, ...userProvidedFinances };
@@ -142,11 +150,69 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       liabilities: existingDetails.liabilities as number | undefined,
       buffer: existingDetails.buffer as number | undefined,
       routine: existingDetails.routine as number | undefined,
+      historicalRoutine: existingDetails.historicalRoutine as number | undefined,
+      spentSoFar: existingDetails.spentSoFar as number | undefined,
       emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
       emergencyTarget: existingDetails.emergencyTarget as number | undefined,
       goals: existingDetails.goals as string | undefined,
+      rawUserFigures: existingDetails.rawUserFigures as number[] | undefined,
       source: "user_message",
     };
+  }
+
+  // Manage local vs persistent format preferences
+  if (intent.formatDirective === "brief_ongoing") {
+    convState.lengthPreference = "brief";
+    convState.preferBriefResponse = true;
+    convState.localFormatInstruction = "one_line";
+  } else if (intent.formatDirective === "detailed_ongoing") {
+    convState.lengthPreference = "detailed";
+    convState.preferBriefResponse = false;
+    convState.localFormatInstruction = "detailed";
+  } else if (intent.formatDirective === "detailed") {
+    convState.localFormatInstruction = "detailed";
+    if (convState.lengthPreference === "brief") {
+      convState.lengthPreference = "detailed";
+      convState.preferBriefResponse = false;
+    }
+  } else if (intent.formatDirective) {
+    convState.localFormatInstruction = intent.formatDirective;
+  } else {
+    convState.localFormatInstruction = null;
+  }
+
+  const isBriefRequested =
+    convState.localFormatInstruction === "one_line" ||
+    convState.lengthPreference === "brief" ||
+    /(?:jawab (?:dengan )?singkat|singkat (?:saja|dulu)|ringkas|1 kalimat|satu kalimat|jangan panjang|pendek saja|to the point|langsung inti)/i.test(messageText);
+
+  const isThankYouOnly =
+    intent.intentType === "thank_you" ||
+    /^(?:oke |baik |sip |siap )?(?:terima\s*kasih|makasih|thanks|tq)(?:\s*(?:banyak|ya|mas|mbak|asisten|infonya))?[.!]?$/i.test(messageText.trim());
+
+  if (isThankYouOnly) {
+    convState.userThanked = true;
+  }
+
+  const isRequestingNominal =
+    intent.intentType === "request_nominal_calculation" ||
+    /(?:bingung (?:mau )?(?:nabung|sisihkan|simpan) berapa|kamu yang hitung|berapa yang aman|rekomendasi(?:kan)? (?:nominal|jumlah)|menurutmu berapa|sebaiknya berapa|belum tahu berapa|tentukan nominal|hitungin)/i.test(messageText);
+
+  let clarificationToAsk: string | null = null;
+  const isOneLine = convState.localFormatInstruction === "one_line" || convState.lengthPreference === "brief";
+  const isConceptual = intent.intentType === "conceptual_question" || intent.isConceptualQuestion;
+
+  if (demoSess.condition === "basic" && !isThankYouOnly && !isOneLine && !isConceptual && intent.intentType !== "greeting_or_ping") {
+    const hasBalance = convState.userProvidedFacts.balance !== undefined;
+    const hasIncome = convState.userProvidedFacts.income !== undefined;
+    const isSpending = convState.activePlan?.type === "spending";
+    if (isSpending && !hasBalance && (convState.askedClarifications || []).length === 0) {
+      clarificationToAsk = "Berapa perkiraan saldo rekening yang Anda miliki saat ini?";
+      convState.askedClarifications = [...(convState.askedClarifications || []), "balance"];
+    } else if (!isSpending && !hasIncome && !hasBalance && (convState.askedClarifications || []).length === 0) {
+      clarificationToAsk = "Berapa pendapatan bulanan yang baru Anda terima atau saldo yang tersedia?";
+      convState.askedClarifications = [...(convState.askedClarifications || []), "income"];
+    }
   }
 
   const existingMsgs = demoMessages.get(sessionId) || [];
@@ -164,29 +230,26 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     simplifyExplanation: convState.confusionCount > 0 || intent.intentType === "confusion",
     avoidQuestionnaireRepeat: demoSess.condition === "basic" && demoSess.followupCount > 0,
     hasUserDisclosedAction: hasDisclosed,
+    preferBriefResponse: Boolean(isBriefRequested),
+    lengthPreference: convState.lengthPreference,
+    localFormatInstruction: convState.localFormatInstruction,
+    requestingNominalRecommendation: Boolean(isRequestingNominal),
+    shouldCloseConversation: isThankYouOnly,
+    isThankYouWithNewQuestion: intent.isThankYouWithNewQuestion,
+    isConceptualQuestion: isConceptual,
     honoredConstraints: convState.userConstraints.prohibitCertificationFunds
       ? ["prohibitCertificationFunds"]
       : [],
-    clarificationToAsk:
-      demoSess.condition === "basic" && demoSess.followupCount === 0
-        ? "Berapa perkiraan saldo kas rekening yang Anda miliki saat ini?"
-        : null,
+    clarificationToAsk,
   };
 
   // Server-side permission check: Basic NEVER receives synthetic profile
   let syntheticProfileContext: FinancialProfileContext | null = null;
   if (demoSess.condition === "context_aware" && pkg?.syntheticProfile) {
     syntheticProfileContext = {
-      totalCashBalance: pkg.syntheticProfile.totalCashBalance,
-      liquidBalance: pkg.syntheticProfile.liquidBalance,
-      budgets: pkg.syntheticProfile.budgets as any,
-      liabilities: pkg.syntheticProfile.liabilities as any,
-      goals: pkg.syntheticProfile.goals as any,
-      buffer: pkg.syntheticProfile.buffer as any,
-      routineExpenses: pkg.syntheticProfile.routineExpenses as any,
-      incomeSchedule: pkg.syntheticProfile.incomeSchedule as any,
-      transactions: (pkg.syntheticProfile as any).transactions,
-      installmentPlan: (pkg.syntheticProfile as any).installmentPlan,
+      ...pkg.syntheticProfile,
+      scenarioId: pkg.scenario.id,
+      h0Date: pkg.scenario.h0Date,
       source: "synthetic_profile",
     };
   }
@@ -451,9 +514,17 @@ export async function POST(
         liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
         buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
         routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
+        historicalRoutine: intent.userProvidedFinances.historicalRoutine ?? (existingDetails?.historicalRoutine as number | undefined),
+        spentSoFar: intent.userProvidedFinances.spentSoFar ?? (existingDetails?.spentSoFar as number | undefined),
         emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
         emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
         goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
+        rawUserFigures: [
+          ...new Set([
+            ...((existingDetails?.rawUserFigures as number[]) || []),
+            ...((intent.userProvidedFinances.rawUserFigures as number[]) || []),
+          ]),
+        ],
         source: "user_message",
       };
       convState.userProvidedFacts = { ...convState.userProvidedFacts, ...userProvidedFinances };
@@ -469,11 +540,69 @@ export async function POST(
         liabilities: existingDetails.liabilities as number | undefined,
         buffer: existingDetails.buffer as number | undefined,
         routine: existingDetails.routine as number | undefined,
+        historicalRoutine: existingDetails.historicalRoutine as number | undefined,
+        spentSoFar: existingDetails.spentSoFar as number | undefined,
         emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
         emergencyTarget: existingDetails.emergencyTarget as number | undefined,
         goals: existingDetails.goals as string | undefined,
+        rawUserFigures: existingDetails.rawUserFigures as number[] | undefined,
         source: "user_message",
       };
+    }
+
+    // Manage local vs persistent format preferences
+    if (intent.formatDirective === "brief_ongoing") {
+      convState.lengthPreference = "brief";
+      convState.preferBriefResponse = true;
+      convState.localFormatInstruction = "one_line";
+    } else if (intent.formatDirective === "detailed_ongoing") {
+      convState.lengthPreference = "detailed";
+      convState.preferBriefResponse = false;
+      convState.localFormatInstruction = "detailed";
+    } else if (intent.formatDirective === "detailed") {
+      convState.localFormatInstruction = "detailed";
+      if (convState.lengthPreference === "brief") {
+        convState.lengthPreference = "detailed";
+        convState.preferBriefResponse = false;
+      }
+    } else if (intent.formatDirective) {
+      convState.localFormatInstruction = intent.formatDirective;
+    } else {
+      convState.localFormatInstruction = null;
+    }
+
+    const isBriefRequested =
+      convState.localFormatInstruction === "one_line" ||
+      convState.lengthPreference === "brief" ||
+      /(?:jawab (?:dengan )?singkat|singkat (?:saja|dulu)|ringkas|1 kalimat|satu kalimat|jangan panjang|pendek saja|to the point|langsung inti)/i.test(message);
+
+    const isThankYouOnly =
+      intent.intentType === "thank_you" ||
+      /^(?:oke |baik |sip |siap )?(?:terima\s*kasih|makasih|thanks|tq)(?:\s*(?:banyak|ya|mas|mbak|asisten|infonya))?[.!]?$/i.test(message.trim());
+
+    if (isThankYouOnly) {
+      convState.userThanked = true;
+    }
+
+    const isRequestingNominal =
+      intent.intentType === "request_nominal_calculation" ||
+      /(?:bingung (?:mau )?(?:nabung|sisihkan|simpan) berapa|kamu yang hitung|berapa yang aman|rekomendasi(?:kan)? (?:nominal|jumlah)|menurutmu berapa|sebaiknya berapa|belum tahu berapa|tentukan nominal|hitungin)/i.test(message);
+
+    let clarificationToAsk: string | null = null;
+    const isOneLine = convState.localFormatInstruction === "one_line" || convState.lengthPreference === "brief";
+    const isConceptual = intent.intentType === "conceptual_question" || intent.isConceptualQuestion;
+
+    if (session.condition === "basic" && !isThankYouOnly && !isOneLine && !isConceptual && intent.intentType !== "greeting_or_ping") {
+      const hasBalance = convState.userProvidedFacts.balance !== undefined;
+      const hasIncome = convState.userProvidedFacts.income !== undefined;
+      const isSpending = convState.activePlan?.type === "spending";
+      if (isSpending && !hasBalance && (convState.askedClarifications || []).length === 0) {
+        clarificationToAsk = "Berapa perkiraan saldo rekening yang Anda miliki saat ini?";
+        convState.askedClarifications = [...(convState.askedClarifications || []), "balance"];
+      } else if (!isSpending && !hasIncome && !hasBalance && (convState.askedClarifications || []).length === 0) {
+        clarificationToAsk = "Berapa pendapatan bulanan yang baru Anda terima atau saldo yang tersedia?";
+        convState.askedClarifications = [...(convState.askedClarifications || []), "income"];
+      }
     }
 
     (updatedAction as any).conversationState = convState;
@@ -503,13 +632,17 @@ export async function POST(
       simplifyExplanation: convState.confusionCount > 0 || intent.intentType === "confusion",
       avoidQuestionnaireRepeat: session.condition === "basic" && session.followupCount > 0,
       hasUserDisclosedAction: hasDisclosed,
+      preferBriefResponse: Boolean(isBriefRequested),
+      lengthPreference: convState.lengthPreference,
+      localFormatInstruction: convState.localFormatInstruction,
+      requestingNominalRecommendation: Boolean(isRequestingNominal),
+      shouldCloseConversation: isThankYouOnly,
+      isThankYouWithNewQuestion: intent.isThankYouWithNewQuestion,
+      isConceptualQuestion: isConceptual,
       honoredConstraints: convState.userConstraints.prohibitCertificationFunds
         ? ["prohibitCertificationFunds"]
         : [],
-      clarificationToAsk:
-        session.condition === "basic" && session.followupCount === 0
-          ? "Berapa perkiraan saldo kas rekening yang Anda miliki saat ini?"
-          : null,
+      clarificationToAsk,
     };
 
     // 5. Retrieve Context strictly by Condition (Profile Access Guardrail)
@@ -524,6 +657,9 @@ export async function POST(
       if (profile) {
         const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === session.scenarioId);
         syntheticProfileContext = {
+          id: profile.id,
+          scenarioId: session.scenarioId,
+          h0Date: pkg?.scenario.h0Date,
           totalCashBalance: profile.totalCashBalance,
           liquidBalance: profile.liquidBalance,
           allocations: pkg?.syntheticProfile?.allocations,
@@ -535,7 +671,8 @@ export async function POST(
           incomeSchedule: profile.incomeSchedule,
           transactions: pkg?.syntheticProfile?.transactions,
           laptopOffer: pkg?.syntheticProfile?.laptopOffer,
-          h0Date: pkg?.scenario.h0Date,
+          emergencyTarget: pkg?.syntheticProfile?.emergencyTarget,
+          certificationGoal: pkg?.syntheticProfile?.certificationGoal,
           source: "synthetic_profile",
         };
       }

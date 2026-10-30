@@ -11,17 +11,38 @@ export const ExtractedIntentSchema = z.object({
     "other",
     // Enhanced Section 8 categories
     "greeting_or_ping",
+    "thank_you",
     "decline_discussion",
     "general_impact_query",
     "specific_aspect_query",
     "alternative_exploration",
+    "action_modification",
     "relative_modification",
     "constraint_setting",
     "advice_request",
+    "request_nominal_calculation",
+    "conceptual_question",
     "confusion",
     "fact_provision_or_correction",
     "out_of_scope",
   ]),
+  formatDirective: z
+    .enum([
+      "one_line",
+      "yes_no_amount",
+      "nominal_only",
+      "few_numbers",
+      "no_numbers",
+      "specific_part_only",
+      "detailed",
+      "compare",
+      "brief_ongoing",
+      "detailed_ongoing",
+    ])
+    .nullable()
+    .optional(),
+  isThankYouWithNewQuestion: z.boolean().optional(),
+  isConceptualQuestion: z.boolean().optional(),
   focalDimension: z
     .enum([
       "liquidity",
@@ -46,9 +67,12 @@ export const ExtractedIntentSchema = z.object({
       liabilities: z.number().optional(),
       buffer: z.number().optional(),
       routine: z.number().optional(),
+      historicalRoutine: z.number().optional(),
+      spentSoFar: z.number().optional(),
       emergencyCurrent: z.number().optional(),
       emergencyTarget: z.number().optional(),
       goals: z.string().optional(),
+      rawUserFigures: z.array(z.number()).optional(),
     })
     .nullable()
     .optional(),

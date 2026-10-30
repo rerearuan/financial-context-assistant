@@ -339,24 +339,24 @@ function ChatPageContent() {
   const showQuickReplies = !hasClickedQuickReply && !hasUserSentMessage && quickReplies.length > 0;
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-white shadow-sm border-x border-slate-200 overflow-hidden">
+    <div className="flex flex-col h-screen max-w-5xl mx-auto bg-white shadow-sm border-x border-slate-200 overflow-hidden">
       {/* 1. Header */}
       <header className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shadow-xs">
         <div>
-          <h1 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-            <MessageSquare className="w-4 h-4 text-slate-800" />
+          <h1 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-slate-800" />
             Asisten Percakapan Finansial
           </h1>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs sm:text-sm text-slate-500">
             ID Partisipan: <span className="font-mono font-medium">{session.participantCode}</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             type="button"
             onClick={() => setIsScenarioOpen((prev) => !prev)}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 shadow-xs cursor-pointer ${
+            className={`px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border transition flex items-center gap-1.5 shadow-xs cursor-pointer ${
               isScenarioOpen
                 ? "bg-blue-50 text-blue-700 border-blue-300 ring-2 ring-blue-100"
                 : "bg-white text-slate-700 hover:bg-slate-50 border-slate-300 hover:border-slate-400"
@@ -364,10 +364,10 @@ function ChatPageContent() {
             title={isScenarioOpen ? "Tutup panel skenario" : "Buka split screen skenario"}
             aria-expanded={isScenarioOpen}
           >
-            <FileText className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+            <FileText className="w-4 h-4 text-blue-600 shrink-0" />
             <span>{isScenarioOpen ? "Tutup Skenario" : "Lihat Skenario"}</span>
             <ChevronDown
-              className={`w-3.5 h-3.5 text-slate-500 transition-transform duration-300 shrink-0 ${
+              className={`w-4 h-4 text-slate-500 transition-transform duration-300 shrink-0 ${
                 isScenarioOpen ? "rotate-180" : ""
               }`}
             />
@@ -375,7 +375,7 @@ function ChatPageContent() {
 
           <button
             onClick={handleFinishDiscussion}
-            className="px-3.5 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
           >
             {isDirectFormMode ? (
               <span>Selesai Diskusi</span>
@@ -385,7 +385,7 @@ function ChatPageContent() {
                 <span className="sm:hidden">Selesai</span>
               </>
             )}
-            <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </header>
@@ -450,13 +450,13 @@ function ChatPageContent() {
             )}
 
             <div
-              className={`max-w-[85%] sm:max-w-[75%] rounded-2xl px-4 py-3 shadow-xs ${
+              className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 shadow-xs ${
                 msg.role === "user"
                   ? "bg-slate-900 text-white rounded-br-xs"
                   : "bg-white text-slate-800 border border-slate-200 rounded-bl-xs"
               }`}
             >
-              <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+              <div className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
                 {msg.content}
               </div>
             </div>
@@ -530,8 +530,8 @@ function ChatPageContent() {
 
       {/* 4. Quick Replies (Single option, disappears permanently after first click or message) */}
       {showQuickReplies && (
-        <div className="bg-white border-t border-slate-200 px-4 py-2.5 overflow-x-auto flex items-center gap-2 no-scrollbar animate-in fade-in duration-200">
-          <span className="text-xs text-slate-400 font-medium shrink-0">Opsi Pertanyaan:</span>
+        <div className="bg-white border-t border-slate-200 px-4 py-3 overflow-x-auto flex items-center gap-2.5 no-scrollbar animate-in fade-in duration-200">
+          <span className="text-xs sm:text-sm text-slate-500 font-medium shrink-0">Opsi Pertanyaan:</span>
           {quickReplies.map((reply, idx) => (
             <button
               key={idx}
@@ -539,7 +539,7 @@ function ChatPageContent() {
                 setHasClickedQuickReply(true);
                 handleSendMessage(reply);
               }}
-              className="whitespace-normal text-left px-3.5 py-1.5 rounded-full text-xs font-medium bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 hover:border-blue-300 transition shrink-0 cursor-pointer shadow-2xs"
+              className="whitespace-normal text-left px-4 py-2 rounded-full text-xs sm:text-sm font-medium bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 hover:border-blue-300 transition shrink-0 cursor-pointer shadow-2xs"
             >
               {reply}
             </button>
@@ -548,13 +548,13 @@ function ChatPageContent() {
       )}
 
       {/* 5. Chat Input Footer (Always enabled for async prompt typing) */}
-      <footer className="p-3 sm:p-4 bg-white border-t border-slate-200">
+      <footer className="p-3.5 sm:p-5 bg-white border-t border-slate-200">
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-3"
         >
           <input
             type="text"
@@ -566,19 +566,21 @@ function ChatPageContent() {
                 : "Ketik pertanyaan atau tanggapan finansial Anda..."
             }
             maxLength={1000}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-xs sm:text-sm"
+            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent text-sm sm:text-base"
           />
           <button
             type="submit"
             disabled={!inputText.trim()}
-            className="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl transition shadow-xs shrink-0 flex items-center gap-1.5 cursor-pointer disabled:cursor-not-allowed"
+            className="px-4 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl transition shadow-xs shrink-0 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed font-medium text-sm"
             title={isSending ? "Antrekan prompt berikutnya" : "Kirim pesan"}
           >
             <Send className="w-4 h-4" />
-            {isSending && (
+            {isSending ? (
               <span className="text-xs font-medium hidden sm:inline">
                 Antrekan
               </span>
+            ) : (
+              <span className="hidden sm:inline">Kirim</span>
             )}
           </button>
         </form>

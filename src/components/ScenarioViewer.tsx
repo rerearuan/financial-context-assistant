@@ -284,12 +284,12 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
   const tableRows = getTableRows();
 
   return (
-    <div className={`space-y-4 ${compact ? "text-xs" : "text-xs sm:text-sm"}`}>
+    <div className={`space-y-5 ${compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"}`}>
       {/* -------------------------------------------------------------
           BAGIAN SITUASI (Teks Narasi Asli Sesuai PDF)
       ------------------------------------------------------------- */}
-      <div className="bg-white rounded-xl border border-slate-300 p-4 sm:p-5 shadow-2xs">
-        <h4 className="font-bold text-slate-900 text-sm mb-2.5 pb-1.5 border-b border-slate-200">
+      <div className="bg-white rounded-xl border border-slate-300 p-5 sm:p-6 shadow-xs">
+        <h4 className="font-bold text-slate-900 text-sm sm:text-base mb-3 pb-2 border-b border-slate-200">
           Situasi
         </h4>
         <div className="whitespace-pre-line text-slate-800 leading-relaxed font-normal">
@@ -300,18 +300,18 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
       {/* -------------------------------------------------------------
           BAGIAN KONDISI KEUANGAN ANDA
       ------------------------------------------------------------- */}
-      <div className="bg-white rounded-xl border border-slate-300 p-4 sm:p-5 shadow-2xs">
-        <h4 className="font-bold text-slate-900 text-sm pb-2 mb-3 border-b border-slate-200">
+      <div className="bg-white rounded-xl border border-slate-300 p-5 sm:p-6 shadow-xs">
+        <h4 className="font-bold text-slate-900 text-sm sm:text-base pb-2 mb-3.5 border-b border-slate-200">
           Kondisi Keuangan Anda
         </h4>
 
         {/* TABEL KEUANGAN */}
-        <div className="overflow-x-auto rounded-lg border border-slate-300">
+        <div className="overflow-x-auto rounded-xl border border-slate-300">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-100/90 border-b border-slate-300 text-slate-800 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                <th className="py-2.5 px-3">Keterangan</th>
-                <th className="py-2.5 px-3 text-right whitespace-nowrap w-40 sm:w-48">
+              <tr className="bg-slate-100/90 border-b border-slate-300 text-slate-800 text-xs sm:text-sm font-bold uppercase tracking-wider">
+                <th className="py-3 px-4 sm:px-5">Keterangan</th>
+                <th className="py-3 px-4 sm:px-5 text-right whitespace-nowrap w-44 sm:w-56">
                   Jumlah / Waktu
                 </th>
               </tr>
@@ -326,7 +326,7 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
                     >
                       <td
                         colSpan={2}
-                        className="py-2 px-3 text-xs tracking-wide"
+                        className="py-2.5 px-4 sm:px-5 text-xs sm:text-sm tracking-wide"
                       >
                         ● {row.label}
                       </td>
@@ -340,18 +340,18 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
                     className={idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}
                   >
                     <td
-                      className={`py-2 px-3 align-top leading-snug ${
+                      className={`py-2.5 px-4 sm:px-5 align-top leading-relaxed ${
                         row.isSubItem
-                          ? "pl-6 sm:pl-7 text-slate-700"
+                          ? "pl-7 sm:pl-9 text-slate-700"
                           : "text-slate-900 font-normal"
                       }`}
                     >
-                      <span className="text-slate-400 mr-1.5">
+                      <span className="text-slate-400 mr-2">
                         {row.isSubItem ? "○" : "●"}
                       </span>
                       {row.label}
                     </td>
-                    <td className="py-2 px-3 align-top text-right font-semibold text-slate-900 whitespace-nowrap">
+                    <td className="py-2.5 px-4 sm:px-5 align-top text-right font-semibold text-slate-900 whitespace-nowrap">
                       {row.value}
                     </td>
                   </tr>
@@ -366,8 +366,8 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
           BAGIAN TUGAS (Sesuai PDF Instrumen Penelitian)
       ------------------------------------------------------------- */}
       {scenario.tugasText && (
-        <div className="bg-white rounded-xl border border-slate-300 p-4 sm:p-5 shadow-2xs">
-          <h4 className="font-bold text-slate-900 text-sm mb-2.5 pb-1.5 border-b border-slate-200">
+        <div className="bg-white rounded-xl border border-slate-300 p-5 sm:p-6 shadow-xs">
+          <h4 className="font-bold text-slate-900 text-sm sm:text-base mb-3 pb-2 border-b border-slate-200">
             Tugas
           </h4>
           <div className="text-slate-800 leading-relaxed font-normal">

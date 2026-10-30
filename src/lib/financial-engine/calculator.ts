@@ -201,6 +201,23 @@ export function calculateFinancialConsequences(
     const goalsEvaluation: GoalAllocationCalculation[] = [];
     const goalImpactNotes: string[] = [];
     let areProtectedAllocationsMaintained: AssessmentStatus = true;
+    let totalProtectedCommitments: number | null = null;
+    let commitmentsShortfall: number | null = null;
+    let isFullyCoveredIncludingAllCommitments: AssessmentStatus = true;
+
+    // In Spending High: check if buffer (5M) + certification (3M) can both be maintained
+    const certGoal = selected.relevantGoals.find((g) => g.title.toLowerCase().includes("sertifikasi"));
+    if (isSpending && certGoal) {
+      totalProtectedCommitments = minBuffer + certGoal.currentAllocated; // 5M + 3M = 8M
+      const remainingAfterRoutine = routineResult?.remainingCashAfterRoutine ?? remainingCashAfterImmediateObligations;
+      if (remainingAfterRoutine < totalProtectedCommitments) {
+        commitmentsShortfall = totalProtectedCommitments - remainingAfterRoutine; // 8M - 7.4M = 600.000
+        isFullyCoveredIncludingAllCommitments = false;
+      } else {
+        commitmentsShortfall = 0;
+        isFullyCoveredIncludingAllCommitments = true;
+      }
+    }
 
     for (const g of selected.relevantGoals) {
       const remainingShortfall = Math.max(0, g.targetAmount - g.currentAllocated);
@@ -237,7 +254,10 @@ export function calculateFinancialConsequences(
               availableSurplusAfterObligations: remainingCashAfterImmediateObligations,
               canMeetGoal: true,
               isUntouchedAndProtected: true,
-              explanation: `Pos alokasi Program Sertifikasi Profesional (Rp ${g.currentAllocated.toLocaleString("id-ID")}) dipertahankan utuh dan tidak digunakan untuk menutupi kekurangan pembelian laptop.`,
+              explanation:
+                commitmentsShortfall && commitmentsShortfall > 0
+                  ? `Pos alokasi Program Sertifikasi Profesional (Rp ${g.currentAllocated.toLocaleString("id-ID")}) dipertahankan utuh dan tidak digunakan untuk pembelian laptop. Namun, jika Dana Darurat Rp ${minBuffer.toLocaleString("id-ID")} juga dipertahankan utuh, sisa kas setelah tagihan dan kebutuhan rutin 12 hari (Rp ${(routineResult?.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}) menyisakan selisih kekurangan (shortfall) Rp ${commitmentsShortfall.toLocaleString("id-ID")}.`
+                  : `Pos alokasi Program Sertifikasi Profesional (Rp ${g.currentAllocated.toLocaleString("id-ID")}) dipertahankan utuh.`,
             });
             goalImpactNotes.push(
               `Dana Program Sertifikasi Profesional (Rp ${g.currentAllocated.toLocaleString("id-ID")}) dipertahankan utuh.`
@@ -305,15 +325,75 @@ export function calculateFinancialConsequences(
       installmentDetails = calculateInstallmentDetails(profile.laptopOffer.price);
     }
 
-    // 7. Deterministic Facts & Stated Assumptions
+    // 7. Baseline and Alternatives for Saving Scenario
+    let baselineSurplusBeforeAction: number | null = null;
+    let baselineSurplusRange: { min: number; max: number } | null = null;
+    let alternativesEvaluation: FinancialCalculationResult["alternativesEvaluation"] = undefined;
+    let recommendedAmount: number | null = null;
+    let recommendedAmountReason: string | null = null;
+
+    if (isSaving) {
+      const cashAfterBillsBeforeSaving = (operatingCashBefore ?? 8000000) - totalLiabilitiesBeforeIncome;
+      const routineEst = profile.routineExpenses?.remainingEstimate ?? 2700000;
+      const routineMin = profile.routineExpenses?.range?.min ?? 2400000;
+      const routineMax = profile.routineExpenses?.range?.max ?? 3000000;
+
+      baselineSurplusBeforeAction = cashAfterBillsBeforeSaving - routineEst; // 4.5M - 2.7M = 1.8M
+      baselineSurplusRange = {
+        min: cashAfterBillsBeforeSaving - routineMax, // 1.5M
+        max: cashAfterBillsBeforeSaving - routineMin, // 2.1M
+      };
+
+      alternativesEvaluation = [
+        {
+          amount: 1000000,
+          label: "Rp 1.000.000",
+          remainingCash: baselineSurplusBeforeAction - 1000000, // 800.000
+          canCoverRoutine: true,
+          notes: "Arus kas bulanan tetap surplus Rp 800.000 (rentang Rp 500.000 – Rp 1.100.000). Sangat aman.",
+        },
+        {
+          amount: 2000000,
+          label: "Rp 2.000.000",
+          remainingCash: baselineSurplusBeforeAction - 2000000, // -200.000
+          canCoverRoutine: false,
+          notes: "Arus kas bulanan defisit Rp 200.000 (rentang defisit Rp 500.000 hingga surplus tipis Rp 100.000). Berisiko mengganggu kelancaran kas harian.",
+        },
+        {
+          amount: 3000000,
+          label: "Rp 3.000.000",
+          remainingCash: baselineSurplusBeforeAction - 3000000, // -1.200.000
+          canCoverRoutine: false,
+          notes: "Arus kas bulanan defisit berat Rp 1.200.000. Sangat tidak disarankan.",
+        },
+      ];
+
+      recommendedAmount = 1000000;
+      recommendedAmountReason =
+        "Nominal Rp 1.000.000 paling aman karena masih menyisakan cadangan kas operasional bulanan sebesar Rp 800.000 setelah seluruh tagihan dan kebutuhan hidup rutin terpenuhi.";
+    }
+
+    // 8. Deterministic Facts & Stated Assumptions
     const deterministicFacts: string[] = [];
     const statedAssumptions: string[] = [];
     const unknownVariables: string[] = [];
 
     // Horizon fact
-    const daysToNextIncome = profile.scenarioId?.startsWith("spending") ? 12 : 30;
+    let daysToNextIncome = 30;
+    if (profile.h0Date && profile.incomeSchedule?.nextDate) {
+      const h0 = new Date(profile.h0Date);
+      const nextInc = new Date(profile.incomeSchedule.nextDate);
+      const diffDays = Math.round((nextInc.getTime() - h0.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays > 0) {
+        daysToNextIncome = diffDays;
+      }
+    } else if (profile.scenarioId?.startsWith("spending") || isSpending) {
+      daysToNextIncome = 12;
+    } else {
+      daysToNextIncome = 30;
+    }
     deterministicFacts.push(
-      `Siklus pendapatan/gaji berikutnya diperkirakan diterima dalam ${daysToNextIncome} hari.`
+      `Gajian berikutnya diperkirakan diterima dalam ${daysToNextIncome} hari.`
     );
 
     // Balance fact
@@ -323,22 +403,25 @@ export function calculateFinancialConsequences(
       );
       if (isBudgetExceeded) {
         deterministicFacts.push(
-          `Alokasi khusus laptop saat ini adalah Rp ${(virtualAllocationsBefore["laptop"] || 0).toLocaleString("id-ID")}, sehingga terdapat kekurangan alokasi sebesar Rp ${Math.abs(budgetVariance || 0).toLocaleString("id-ID")}. Kekurangan ini ditutup dari kas operasional bulan berjalan (tersisa Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}).`
+          `Alokasi khusus laptop saat ini adalah Rp ${(virtualAllocationsBefore["laptop"] || 0).toLocaleString("id-ID")}, sehingga terdapat kekurangan alokasi sebesar Rp ${Math.abs(budgetVariance || 0).toLocaleString("id-ID")}. Kekurangan ini ditutup dari uang kebutuhan bulan ini (tersisa Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}).`
         );
       }
     } else {
       deterministicFacts.push(
-        `Saldo total rekening bank adalah Rp ${initialBalance.toLocaleString("id-ID")}. Penambahan tabungan dana darurat merupakan alokasi virtual di rekening yang sama, sehingga total saldo kas rekening bank tetap Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+        `Saldo total rekening bank adalah Rp ${initialBalance.toLocaleString("id-ID")}. Penambahan tabungan dana darurat merupakan alokasi virtual di rekening yang sama, sehingga total saldo rekening tetap Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
       );
       if (action.amount > 0) {
         deterministicFacts.push(
-          `Menyetor tabungan Rp ${action.amount.toLocaleString("id-ID")} memotong pos kas operasional bulan berjalan dari Rp ${operatingCashBefore?.toLocaleString("id-ID")} menjadi Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}, dan meningkatkan alokasi Dana Darurat menjadi Rp ${(virtualAllocationsAfter["emergency"] || 0).toLocaleString("id-ID")}.`
+          `Menyetor tabungan Rp ${action.amount.toLocaleString("id-ID")} memotong pos uang kebutuhan bulan ini dari Rp ${operatingCashBefore?.toLocaleString("id-ID")} menjadi Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}, dan meningkatkan alokasi Dana Darurat menjadi Rp ${(virtualAllocationsAfter["emergency"] || 0).toLocaleString("id-ID")}.`
         );
       } else {
         deterministicFacts.push(
-          `Belum ada nominal tabungan yang dipilih. Pendapatan baru Rp ${operatingCashBefore?.toLocaleString("id-ID")} tersedia penuh di pos kas operasional.`
+          `Belum ada nominal tabungan yang dipilih. Surplus arus kas bulanan sebelum penyisihan tabungan adalah Rp ${baselineSurplusBeforeAction?.toLocaleString("id-ID")} (rentang Rp ${baselineSurplusRange?.min.toLocaleString("id-ID")} – Rp ${baselineSurplusRange?.max.toLocaleString("id-ID")}).`
         );
       }
+      deterministicFacts.push(
+        `Rekomendasi alokasi tabungan yang aman: Rp 1.000.000 (menyisakan uang kebutuhan bulan ini Rp 800.000). Menabung Rp 2.000.000 akan memicu defisit kas bulanan Rp 200.000.`
+      );
     }
 
     // Liabilities fact
@@ -360,13 +443,13 @@ export function calculateFinancialConsequences(
         })
         .join(", ");
       deterministicFacts.push(
-        `Kewajiban tagihan wajib sebelum pemasukan berikutnya: total Rp ${totalLiabilitiesBeforeIncome.toLocaleString("id-ID")} [${billDetails}].`
+        `Kewajiban tagihan wajib sebelum gajian berikutnya: total Rp ${totalLiabilitiesBeforeIncome.toLocaleString("id-ID")} [${billDetails}].`
       );
     }
 
     // Operating cash after bills
     deterministicFacts.push(
-      `Sisa kas operasional setelah melunasi kewajiban tagihan terdekat: Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
+      `Sisa uang kebutuhan bulan ini setelah melunasi kewajiban tagihan terdekat: Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
     );
 
     // Buffer fact
@@ -377,7 +460,7 @@ export function calculateFinancialConsequences(
         );
       } else {
         deterministicFacts.push(
-          `Sisa kas rekening setelah tagihan berada Rp ${bufferShortfall.toLocaleString("id-ID")} di bawah batas minimum buffer dana darurat (target buffer minimal Rp ${minBuffer.toLocaleString("id-ID")}).`
+          `Sisa saldo rekening setelah tagihan berada Rp ${bufferShortfall.toLocaleString("id-ID")} di bawah batas minimum buffer dana darurat (target buffer minimal Rp ${minBuffer.toLocaleString("id-ID")}).`
         );
       }
     }
@@ -400,6 +483,12 @@ export function calculateFinancialConsequences(
           );
         }
       }
+    }
+
+    if (isSpending && commitmentsShortfall && commitmentsShortfall > 0) {
+      deterministicFacts.push(
+        `Perhatian komitmen alokasi: Sisa kas setelah tagihan dan estimasi kebutuhan rutin (12 hari) adalah Rp ${(routineResult?.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}. Untuk mempertahankan Dana Darurat Rp ${minBuffer.toLocaleString("id-ID")} dan Alokasi Sertifikasi Rp ${(certGoal?.currentAllocated || 0).toLocaleString("id-ID")} secara bersamaan dibutuhkan Rp ${totalProtectedCommitments?.toLocaleString("id-ID")}, sehingga terdapat selisih kekurangan (shortfall) sebesar Rp ${commitmentsShortfall.toLocaleString("id-ID")}. Oleh karena itu, kedua pos proteksi tidak dapat dipertahankan utuh sekaligus tanpa mengorbankan salah satunya jika laptop dibeli sekarang.`
+      );
     }
 
     // Goals facts
@@ -469,6 +558,14 @@ export function calculateFinancialConsequences(
       canCoverEssentialExpenses,
       isBufferMaintained,
       areProtectedAllocationsMaintained,
+      totalProtectedCommitments,
+      commitmentsShortfall,
+      isFullyCoveredIncludingAllCommitments,
+      baselineSurplusBeforeAction,
+      baselineSurplusRange,
+      alternativesEvaluation,
+      recommendedAmount,
+      recommendedAmountReason,
       bufferImpact: {
         minBuffer,
         projectedBufferRemaining: Math.max(0, remainingCashAfterImmediateObligations),
@@ -520,13 +617,6 @@ export function calculateFinancialConsequences(
         : `Kelayakan penyisihan tabungan bergantung pada pendapatan dan kebutuhan bulanan yang harus dipenuhi.`,
     ];
 
-    if (isSpending && action.amount === 7000000) {
-      const inst = calculateInstallmentDetails(7000000);
-      deterministicFacts.push(
-        `Ketentuan Opsi Cicilan 12 Bulan: Angsuran Rp ${inst.monthlyTotalInstallment.toLocaleString("id-ID")}/bulan (pokok Rp ${Math.round(inst.monthlyPrincipal).toLocaleString("id-ID")} + bunga 1,2% Rp ${inst.monthlyFlatInterest.toLocaleString("id-ID")}) ditambah biaya administrasi 1% Rp ${inst.adminFee.toLocaleString("id-ID")}. Total pembayaran cicilan adalah Rp ${inst.totalPayment12Months.toLocaleString("id-ID")} (selisih Rp ${inst.excessOverCash.toLocaleString("id-ID")} lebih mahal dari tunai).`
-      );
-    }
-
     return {
       status: "needs_clarification",
       clarificationReason:
@@ -553,7 +643,7 @@ export function calculateFinancialConsequences(
       isLiquidityThreatened: false,
       deficitAmount: 0,
       routineExpenses: null,
-      installmentDetails: isSpending && action.amount === 7000000 ? calculateInstallmentDetails(7000000) : null,
+      installmentDetails: null,
       canPayAction: "unknown",
       canCoverObligations: "unknown",
       canCoverEssentialExpenses: "unknown",
@@ -653,11 +743,11 @@ export function calculateFinancialConsequences(
   if (initialBalance !== null && balanceAfterAction !== null) {
     if (isSpending) {
       deterministicFacts.push(
-        `Berdasarkan data pengguna, saldo kas saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah pengeluaran Rp ${action.amount.toLocaleString("id-ID")}, saldo kas menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+        `Berdasarkan data pengguna, saldo rekening saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah pengeluaran Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
       );
     } else {
       deterministicFacts.push(
-        `Total saldo rekening bank tetap Rp ${initialBalance.toLocaleString("id-ID")} karena penambahan tabungan merupakan pemindahan alokasi pos internal rekening.`
+        `Total saldo rekening tetap Rp ${initialBalance.toLocaleString("id-ID")} karena penambahan tabungan merupakan pemindahan alokasi pos internal rekening.`
       );
     }
   }
@@ -670,7 +760,7 @@ export function calculateFinancialConsequences(
 
   if (userLiabilities !== null && remainingCashAfterImmediateObligations !== null) {
     deterministicFacts.push(
-      `Kewajiban tagihan yang disampaikan Rp ${userLiabilities.toLocaleString("id-ID")}. Sisa kas operasional setelah tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
+      `Kewajiban tagihan yang disampaikan Rp ${userLiabilities.toLocaleString("id-ID")}. Sisa uang kebutuhan bulan ini setelah tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
     );
   }
 
@@ -727,6 +817,42 @@ export function calculateFinancialConsequences(
     );
   }
 
+  let baselineSurplusBeforeAction: number | null = null;
+  let baselineSurplusRange: { min: number; max: number } | null = null;
+  let alternativesEvaluation: FinancialCalculationResult["alternativesEvaluation"] = undefined;
+  let recommendedAmount: number | null = null;
+  let recommendedAmountReason: string | null = null;
+
+  if (isSaving && userIncome !== null) {
+    const cashAfterBills = userIncome - totalLiabilitiesBeforeIncome;
+    const routine = userRoutine ?? 0;
+    baselineSurplusBeforeAction = cashAfterBills - routine;
+    baselineSurplusRange = {
+      min: baselineSurplusBeforeAction - 300000,
+      max: baselineSurplusBeforeAction + 300000,
+    };
+    if (baselineSurplusBeforeAction >= 1000000) {
+      recommendedAmount = 1000000;
+      recommendedAmountReason = `Nominal Rp 1.000.000 aman karena menyisakan surplus operasional Rp ${(baselineSurplusBeforeAction - 1000000).toLocaleString("id-ID")}.`;
+    }
+    alternativesEvaluation = [
+      {
+        amount: 1000000,
+        label: "Rp 1.000.000",
+        remainingCash: baselineSurplusBeforeAction - 1000000,
+        canCoverRoutine: baselineSurplusBeforeAction - 1000000 >= 0,
+        notes: baselineSurplusBeforeAction - 1000000 >= 0 ? "Surplus kas bulanan aman." : "Defisit kas.",
+      },
+      {
+        amount: 2000000,
+        label: "Rp 2.000.000",
+        remainingCash: baselineSurplusBeforeAction - 2000000,
+        canCoverRoutine: baselineSurplusBeforeAction - 2000000 >= 0,
+        notes: baselineSurplusBeforeAction - 2000000 >= 0 ? "Surplus kas mencukupi." : "Defisit kas bulanan.",
+      },
+    ];
+  }
+
   return {
     status: "valid",
     actionAmount: action.amount,
@@ -752,12 +878,20 @@ export function calculateFinancialConsequences(
     deficitAmount,
     routineExpenses: routineResult,
     emergencyFundEvaluation,
-    installmentDetails: isSpending && action.amount === 7000000 ? calculateInstallmentDetails(7000000) : null,
+    installmentDetails: null,
     canPayAction,
     canCoverObligations,
     canCoverEssentialExpenses,
     isBufferMaintained,
     areProtectedAllocationsMaintained: "unknown",
+    totalProtectedCommitments: null,
+    commitmentsShortfall: null,
+    isFullyCoveredIncludingAllCommitments: "unknown",
+    baselineSurplusBeforeAction,
+    baselineSurplusRange,
+    alternativesEvaluation,
+    recommendedAmount,
+    recommendedAmountReason,
     bufferImpact: {
       minBuffer,
       projectedBufferRemaining: remainingCashAfterImmediateObligations ? Math.max(0, remainingCashAfterImmediateObligations) : null,

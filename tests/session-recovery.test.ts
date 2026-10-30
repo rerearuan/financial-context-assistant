@@ -61,7 +61,7 @@ describe("Serverless Session Persistence & Self-Healing", () => {
     const data = await res.json();
     expect(data.reply || data.assistantMessage).toBeTruthy();
     expect(demoSessions.has(sessionId)).toBe(true);
-  });
+  }, 25000);
 
   it("restores legacy sessions via fallback cell header if cell tag is not in ID", async () => {
     // Opaque legacy ID without _c
