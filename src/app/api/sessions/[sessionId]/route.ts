@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { sessions, scenarios, messages, syntheticProfiles } from "@/db/schema";
+import { sessions, scenarios, messages, syntheticProfiles, participants } from "@/db/schema";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
 import { eq, asc } from "drizzle-orm";
-import { demoSessions, demoMessages } from "@/lib/demo-store";
+import { demoSessions, demoMessages, demoParticipants } from "@/lib/demo-store";
 import { getOrRestoreSession } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
@@ -47,8 +47,11 @@ function getDemoSessionResponse(sessionId: string) {
   const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === demoSess.scenarioId);
   const msgs = demoMessages.get(sessionId) || [];
 
+  const demoPart = Array.from(demoParticipants.values()).find((p) => p.sessionId === sessionId);
+
   return {
     sessionId: demoSess.id,
+    participantId: demoPart?.id || null,
     participantCode: demoSess.participantCode,
     scenarioId: demoSess.scenarioId,
     condition: demoSess.condition,
@@ -133,8 +136,15 @@ export async function GET(
       devProfile = profile;
     }
 
+    const [participantRecord] = await db
+      .select({ id: participants.id })
+      .from(participants)
+      .where(eq(participants.sessionId, sessionId))
+      .limit(1);
+
     return NextResponse.json({
       sessionId: session.id,
+      participantId: participantRecord?.id || null,
       participantCode: session.participantCode,
       scenarioId: session.scenarioId,
       condition: session.condition,

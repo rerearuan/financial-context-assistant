@@ -1491,10 +1491,10 @@ function ExperimentContent() {
               <p>
                 Apabila Anda memiliki pertanyaan, kritik, atau saran, silakan menghubungi kami melalui email:{" "}
                 <a
-                  href="mailto:alfian.firja@gmail.com"
+                  href="mailto:alfian.bassam@ui.ac.id"
                   className="text-blue-600 font-semibold underline"
                 >
-                  alfian.firja@gmail.com
+                  alfian.bassam@ui.ac.id
                 </a>
                 .
               </p>
@@ -1502,13 +1502,6 @@ function ExperimentContent() {
                 Hormat kami,
                 <br />
                 <strong>Alfian & Regina</strong>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-left mb-6">
-              <div className="text-xs text-slate-500">Kode Bukti Partisipan Anda:</div>
-              <div className="font-mono font-bold text-slate-800 text-base">
-                {participant.participantCode}
               </div>
             </div>
 

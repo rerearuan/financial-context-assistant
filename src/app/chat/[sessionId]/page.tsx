@@ -36,6 +36,7 @@ interface MessageItem {
 
 interface SessionData {
   sessionId: string;
+  participantId?: string | null;
   participantCode: string;
   scenarioId: string;
   condition: "basic" | "context_aware";
@@ -287,8 +288,13 @@ function ChatPageContent() {
   };
 
   const handleFinishDiscussion = () => {
-    if (participantId && !isDirectFormMode) {
-      router.push(`/experiment?participantId=${participantId}&step=6`);
+    const effectivePartId =
+      participantId ||
+      session?.participantId ||
+      (typeof window !== "undefined" ? localStorage.getItem("exp_participant_id") : null);
+
+    if (effectivePartId) {
+      router.push(`/experiment?participantId=${effectivePartId}&step=6`);
     } else {
       setShowCompletionModal(true);
     }
@@ -377,14 +383,8 @@ function ChatPageContent() {
             onClick={handleFinishDiscussion}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
           >
-            {isDirectFormMode ? (
-              <span>Selesai Diskusi</span>
-            ) : (
-              <>
-                <span className="hidden sm:inline">Selesai Diskusi & Lanjut ke Keputusan Akhir</span>
-                <span className="sm:hidden">Selesai</span>
-              </>
-            )}
+            <span className="hidden sm:inline">Selesai Diskusi & Lanjut ke Keputusan Akhir</span>
+            <span className="sm:hidden">Selesai</span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
