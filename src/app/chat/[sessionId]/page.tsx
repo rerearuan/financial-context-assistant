@@ -282,17 +282,10 @@ function ChatPageContent() {
       {/* 1. Header */}
       <header className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 shadow-xs">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-slate-800" />
-              Asisten Percakapan Finansial
-            </h1>
-            {cellParam && (
-              <span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md text-[10px] font-bold">
-                Cell {cellParam}
-              </span>
-            )}
-          </div>
+          <h1 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-slate-800" />
+            Asisten Percakapan Finansial
+          </h1>
           <p className="text-xs text-slate-500">
             ID Partisipan: <span className="font-mono font-medium">{session.participantCode}</span>
           </p>
@@ -389,30 +382,6 @@ function ChatPageContent() {
 
       {/* 3. Messages Scroll Area */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 bg-slate-50/70">
-        {/* Direct Form / Manip Check Hint Banner */}
-        {isDirectFormMode && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-xs text-blue-900 flex items-start justify-between gap-3 shadow-xs">
-            <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold block">
-                  Simulasi Asisten Finansial {cellParam ? `(Kombinasi #${cellParam})` : ""}
-                </span>
-                <span className="text-slate-600">
-                  Skenario: <strong>{session.scenario.title}</strong>. Klik tombol <strong>&quot;Lihat Skenario&quot;</strong> di atas untuk membaca kondisi keuangan.
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsScenarioOpen(true)}
-              className="text-blue-700 hover:text-blue-900 font-semibold underline shrink-0 cursor-pointer text-[11px]"
-            >
-              Buka Skenario
-            </button>
-          </div>
-        )}
-
         {session.messages.map((msg) => (
           <div
             key={msg.id}

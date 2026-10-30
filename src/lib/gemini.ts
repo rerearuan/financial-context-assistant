@@ -413,9 +413,7 @@ export function generateSafeFallbackResponse(
   // 1. Sapaan / Tes
   if (responsePlan.intentType === "greeting_or_ping") {
     return (
-      `Halo! Saya siap mendampingi Anda mengevaluasi rencana ` +
-      `${action.type === "spending" ? "pengeluaran" : "penyisihan tabungan"} ini secara objektif sebelum Anda mengambil tindakan nyata. ` +
-      `Ada aspek tertentu yang ingin Anda diskusikan mengenai rencana ini?`
+      "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan atau tanyakan hari ini?"
     );
   }
 

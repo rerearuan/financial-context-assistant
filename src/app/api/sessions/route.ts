@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       condition = matchedCell.condition;
 
       if (!participantCode) {
-        participantCode = `MC-C${cellNum}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+        participantCode = `PART-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
       }
     }
 
