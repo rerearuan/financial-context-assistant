@@ -30,6 +30,8 @@ export async function GET(
           const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === part.scenarioId);
           scenarioData = {
             ...sc,
+            tugasText: pkg?.scenario.tugasText || sc.tugasText,
+            tugasQuestions: pkg?.scenario.tugasQuestions || sc.tugasQuestions,
             comprehensionQuestions: sc.comprehensionQuestions || pkg?.scenario.comprehensionQuestions || [],
           };
         }

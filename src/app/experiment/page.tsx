@@ -16,7 +16,7 @@ import {
   Award,
   FileText,
 } from "lucide-react";
-import { ScenarioViewer } from "@/components/ScenarioViewer";
+import { ScenarioViewer, formatBoldText } from "@/components/ScenarioViewer";
 import {
   POST_QUESTIONNAIRE_ITEMS,
   LIKERT_OPTIONS,
@@ -1176,14 +1176,15 @@ function ExperimentContent() {
         {step === 6 && scenario && (
           <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-10 shadow-sm">
             <div className="border-b border-slate-100 pb-4 mb-6">
-              <span className="text-xs sm:text-sm font-semibold text-emerald-600 uppercase tracking-wider">
-                Tahap 6
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-                Pertanyaan Keputusan Akhir
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                Tugas
               </h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Setelah berdiskusi dengan chatbot, mohon tetapkan keputusan akhir Anda mengenai tindakan pada skenario.
+              <p className="text-sm sm:text-base text-slate-700 mt-2 leading-relaxed">
+                {formatBoldText(
+                  scenario.actionType === "spending"
+                    ? "Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan **Pembelian Laptop**."
+                    : "Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**."
+                )}
               </p>
             </div>
 
@@ -1191,7 +1192,9 @@ function ExperimentContent() {
               {/* 1. Keputusan Akhir */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-2.5 text-sm sm:text-base">
-                  1. Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan {scenario.actionType === "spending" ? "pembelian laptop tersebut?" : "penambahan Dana Darurat dari pendapatan bulan ini?"} *
+                  1. {scenario.actionType === "spending"
+                    ? "Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan pembelian tersebut?"
+                    : "Setelah berdiskusi dengan chatbot, apakah Anda akan menambah Dana Darurat dari pendapatan bulan ini?"} *
                 </label>
                 <div className="grid grid-cols-2 gap-3.5">
                   {["Ya", "Tidak"].map((opt) => (
@@ -1228,7 +1231,7 @@ function ExperimentContent() {
                   </label>
                   <div className="space-y-2.5">
                     {(scenario.actionType === "spending"
-                      ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
+                      ? ["Tunai", "Cicilan"]
                       : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
                     ).map((opt) => (
                       <label
@@ -1258,13 +1261,13 @@ function ExperimentContent() {
               {/* 3. Alasan Keputusan Akhir */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base">
-                  3. Jelaskan alasan keputusan akhir Anda! *
+                  3. Jelaskan alasan keputusan Anda! *
                 </label>
                 <textarea
                   rows={4}
                   value={finalDecision.q3}
                   onChange={(e) => setFinalDecision({ ...finalDecision, q3: e.target.value })}
-                  placeholder="Jelaskan secara lengkap pertimbangan dan alasan di balik keputusan akhir Anda setelah berdiskusi dengan chatbot..."
+                  placeholder="Jelaskan alasan keputusan Anda..."
                   className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm sm:text-base"
                   required
                 />

@@ -486,7 +486,7 @@ Pada periode ini, **tidak terdapat tujuan finansial besar lain** yang secara khu
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini** sebaiknya **dialokasikan**.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
@@ -678,7 +678,7 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
 ● Tagihan utilitas bulan ini diperkirakan sebesar Rp400.000–Rp600.000.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui pada bulan ini.
 ● Tidak terdapat sumber pendapatan tambahan yang telah dipastikan sebelum pendapatan berikutnya diterima.`,
-      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini** sebaiknya **dialokasikan**.`,
+      tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda menentukan bagaimana **pendapatan bulan ini sebaiknya dialokasikan**.`,
       descriptionText: `Pertimbangan alokasi penambahan tabungan dana darurat dari pendapatan bulanan.`,
       initialAction: {
         type: "saving",
