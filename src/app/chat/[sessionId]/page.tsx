@@ -12,7 +12,6 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
-  Info,
   Clock,
   CheckCircle,
 } from "lucide-react";
@@ -496,20 +495,7 @@ function ChatPageContent() {
         </div>
       )}
 
-      {/* 5. Interaction Counter Status Bar */}
-      <div className="bg-slate-50 border-t border-slate-200 px-4 py-1.5 flex items-center justify-between text-[11px] text-slate-500">
-        <div className="flex items-center gap-1.5">
-          <Info className="w-3 h-3 text-slate-400" />
-          <span>
-            Interaksi: <strong>{session.followupCount}</strong> dari {session.maxFollowupAllowed} pertanyaan
-          </span>
-        </div>
-        <div>
-          <span>Klik tombol di kanan atas untuk lanjut ke tahap Keputusan Akhir kapan saja.</span>
-        </div>
-      </div>
-
-      {/* 6. Chat Input Footer (Always enabled for async prompt typing) */}
+      {/* 5. Chat Input Footer (Always enabled for async prompt typing) */}
       <footer className="p-3 sm:p-4 bg-white border-t border-slate-200">
         <form
           onSubmit={(e) => {
