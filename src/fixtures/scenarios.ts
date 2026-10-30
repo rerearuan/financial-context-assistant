@@ -659,7 +659,7 @@ Pada periode ini, **tidak terdapat tujuan finansial besar lain** yang secara khu
 
 Anda baru menerima pendapatan bulanan dan salah satu **tujuan finansial** yang ingin Anda capai adalah **meningkatkan Dana Darurat** agar lebih siap menghadapi kebutuhan tidak terduga.
 
-Namun, pada saat yang sama, Anda juga masih mempersiapkan dana untuk mengikuti program sertifikasi profesional dalam beberapa bulan ke depan.
+Namun, pada saat yang sama, Anda juga masih mempersiapkan dana untuk **mengikuti program sertifikasi** profesional dalam beberapa bulan ke depan.
 
 Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama merupakan tujuan yang penting.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
