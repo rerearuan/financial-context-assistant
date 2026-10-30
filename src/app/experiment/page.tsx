@@ -90,6 +90,7 @@ function ExperimentContent() {
 
   // Step 4: Comprehension Check & Early Decision
   const [comprehension, setComprehension] = useState<Record<string, string>>({});
+  const [compError, setCompError] = useState<string | null>(null);
   const [earlyDecision, setEarlyDecision] = useState({
     q1: "",
     q2: "",
@@ -294,8 +295,23 @@ function ExperimentContent() {
       return;
     }
 
+    // Comprehension check validation: Di PDF instrumen penelitian, seluruh jawaban benar adalah opsi B (index 1)
+    const hasWrongAnswer = compQuestions.some((q) => {
+      const selected = comprehension[q.id];
+      const correct = q.correctAnswer || q.options[1];
+      return selected !== correct;
+    });
+
+    if (hasWrongAnswer) {
+      setComprehension({});
+      setCompError("Anda Salah, silakan coba pahami dan jawab kembali");
+      alert("Anda Salah, silakan coba pahami dan jawab kembali");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMessage(null);
+    setCompError(null);
 
     try {
       const res = await fetch("/api/experiment", {
@@ -312,6 +328,13 @@ function ExperimentContent() {
       });
 
       const data = await res.json();
+      if (!res.ok || data.invalidComprehension) {
+        setComprehension({});
+        setCompError(data.error || "Anda Salah, silakan coba pahami dan jawab kembali");
+        alert(data.error || "Anda Salah, silakan coba pahami dan jawab kembali");
+        return;
+      }
+
       if (data.success) {
         setStep(5);
       }
@@ -949,6 +972,13 @@ function ExperimentContent() {
                       Bagian 1: Uji Pemahaman Skenario
                     </div>
 
+                    {compError && (
+                      <div className="bg-rose-50 border border-rose-300 text-rose-800 p-3.5 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-2.5 shadow-2xs animate-in fade-in duration-200">
+                        <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0" />
+                        <span>{compError}</span>
+                      </div>
+                    )}
+
                     {/* Pertanyaan Dinamis Uji Pemahaman dari PDF Instrumen */}
                     {(() => {
                       const compQuestions =
@@ -976,9 +1006,10 @@ function ExperimentContent() {
                                   name={`comp_${q.id}`}
                                   value={opt}
                                   checked={comprehension[q.id] === opt}
-                                  onChange={(e) =>
-                                    setComprehension((prev) => ({ ...prev, [q.id]: e.target.value }))
-                                  }
+                                  onChange={(e) => {
+                                    setCompError(null);
+                                    setComprehension((prev) => ({ ...prev, [q.id]: e.target.value }));
+                                  }}
                                   className="mt-0.5 text-blue-600 cursor-pointer"
                                   required
                                 />

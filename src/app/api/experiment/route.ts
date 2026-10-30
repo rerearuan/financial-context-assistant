@@ -6,7 +6,7 @@ import crypto from "crypto";
 import { assignBalancedCell } from "@/lib/randomizer";
 import { getGeminiModel } from "@/lib/gemini";
 import { PROMPT_VERSION } from "@/lib/prompts/templates";
-import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
+import { SCENARIO_PACKAGES, COMPREHENSION_QUESTIONS_BY_SCENARIO } from "@/fixtures/scenarios";
 import {
   demoParticipants,
   demoSessions,
@@ -293,6 +293,39 @@ export async function POST(req: NextRequest) {
       const { participantId, earlyDecision } = body;
       if (!participantId || !earlyDecision) {
         return NextResponse.json({ error: "Data keputusan awal diperlukan" }, { status: 400 });
+      }
+
+      // Validasi comprehension check: seluruh jawaban benar adalah opsi B (index 1)
+      if (earlyDecision.comprehensionCheck) {
+        let scenarioId: string | null | undefined;
+        try {
+          const [part] = await db
+            .select()
+            .from(participants)
+            .where(eq(participants.id, participantId));
+          scenarioId = part?.scenarioId;
+        } catch {
+          scenarioId = demoParticipants.get(participantId)?.scenarioId;
+        }
+
+        if (scenarioId && COMPREHENSION_QUESTIONS_BY_SCENARIO[scenarioId]) {
+          const compQuestions = COMPREHENSION_QUESTIONS_BY_SCENARIO[scenarioId];
+          const hasWrongAnswer = compQuestions.some((q) => {
+            const selected = earlyDecision.comprehensionCheck[q.id];
+            const correct = q.correctAnswer || q.options[1];
+            return selected && selected !== correct;
+          });
+
+          if (hasWrongAnswer) {
+            return NextResponse.json(
+              {
+                error: "Anda Salah, silakan coba pahami dan jawab kembali",
+                invalidComprehension: true,
+              },
+              { status: 400 }
+            );
+          }
+        }
       }
 
       try {
