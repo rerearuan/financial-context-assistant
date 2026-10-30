@@ -43,6 +43,15 @@ export default function HomePage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+          <div className="text-center pt-1">
+            <Link
+              href="/c"
+              className="text-xs text-blue-700 hover:text-blue-900 font-medium inline-flex items-center gap-1 hover:underline"
+            >
+              Daftar Link Langsung 8 Kombinasi Chatbot (Uji Manipulasi)
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       </div>
 

@@ -791,7 +791,7 @@ function ExperimentContent() {
                   disabled={submitting}
                   className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2"
                 >
-                  {submitting ? "Menyimpan & Mengalokasikan Skenario..." : "Lanjut ke Petunjuk & Skenario"}
+                  {submitting ? "Menyimpan..." : "Lanjut ke Petunjuk Eksperimen"}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -800,20 +800,105 @@ function ExperimentContent() {
         )}
 
         {/* ============================================================== */}
-        {/* TAHAP 3 & 4: PETUNJUK, SKENARIO & PROFILE (ANTI COPY-PASTE) +   */}
-        {/* COMPREHENSION CHECK (SIDE-BY-SIDE WITH EARLY DECISION)         */}
+        {/* TAHAP 3: PETUNJUK EKSPERIMEN                                    */}
         {/* ============================================================== */}
-        {(step === 3 || step === 4) && scenario && (
-          <div className="space-y-6">
-            {/* Petunjuk Eksperimen */}
-            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-xs sm:text-sm text-blue-900 leading-relaxed">
-              <h3 className="font-bold text-sm mb-1 flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-blue-600" />
+        {step === 3 && (
+          <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <h2 className="text-lg font-bold text-slate-900">
                 Petunjuk Eksperimen
-              </h3>
+              </h2>
+            </div>
+
+            <div className="text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed">
               <p>
-                Pada bagian ini, Anda akan dihadapkan pada sebuah skenario pengambilan keputusan keuangan dalam kehidupan sehari-hari. Bayangkan bahwa Anda sedang berada dalam situasi yang dijelaskan dan <strong>anggap seluruh informasi yang diberikan sebagai kondisi keuangan Anda sendiri</strong>.
+                Pada bagian ini, Anda akan dihadapkan pada sebuah skenario pengambilan keputusan keuangan dalam kehidupan sehari-hari.
               </p>
+
+              <p>
+                Anda akan diberikan informasi mengenai kondisi keuangan, kebutuhan, dan tujuan keuangan yang berkaitan dengan situasi tersebut. Bayangkan bahwa Anda sedang berada dalam situasi yang dijelaskan dan anggap seluruh informasi yang diberikan sebagai kondisi keuangan Anda sendiri.
+              </p>
+
+              <p>
+                Untuk membantu Anda mempertimbangkan keputusan, tersedia sebuah chatbot yang dapat Anda ajak berdiskusi.
+              </p>
+
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                <p className="font-semibold text-slate-800">
+                  Selama berdiskusi dengan chatbot, Anda bebas untuk:
+                </p>
+                <ul className="space-y-1.5 pl-5 list-disc text-slate-700">
+                  <li>mengajukan pertanyaan;</li>
+                  <li>meminta perhitungan;</li>
+                  <li>meminta assistant membandingkan beberapa pilihan;</li>
+                  <li>meminta assistant menjelaskan konsekuensi finansial; atau</li>
+                  <li>meminta pertimbangan lain yang menurut Anda diperlukan.</li>
+                </ul>
+              </div>
+
+              <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-3.5 rounded-xl text-xs sm:text-sm flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Perhatian:</strong> Anda tidak diperbolehkan copy-paste teks skenario ke dalam percakapan dengan chatbot.
+                </span>
+              </div>
+
+              <p>
+                Setelah selesai berdiskusi dengan chatbot, Anda akan diminta untuk menjawab beberapa pertanyaan mengenai keputusan yang Anda ambil serta alasan di balik keputusan tersebut.
+              </p>
+
+              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-slate-600 text-xs sm:text-sm">
+                <p>
+                  <strong>Tidak ada jawaban benar atau salah.</strong> Pilihlah keputusan yang menurut Anda paling sesuai dengan kondisi keuangan, kebutuhan, dan tujuan yang dijelaskan dalam skenario.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="px-5 py-3 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-1.5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Kembali
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 shadow-sm"
+              >
+                Lanjut ke Skenario Penelitian
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAHAP 4: SKENARIO & PROFILE (ANTI COPY-PASTE) +                 */}
+        {/* COMPREHENSION CHECK & KEPUTUSAN AWAL                           */}
+        {/* ============================================================== */}
+        {step === 4 && scenario && (
+          <div className="space-y-6">
+            {/* Petunjuk Singkat & Tombol Baca Ulang */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 sm:p-5 text-xs sm:text-sm text-slate-700 leading-relaxed flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="font-bold text-slate-900 flex items-center gap-2 mb-1">
+                  <HelpCircle className="w-4 h-4 text-slate-700" />
+                  Skenario Pengambilan Keputusan Keuangan
+                </h3>
+                <p className="text-slate-600 text-xs">
+                  Bayangkan Anda sedang berada dalam situasi berikut dan anggap seluruh informasi sebagai kondisi keuangan Anda sendiri. Anda tidak diperbolehkan copy-paste teks skenario ke chatbot.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="self-start sm:self-auto px-3 py-1.5 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-100 rounded-lg shrink-0 transition"
+              >
+                Baca Petunjuk Lengkap
+              </button>
             </div>
 
             {/* Side by Side Layout: Skenario & Profil (Kiri) vs Comprehension Check (Kanan) */}
@@ -992,11 +1077,11 @@ function ExperimentContent() {
                   <div className="flex items-center gap-2 pt-1">
                     <button
                       type="button"
-                      onClick={() => setStep(2)}
+                      onClick={() => setStep(3)}
                       className="px-3.5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1"
                     >
                       <ArrowLeft className="w-3.5 h-3.5" />
-                      Kembali
+                      Kembali ke Petunjuk
                     </button>
                     <button
                       type="submit"
@@ -1014,7 +1099,7 @@ function ExperimentContent() {
         )}
 
         {/* ============================================================== */}
-        {/* TAHAP 5: PENGANTAR MASUK KE CHATBOT */}
+        {/* TAHAP 5: PENGANTAR MASUK KE CHATBOT                             */}
         {/* ============================================================== */}
         {step === 5 && participant && (
           <div className="max-w-xl mx-auto bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
@@ -1022,16 +1107,36 @@ function ExperimentContent() {
               Diskusi dengan Chatbot
             </h2>
 
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-6">
-              Silakan berdiskusi dengan chatbot untuk mengevaluasi keputusan keuangan Anda pada skenario ini. Anda dapat menanyakan dampak pengeluaran, sisa anggaran pos terkait, atau konsekuensi finansial lainnya.
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
+              Untuk membantu Anda mempertimbangkan keputusan, tersedia sebuah chatbot yang dapat Anda ajak berdiskusi mengenai skenario keuangan yang telah Anda pelajari.
             </p>
+
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4 text-xs sm:text-sm">
+              <p className="font-semibold text-slate-800 mb-2">
+                Selama berdiskusi dengan chatbot, Anda bebas untuk:
+              </p>
+              <ul className="space-y-1.5 pl-5 list-disc text-slate-700">
+                <li>mengajukan pertanyaan;</li>
+                <li>meminta perhitungan;</li>
+                <li>meminta assistant membandingkan beberapa pilihan;</li>
+                <li>meminta assistant menjelaskan konsekuensi finansial; atau</li>
+                <li>meminta pertimbangan lain yang menurut Anda diperlukan.</li>
+              </ul>
+            </div>
+
+            <div className="bg-amber-50/70 border border-amber-200 text-amber-900 p-3 rounded-xl text-xs mb-6 flex items-start gap-2">
+              <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <span>
+                <strong>Pengingat:</strong> Anda tidak diperbolehkan copy-paste teks skenario ke dalam percakapan dengan chatbot.
+              </span>
+            </div>
 
             <div className="space-y-3">
               <a
                 href={`/chat/${participant.sessionId}?participantId=${participant.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-center shadow-sm"
+                className="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-center gap-2 text-center shadow-sm"
               >
                 Buka Chatbot Finansial
                 <ExternalLink className="w-4 h-4" />
@@ -1040,7 +1145,7 @@ function ExperimentContent() {
               <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   className="text-xs text-slate-500 hover:text-slate-800 transition flex items-center gap-1"
                 >
                   <ArrowLeft className="w-3.5 h-3.5" />

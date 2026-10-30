@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-import { Table, FileText } from "lucide-react";
+import React from "react";
 
 export interface ScenarioData {
   id?: string;
@@ -28,8 +27,6 @@ interface TableRowItem {
 }
 
 export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProps) {
-  const [viewMode, setViewMode] = useState<"table" | "text">("table");
-
   const id = scenario.id || "";
   const isSpendingLow = id === "spending_low";
   const isSpendingHigh = id === "spending_high";
@@ -289,102 +286,65 @@ export function ScenarioViewer({ scenario, compact = false }: ScenarioViewerProp
           BAGIAN KONDISI KEUANGAN ANDA
       ------------------------------------------------------------- */}
       <div className="bg-white rounded-xl border border-slate-300 p-4 sm:p-5 shadow-2xs">
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-2 mb-3 border-b border-slate-200">
-          <h4 className="font-bold text-slate-900 text-sm">
-            Kondisi Keuangan Anda
-          </h4>
+        <h4 className="font-bold text-slate-900 text-sm pb-2 mb-3 border-b border-slate-200">
+          Kondisi Keuangan Anda
+        </h4>
 
-          {/* Toggle View: Tabel vs Teks Asli PDF */}
-          <div className="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50 text-[11px]">
-            <button
-              type="button"
-              onClick={() => setViewMode("table")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition cursor-pointer ${
-                viewMode === "table"
-                  ? "bg-white text-slate-900 shadow-2xs font-semibold"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <Table className="w-3.5 h-3.5" />
-              <span>Format Tabel</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("text")}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md font-medium transition cursor-pointer ${
-                viewMode === "text"
-                  ? "bg-white text-slate-900 shadow-2xs font-semibold"
-                  : "text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>Format Teks Asli (PDF)</span>
-            </button>
-          </div>
-        </div>
-
-        {viewMode === "table" ? (
-          /* TABEL: Kiri Semua Tulisan, Kanan Angka (Sesuai Arahan Alfian) */
-          <div className="overflow-x-auto rounded-lg border border-slate-300">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-100/90 border-b border-slate-300 text-slate-800 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-                  <th className="py-2.5 px-3">Keterangan</th>
-                  <th className="py-2.5 px-3 text-right whitespace-nowrap w-40 sm:w-48">
-                    Jumlah / Waktu
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 text-xs sm:text-sm text-slate-800">
-                {tableRows.map((row, idx) => {
-                  if (row.isSectionHeader) {
-                    return (
-                      <tr
-                        key={idx}
-                        className="bg-slate-50 font-semibold text-slate-900"
-                      >
-                        <td
-                          colSpan={2}
-                          className="py-2 px-3 text-xs tracking-wide"
-                        >
-                          ● {row.label}
-                        </td>
-                      </tr>
-                    );
-                  }
-
+        {/* TABEL KEUANGAN */}
+        <div className="overflow-x-auto rounded-lg border border-slate-300">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-100/90 border-b border-slate-300 text-slate-800 text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+                <th className="py-2.5 px-3">Keterangan</th>
+                <th className="py-2.5 px-3 text-right whitespace-nowrap w-40 sm:w-48">
+                  Jumlah / Waktu
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-xs sm:text-sm text-slate-800">
+              {tableRows.map((row, idx) => {
+                if (row.isSectionHeader) {
                   return (
                     <tr
                       key={idx}
-                      className={idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}
+                      className="bg-slate-50 font-semibold text-slate-900"
                     >
                       <td
-                        className={`py-2 px-3 align-top leading-snug ${
-                          row.isSubItem
-                            ? "pl-6 sm:pl-7 text-slate-700"
-                            : "text-slate-900 font-normal"
-                        }`}
+                        colSpan={2}
+                        className="py-2 px-3 text-xs tracking-wide"
                       >
-                        <span className="text-slate-400 mr-1.5">
-                          {row.isSubItem ? "○" : "●"}
-                        </span>
-                        {row.label}
-                      </td>
-                      <td className="py-2 px-3 align-top text-right font-semibold text-slate-900 whitespace-nowrap">
-                        {row.value}
+                        ● {row.label}
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          /* TEKS ASLI: Daftar Poin-Poin Persis Seperti di PDF */
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-line font-normal">
-            {scenario.kondisiKeuanganText}
-          </div>
-        )}
+                }
+
+                return (
+                  <tr
+                    key={idx}
+                    className={idx % 2 === 1 ? "bg-slate-50/50" : "bg-white"}
+                  >
+                    <td
+                      className={`py-2 px-3 align-top leading-snug ${
+                        row.isSubItem
+                          ? "pl-6 sm:pl-7 text-slate-700"
+                          : "text-slate-900 font-normal"
+                      }`}
+                    >
+                      <span className="text-slate-400 mr-1.5">
+                        {row.isSubItem ? "○" : "●"}
+                      </span>
+                      {row.label}
+                    </td>
+                    <td className="py-2 px-3 align-top text-right font-semibold text-slate-900 whitespace-nowrap">
+                      {row.value}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
