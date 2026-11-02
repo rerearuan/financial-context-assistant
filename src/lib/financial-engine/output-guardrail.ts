@@ -34,10 +34,25 @@ const FORBIDDEN_RESEARCH_TERMS = [
 
 /**
  * Extracts Rupiah amounts mentioned in the text.
- * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000", "Rp 667.333".
+ * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000", "Rp 667.333", "4-4.5 jt".
  */
 export function extractMentionedAmounts(text: string): number[] {
   const amounts: number[] = [];
+
+  // 1. Detect range patterns like "4-4.5 jt", "4 - 4.5 juta", "4.000.000 - 4.500.000"
+  const rangeRegex = /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*[-–—]\s*(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
+  let rangeMatch: RegExpExecArray | null;
+  while ((rangeMatch = rangeRegex.exec(text)) !== null) {
+    const unit = rangeMatch[3] || "";
+    if (unit) {
+      const a1 = sanitizeAmount(`${rangeMatch[1]} ${unit}`);
+      const a2 = sanitizeAmount(`${rangeMatch[2]} ${unit}`);
+      if (a1 && a1 >= 1000 && !amounts.includes(a1)) amounts.push(a1);
+      if (a2 && a2 >= 1000 && !amounts.includes(a2)) amounts.push(a2);
+    }
+  }
+
+  // 2. Standard single amount regex
   const regex = /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
 
   let match: RegExpExecArray | null;
@@ -239,6 +254,15 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     if (uf.rawUserFigures) {
       for (const fig of uf.rawUserFigures) {
         allowed.add(fig);
+      }
+      // If user provided a target/cost and current accumulated amount (e.g. 4.5jt target, 2jt terkumpul),
+      // allow mathematical differences between them (e.g. 4.5jt - 2jt = 2.5jt, 4jt - 2jt = 2jt)
+      const figs = uf.rawUserFigures;
+      for (let i = 0; i < figs.length; i++) {
+        for (let j = 0; j < figs.length; j++) {
+          const diff = Math.abs(figs[i] - figs[j]);
+          if (diff >= 1000) allowed.add(diff);
+        }
       }
     }
   }
