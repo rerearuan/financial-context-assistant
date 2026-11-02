@@ -57,6 +57,25 @@ interface SessionData {
   messages: MessageItem[];
 }
 
+function renderMessageContent(content: string, isUser: boolean) {
+  // Support inline markdown bold **text** while preserving whitespace and emoji
+  const parts = content.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 4) {
+      const boldText = part.slice(2, -2);
+      return (
+        <strong
+          key={index}
+          className={isUser ? "font-semibold text-white" : "font-semibold text-slate-900"}
+        >
+          {boldText}
+        </strong>
+      );
+    }
+    return part;
+  });
+}
+
 function ChatPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -457,7 +476,7 @@ function ChatPageContent() {
               }`}
             >
               <div className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap">
-                {msg.content}
+                {renderMessageContent(msg.content, msg.role === "user")}
               </div>
             </div>
 

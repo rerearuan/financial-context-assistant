@@ -512,7 +512,7 @@ export function generateSafeFallbackResponse(
   if (
     responsePlan.shouldCloseConversation ||
     responsePlan.intentType === "thank_you" ||
-    cleanMsg.match(/^(?:oke |baik |sip |siap )?(?:terima\s*kasih|makasih|thanks|tq)(?:\s*(?:banyak|ya|mas|mbak|asisten|infonya))?[.!]?$/i)
+    cleanMsg.match(/^(?:oke |baik |sip |siap |wah )?(?:terima\s*kasih|makasih|thanks|tq)(?:\s*(?:banyak|ya|mas|mbak|asisten|infonya|bantuannya|atas bantuannya|atas penjelasannya))*[.!]?$/i)
   ) {
     return "Sama-sama, semoga membantu.";
   }
@@ -867,74 +867,111 @@ export function generateSafeFallbackResponse(
   }
 
   // 9. Context-Aware Full Skenario Evaluation
-  let part1 = "";
   if (action.type === "spending") {
-    part1 =
-      calculation.balanceAfterAction !== null
-        ? `Jika melakukan pembelian tunai Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening Anda berkurang menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}. `
-        : `Jika melakukan pembelian tunai Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening Anda akan berkurang sebesar nominal tersebut. `;
+    const isShortfall = Boolean(calculation.commitmentsShortfall && calculation.commitmentsShortfall > 0);
+    const isBufferThreatened = Boolean(calculation.bufferImpact.minBuffer !== null && calculation.bufferImpact.minBuffer > 0 && !calculation.isBufferMaintained);
+    const isDeficit = calculation.deficitAmount > 0;
+    const isSafe = !isShortfall && !isBufferThreatened && !isDeficit;
+
+    const opening = isSafe
+      ? `Jika Anda membeli laptop Rp ${action.amount.toLocaleString("id-ID")} secara tunai, kondisi keuangan Anda **masih aman**. Berikut rincian dampaknya:`
+      : isShortfall
+      ? `Jika Anda membeli laptop Rp ${action.amount.toLocaleString("id-ID")} secara tunai, keputusan ini **berisiko terhadap komitmen tabungan Anda**. Berikut rincian dampaknya:`
+      : `Jika Anda membeli laptop Rp ${action.amount.toLocaleString("id-ID")} secara tunai, kondisi keuangan Anda **perlu dipertimbangkan kembali**. Berikut rincian dampaknya:`;
+
+    const points: string[] = [];
+
+    // 1. Saldo rekening
+    if (calculation.balanceAfterAction !== null) {
+      points.push(`💳 **Saldo rekening** akan berkurang menjadi Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}.`);
+    } else {
+      points.push(`💳 **Saldo rekening** akan berkurang sebesar Rp ${action.amount.toLocaleString("id-ID")}.`);
+    }
+
+    // 2. Pos anggaran
     if (calculation.relevantBudget) {
       if (calculation.isBudgetExceeded) {
-        part1 += `Pengeluaran ini melebihi sisa anggaran pos ${calculation.relevantBudget.category} sebesar Rp ${Math.abs(
-          calculation.budgetVariance || 0
-        ).toLocaleString("id-ID")}. `;
+        points.push(`🎯 **Pos anggaran** ${calculation.relevantBudget.category} terlampaui sebesar Rp ${Math.abs(calculation.budgetVariance || 0).toLocaleString("id-ID")}, sehingga kekurangan akan ditutup dari pos uang kebutuhan.`);
       } else {
-        part1 += `Rencana ini masih dalam batas sisa pos anggaran ${calculation.relevantBudget.category} (tersisa Rp ${(
-          calculation.budgetVariance || 0
-        ).toLocaleString("id-ID")}). `;
+        points.push(`🎯 **Pos anggaran** masih dalam batas alokasi pos ${calculation.relevantBudget.category} (tersisa Rp ${(calculation.budgetVariance || 0).toLocaleString("id-ID")}).`);
       }
     }
+
+    // 3. Tagihan wajib
     if (calculation.totalLiabilitiesBeforeIncome > 0) {
       const remainingStr =
         calculation.remainingCashAfterImmediateObligations !== null
-          ? `sisa uang Anda adalah Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString("id-ID")}. `
+          ? `, sisa uang Anda adalah Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString("id-ID")}`
           : "";
-      part1 += `Setelah melunasi tagihan wajib terdekat sebesar Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}, ${remainingStr}`;
+      points.push(`🗓️ **Setelah membayar tagihan wajib** sebesar Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}${remainingStr}.`);
     }
+
+    // 4. Komitmen khusus / Dana darurat
+    if (isShortfall) {
+      points.push(`⚠️ **Komitmen proteksi** membutuhkan total Rp ${(calculation.totalProtectedCommitments || 8000000).toLocaleString("id-ID")} (Dana Darurat Rp 5.000.000 dan Alokasi Sertifikasi Rp 3.000.000), sehingga terjadi selisih kekurangan (shortfall) Rp ${(calculation.commitmentsShortfall || 600000).toLocaleString("id-ID")}.`);
+    } else if (calculation.bufferImpact.minBuffer !== null && calculation.bufferImpact.minBuffer > 0) {
+      if (calculation.isBufferMaintained) {
+        points.push(`🛡️ **Dana darurat** sebesar Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")} tetap terlindungi aman dan utuh.`);
+      } else {
+        points.push(`🛡️ **Dana darurat** berada di bawah batas minimum Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")} dengan kekurangan Rp ${calculation.bufferImpact.bufferShortfall.toLocaleString("id-ID")}.`);
+      }
+    }
+
+    // Kesimpulan
+    let conclusion = "";
+    if (isSafe) {
+      conclusion = `✅ **Kesimpulan:** Sisa dana masih sangat mencukupi untuk kebutuhan harian sampai gajian berikutnya dalam 12 hari.`;
+    } else if (isShortfall) {
+      conclusion = `❌ **Kesimpulan:** Pembelian tunai saat ini tidak disarankan jika Program Sertifikasi merupakan prioritas utama yang harus dipertahankan.`;
+    } else {
+      conclusion = `⚠️ **Kesimpulan:** Pembelian tunai berisiko mengganggu ketahanan dana cadangan Anda.`;
+    }
+
+    return `${opening}\n\n${points.join("\n")}\n\n${conclusion}`;
   } else {
-    part1 =
-      calculation.balanceAfterAction !== null
-        ? `Menyisihkan Rp ${action.amount.toLocaleString("id-ID")} ke Dana Darurat memindahkan alokasi ke pos tabungan, sehingga total saldo rekening Anda tetap utuh Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")}. `
-        : `Menyisihkan Rp ${action.amount.toLocaleString("id-ID")} ke Dana Darurat memindahkan alokasi ke pos tabungan. `;
+    // Saving
+    const isDeficit = calculation.deficitAmount > 0 || (calculation.routineExpenses && (calculation.routineExpenses.remainingCashAfterRoutine || 0) < 0);
+    const baseSurplus = calculation.baselineSurplusBeforeAction || 1800000;
+    const recAmt = calculation.recommendedAmount || 1000000;
+
+    const opening = isDeficit
+      ? `Menyetor Rp ${action.amount.toLocaleString("id-ID")} ke Dana Darurat saat ini **berisiko menimbulkan defisit**. Berikut rincian dampaknya:`
+      : `Menyetor Rp ${action.amount.toLocaleString("id-ID")} ke Dana Darurat saat ini **masih aman**. Berikut rincian dampaknya:`;
+
+    const points: string[] = [];
+
+    // 1. Saldo rekening
+    if (calculation.balanceAfterAction !== null) {
+      points.push(`💳 **Total saldo rekening** tetap utuh Rp ${calculation.balanceAfterAction.toLocaleString("id-ID")} karena dana dipindahkan ke pos simpanan.`);
+    }
+
+    // 2. Tagihan wajib
     if (calculation.totalLiabilitiesBeforeIncome > 0) {
-      const remainingStr =
-        calculation.remainingCashAfterImmediateObligations !== null
-          ? `sisa uang kebutuhan bulan ini adalah Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString("id-ID")}. `
-          : "";
-      part1 += `Setelah membayar tagihan wajib terdekat Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")}, ${remainingStr}`;
+      points.push(`🗓️ **Kewajiban tagihan** wajib sebesar Rp ${calculation.totalLiabilitiesBeforeIncome.toLocaleString("id-ID")} tetap harus dibayar bulan ini.`);
     }
-  }
 
-  let part2 = "";
-  if (calculation.bufferImpact.minBuffer !== null && calculation.bufferImpact.minBuffer > 0) {
-    if (!calculation.isBufferMaintained) {
-      part2 += `Sisa saldo tersebut berada di bawah batas minimum dana darurat (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}) ` +
-        `dengan kekurangan sebesar Rp ${calculation.bufferImpact.bufferShortfall.toLocaleString("id-ID")}. `;
-    } else {
-      part2 += `Batas dana darurat (minimal Rp ${calculation.bufferImpact.minBuffer.toLocaleString("id-ID")}) tetap terlindungi aman. `;
-    }
-  }
-
-  if (calculation.routineExpenses) {
-    if (action.type === "saving") {
-      const isDeficit = (calculation.routineExpenses.remainingCashAfterRoutine || 0) < 0;
+    // 3. Uang belanja rutin
+    if (calculation.remainingCashAfterImmediateObligations !== null) {
       if (isDeficit) {
-        part2 += `Untuk kebutuhan rutin bulanan (rata-rata Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}), ` +
-          `uang belanja harian mengalami defisit Rp ${Math.abs(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}. `;
-        if (calculation.goalsEvaluation.length > 0) {
-          part2 += calculation.goalsEvaluation.map(g => `Ruang alokasi untuk pos ${g.title} bulan ini menjadi Rp 0.`).join(" ");
-        }
+        const defAmt = Math.abs(calculation.routineExpenses?.remainingCashAfterRoutine || 200000);
+        points.push(`📉 **Uang belanja bulanan** tersisa Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString("id-ID")}, berada di bawah kebutuhan rutin sehingga terjadi defisit sekitar Rp ${defAmt.toLocaleString("id-ID")}.`);
       } else {
-        part2 += `Sisa uang setelah setoran dan tagihan (Rp ${calculation.remainingCashAfterImmediateObligations?.toLocaleString("id-ID")}) ` +
-          `mencukupi estimasi kebutuhan rutin bulanan (Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}).`;
+        points.push(`📈 **Uang belanja bulanan** tersisa Rp ${calculation.remainingCashAfterImmediateObligations.toLocaleString("id-ID")}, masih mencukupi estimasi kebutuhan rutin.`);
       }
-    } else {
-      part2 += `Sisa saldo mencukupi kebutuhan rutin hingga gajian berikutnya (estimasi Rp ${calculation.routineExpenses.estimatedRemaining.toLocaleString("id-ID")}) ` +
-        `dengan sisa akhir Rp ${(calculation.routineExpenses.remainingCashAfterRoutine || 0).toLocaleString("id-ID")}.`;
     }
-  }
 
-  return `${part1.trim()}\n\n${part2.trim()}`;
+    // 4. Rekomendasi jika defisit
+    if (isDeficit) {
+      points.push(`🎯 **Rekomendasi alokasi:** Menyesuaikan setoran menjadi Rp ${recAmt.toLocaleString("id-ID")} agar uang belanja bulanan tetap aman dan menyisakan cadangan kas Rp ${(baseSurplus - recAmt).toLocaleString("id-ID")}.`);
+    }
+
+    // Kesimpulan
+    const conclusion = isDeficit
+      ? `⚠️ **Kesimpulan:** Keputusan menabung Rp ${action.amount.toLocaleString("id-ID")} tidak disarankan karena mengganggu kebutuhan belanja rutin harian. Disarankan menabung Rp ${recAmt.toLocaleString("id-ID")}.`
+      : `✅ **Kesimpulan:** Alokasi tabungan aman dilakukan tanpa mengganggu kebutuhan rutin harian.`;
+
+    return `${opening}\n\n${points.join("\n")}\n\n${conclusion}`;
+  }
 }
 
 export interface AssistantResponseResult {

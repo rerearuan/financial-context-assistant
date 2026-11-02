@@ -56,7 +56,7 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
           exploredAlternatives: [],
           followupHistory: [{ userPrompt: "Awal" }],
           clarificationsPending: [],
-        },
+        } as any,
         hasUserDisclosedAction: true,
       });
 
@@ -121,7 +121,7 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
       ];
 
       for (const prompt of testPrompts) {
-        const fallback = generateSafeFallbackResponse(packet, prompt, [
+        const fallback = generateSafeFallbackResponse(packet as any, prompt, [
           { role: "user", content: "Halo" },
           { role: "assistant", content: "Halo! Ada yang bisa dibantu?" },
         ]);
@@ -175,7 +175,7 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
       ];
 
       for (const prompt of testPrompts) {
-        const fallback = generateSafeFallbackResponse(packet, prompt, [
+        const fallback = generateSafeFallbackResponse(packet as any, prompt, [
           { role: "user", content: "Halo" },
           { role: "assistant", content: "Halo! Ada yang bisa dibantu?" },
         ]);
@@ -214,9 +214,9 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
             source: "synthetic_profile",
           },
           responsePlan: {
-            intentType: "inquiry",
+            intentType: "inquire",
             focalDimension: "liquidity",
-          },
+          } as any,
           hasUserDisclosedAction: true,
         });
 
@@ -275,7 +275,7 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
         action,
         syntheticProfile: null,
         userProvidedFinances: extracted.userProvidedFinances,
-        conversationState: convState,
+        conversationState: convState as any,
         hasUserDisclosedAction: true,
       });
 
@@ -322,7 +322,7 @@ describe("Regression Tests: Bug Report Prevention (Rp undefined & User Range Inp
         action,
         syntheticProfile: null,
         userProvidedFinances: userProvided,
-        conversationState: convState,
+        conversationState: convState as any,
         hasUserDisclosedAction: true,
       });
 

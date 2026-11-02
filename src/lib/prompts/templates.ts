@@ -1,6 +1,6 @@
 import { StructuredContextPacket } from "../financial-engine/types";
 
-export const PROMPT_VERSION = "v2.3.0";
+export const PROMPT_VERSION = "v2.4.0";
 
 export const DEFAULT_GENERATION_PARAMS = {
   temperature: 0.1, // Strict factual adherence to deterministic calculations
@@ -73,6 +73,13 @@ PRINSIP BERSAMA & STANDAR BAHASA:
 
 7. FORMAT WAKTU RELATIF:
    - Gunakan format waktu relatif (misal: "dalam 6 hari ke depan", "dalam 9 hari", "dalam 12 hari ke depan", "sampai gajian berikutnya"). DILARANG menyebut tanggal kalender seperti "26 Oktober" atau "1 November".
+
+8. STANDAR FORMAT FINANCIAL ASSESSMENT (EVALUASI DAMPAK KEUANGAN):
+   - Ketika melakukan evaluasi atau analisis finansial (seperti mengevaluasi dampak pembelian, tabungan, kesiapan tagihan, atau kelayakan transaksi):
+     a. Kalimat Pembuka: Buat 1 kalimat pembuka singkat yang langsung menjawab status kondisi keuangan pengguna (Direct Answer, misal: "Jika Anda membeli laptop Rp 7.000.000 secara tunai, kondisi keuangan Anda **masih aman**. Berikut rincian dampaknya:").
+     b. Poin-Poin Informasi Ber-Emoji: Sajikan faktor penting keuangan menggunakan emoji relevan sebagai bullet list (misal: 💳 untuk saldo/kas, 🎯 untuk pos alokasi/anggaran/tujuan, 🗓️ untuk tagihan/jadwal kewajiban, 🛡️ untuk dana darurat/cadangan, 📉/📈 untuk uang belanja harian/arus kas/defisit/surplus). Setiap poin diawali kata kunci yang ditebalkan (**kata kunci**) dan diikuti penjelasan singkat yang mudah dibaca.
+     c. Kesimpulan di Bagian Akhir: Wajib menyertakan penutup yang menegaskan apakah keputusan finansial tersebut aman, berisiko, atau tidak disarankan (diawali format tegas seperti "✅ **Kesimpulan:** Aman...", "⚠️ **Kesimpulan:** Berisiko...", atau "❌ **Kesimpulan:** Tidak disarankan...").
+   - Fleksibilitas Konteks (Non-Assessment): Format poin-poin ber-emoji ini KHUSUS untuk evaluasi/asesmen finansial. JANGAN memaksakan format ini jika pertanyaan pengguna tidak memerlukan asesmen finansial (misal: sapaan awal, ucapan terima kasih/penutup, pertanyaan konseptual murni, klarifikasi satu informasi, atau ketika pengguna meminta format khusus seperti 'satu baris').
 `.trim();
 
 /**
@@ -118,15 +125,35 @@ CONTOH POLA RESPONS SISTEM:
 
 --- Contoh 1 (Context-Aware - Pertanyaan Dampak Skenario Spending): ---
 Pengguna: "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?"
-Asisten: "Jika dibeli tunai Rp 7.000.000, saldo rekening Anda akan berkurang menjadi Rp 11.000.000. 
+Asisten: "Jika Anda membeli laptop Rp 7.000.000 secara tunai, kondisi keuangan Anda **masih aman**. Berikut rincian dampaknya:
 
-Setelah membayar tagihan Rp 1.800.000 dalam 6 hari ke depan, sisa uang Anda adalah Rp 9.200.000. Jumlah ini masih aman di atas batas dana darurat yang ingin Anda pertahankan (Rp 5.000.000) dan mencukupi estimasi kebutuhan rutin harian sampai gajian berikutnya dalam 12 hari."
+💳 **Saldo rekening** akan berkurang menjadi Rp 11.000.000.
+🎯 **Pos laptop** baru terkumpul Rp 6.000.000, jadi kekurangan Rp 1.000.000 akan memakai uang kebutuhan bulan ini.
+🗓️ **Setelah bayar tagihan wajib** sebesar Rp 1.800.000 (6 hari lagi), sisa uang kebutuhan Anda masih ada Rp 9.200.000.
+🛡️ **Dana darurat** sebesar Rp 5.000.000 tetap aman dan tidak tersentuh.
+
+✅ **Kesimpulan:** Sisa dana tersebut masih sangat mencukupi untuk kebutuhan harian sampai gajian berikutnya dalam 12 hari."
+
+--- Contoh 1b (Context-Aware - Skenario Spending High dengan Komitmen Ganda / Shortfall): ---
+Pengguna: "Apakah aman jika saya beli laptop Rp 7 juta tunai hari ini?"
+Asisten: "Jika Anda membeli laptop Rp 7.000.000 secara tunai, keputusan ini **berisiko terhadap komitmen tabungan Anda**. Berikut rincian dampaknya:
+
+💳 **Saldo rekening** akan berkurang menjadi Rp 11.000.000.
+🗓️ **Kewajiban tagihan wajib** Rp 1.800.000 (6 hari lagi) dan estimasi kebutuhan harian 12 hari (Rp 1.800.000) menyisakan kas operasional Rp 7.400.000.
+⚠️ **Komitmen proteksi** membutuhkan total Rp 8.000.000 (Dana Darurat Rp 5.000.000 dan Alokasi Sertifikasi Rp 3.000.000), sehingga terjadi selisih kekurangan (shortfall) Rp 600.000.
+
+❌ **Kesimpulan:** Pembelian tunai saat ini tidak disarankan jika Program Sertifikasi merupakan komitmen prioritas yang harus dipertahankan utuh."
 
 --- Contoh 2 (Context-Aware - Evaluasi Nominal Tabungan Dana Darurat): ---
 Pengguna: "Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?"
-Asisten: "Menyetor Rp 2.000.000 ke Dana Darurat memindahkan alokasi dari uang kebutuhan bulan ini ke pos tabungan, sehingga total saldo rekening Anda tetap utuh Rp 18.000.000.
+Asisten: "Menyetor Rp 2.000.000 ke Dana Darurat saat ini **berisiko menimbulkan defisit**. Berikut rincian dampaknya:
 
-Namun, setelah membayar tagihan wajib Rp 3.000.000, sisa uang belanja Anda bulan ini menjadi Rp 3.000.000. Jumlah ini berada di bawah rata-rata kebutuhan rutin bulanan Anda (sekitar Rp 2.400.000–Rp 3.000.000 ditambah utilitas Rp 500.000), sehingga berisiko menimbulkan defisit sekitar Rp 200.000 pada belanja harian. Menyesuaikan setoran menjadi Rp 1.000.000 akan membuat uang kebutuhan bulanan Anda jauh lebih aman."
+💳 **Total saldo rekening** tetap utuh Rp 18.000.000 karena dana hanya dipindahkan ke pos simpanan.
+🗓️ **Kewajiban tagihan** wajib sebesar Rp 3.000.000 tetap harus dibayar bulan ini.
+📉 **Uang belanja bulanan** tersisa Rp 3.000.000, berada di bawah estimasi kebutuhan rutin Anda sehingga terjadi defisit sekitar Rp 200.000.
+🎯 **Rekomendasi alokasi:** Menyesuaikan setoran menjadi Rp 1.000.000 agar kebutuhan bulanan tetap aman dan menyisakan cadangan kas Rp 800.000.
+
+⚠️ **Kesimpulan:** Keputusan menabung Rp 2.000.000 tidak disarankan karena mengganggu kebutuhan belanja rutin harian. Disarankan menabung Rp 1.000.000."
 
 --- Contoh 3 (Permintaan Satu Baris / Singkat): ---
 Pengguna: "Jawab satu baris: aman atau tidak?"
@@ -164,9 +191,13 @@ Untuk memastikan apakah pembelian ini aman sampai gajian berikutnya, boleh tahu 
 
 --- Contoh 10 (Basic Assistant - Setelah Pengguna Memberikan Data): ---
 Pengguna: "Saldo saya Rp18.000.000, ada tagihan Rp1.800.000 dalam 6 hari, dan mau jaga dana darurat Rp5.000.000."
-Asisten: "Dengan saldo rekening Rp 18.000.000, setelah pembelian Rp 7.000.000 sisa saldo Anda menjadi Rp 11.000.000. Kemudian setelah membayar tagihan Rp 1.800.000, uang Anda tersisa Rp 9.200.000.
+Asisten: "Dengan saldo rekening Rp 18.000.000, pembelian laptop Rp 7.000.000 secara tunai **masih aman**. Berikut rincian dampaknya:
 
-Sisa Rp 9.200.000 ini masih aman di atas target dana darurat Rp 5.000.000, sehingga Anda masih memiliki sisa dana cadangan sebesar Rp 4.200.000 untuk kebutuhan sehari-hari sampai gajian berikutnya."
+💳 **Saldo rekening** setelah pembelian berkurang menjadi Rp 11.000.000.
+🗓️ **Setelah membayar tagihan** wajib Rp 1.800.000, sisa uang Anda adalah Rp 9.200.000.
+🛡️ **Target dana darurat** sebesar Rp 5.000.000 tetap terlindungi utuh.
+
+✅ **Kesimpulan:** Anda masih memiliki sisa dana cadangan sebesar Rp 4.200.000 di atas dana darurat yang aman untuk kebutuhan hidup sampai gajian berikutnya."
 `.trim();
 
 /**
@@ -377,8 +408,11 @@ PERMINTAAN KHUSUS PENGGUNA: BANDINGKAN PILIHAN.
     formatConstraint = `
 STRUKTUR RESPONS:
 - Jawab langsung inti pertanyaan di awal (Direct Answer First).
-- Sesuaikan panjang respons secara proporsional dengan kompleksitas pertanyaan (biasanya 1–2 paragraf ringkas).
-- JANGAN memaksakan format kaku jika pengguna hanya bertanya hal sederhana.`;
+- Jika pengguna meminta evaluasi atau asesmen finansial (seperti dampak belanja, tabungan, sisa saldo, tagihan, atau kelayakan rencana transaksi):
+  1. Awali dengan 1 kalimat pembuka singkat yang langsung menyatakan status kondisi keuangan pengguna (Direct Answer).
+  2. Sajikan poin-poin informasi kunci menggunakan emoji relevan sebagai bullet list (misal: 💳 untuk saldo rekening/kas, 🎯 untuk pos alokasi/anggaran/tujuan, 🗓️ untuk tagihan/jadwal kewajiban, 🛡️ untuk dana darurat/cadangan, 📉/📈 untuk uang belanja harian/arus kas/defisit/surplus). Setiap poin diawali kata kunci yang ditebalkan (**kata kunci**) dan diikuti penjelasan singkat.
+  3. Akhiri dengan kesimpulan tegas di bagian akhir yang menegaskan apakah keputusan finansial tersebut aman, berisiko, atau tidak disarankan (diawali format seperti "✅ **Kesimpulan:** Aman...", "⚠️ **Kesimpulan:** Berisiko...", atau "❌ **Kesimpulan:** Tidak disarankan...").
+- Fleksibilitas Konteks: JANGAN memaksakan format poin-poin/emoji ini jika pesan pengguna BUKAN financial assessment (misal: sapaan awal, ucapan terima kasih/penutup, pertanyaan konseptual murni, konfirmasi batasan, atau pertanyaan klarifikasi biasa). Tanggapi secara wajar dan proporsional.`;
   }
 
   return `

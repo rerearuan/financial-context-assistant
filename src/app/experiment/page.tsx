@@ -286,12 +286,8 @@ function ExperimentContent() {
       return;
     }
 
-    if (earlyDecision.q1 === "Ya" && !earlyDecision.q2) {
-      alert(
-        scenario.actionType === "spending"
-          ? "Mohon pilih metode pembayaran jika Anda memilih Ya."
-          : "Mohon pilih jumlah penambahan jika Anda memilih Ya."
-      );
+    if (scenario.actionType !== "spending" && earlyDecision.q1 === "Ya" && !earlyDecision.q2) {
+      alert("Mohon pilih jumlah penambahan jika Anda memilih Ya.");
       return;
     }
 
@@ -1058,19 +1054,14 @@ function ExperimentContent() {
                       </div>
                     </div>
 
-                    {/* Pertanyaan 4 */}
-                    {earlyDecision.q1 === "Ya" && (
+                    {/* Pertanyaan 4 (khusus saving jika ada) */}
+                    {scenario.actionType !== "spending" && earlyDecision.q1 === "Ya" && (
                       <div>
                         <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
-                          4. {scenario.actionType === "spending"
-                            ? "Metode pembayaran apa yang Anda rencanakan?"
-                            : "Berapa jumlah yang rencananya akan Anda tambahkan?"} *
+                          4. Berapa jumlah yang rencananya akan Anda tambahkan? *
                         </label>
                         <div className="space-y-2">
-                          {(scenario.actionType === "spending"
-                            ? ["Tunai (Rp7.000.000)", "Cicilan (12 bulan)"]
-                            : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
-                          ).map((opt) => (
+                          {["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"].map((opt) => (
                             <label
                               key={opt}
                               className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer text-xs sm:text-sm transition ${
@@ -1095,10 +1086,10 @@ function ExperimentContent() {
                       </div>
                     )}
 
-                    {/* Pertanyaan 5 */}
+                    {/* Pertanyaan Alasan Pertimbangan */}
                     <div>
                       <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base leading-snug">
-                        5. Jelaskan alasan pertimbangan keputusan awal Anda! *
+                        {scenario.actionType !== "spending" && earlyDecision.q1 === "Ya" ? "5" : "4"}. Jelaskan alasan pertimbangan keputusan awal Anda! *
                       </label>
                       <textarea
                         rows={3}
@@ -1384,7 +1375,7 @@ function ExperimentContent() {
                         {idx + 1}
                       </span>
                       <p className="text-sm sm:text-base font-medium text-slate-900 leading-relaxed pt-0.5">
-                        {item.statement}
+                        {formatBoldText(item.statement)}
                       </p>
                     </div>
 

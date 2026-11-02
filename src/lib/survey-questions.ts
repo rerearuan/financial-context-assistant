@@ -10,25 +10,29 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
   {
     code: "AT1",
     category: "Assistant Type (AT)",
-    statement: "Chatbot menggunakan informasi mengenai kondisi keuangan saya ketika memberikan respons.",
+    statement:
+      "Dalam memberikan respons, chatbot secara **langsung menyebutkan** kondisi keuangan saya **tanpa perlu saya jelaskan**.",
     source: "Self-developed",
   },
   {
     code: "AT2",
     category: "Assistant Type (AT)",
-    statement: "Chatbot mempertimbangkan beberapa informasi keuangan yang relevan secara bersamaan.",
+    statement:
+      "Dalam memberikan respons, chatbot **menggunakan informasi** keuangan saya meskipun saya **belum menyampaikannya** dalam percakapan.",
     source: "Self-developed",
   },
   {
     code: "AT3",
     category: "Assistant Type (AT)",
-    statement: "Respons chatbot disesuaikan dengan situasi keuangan saya secara keseluruhan.",
+    statement:
+      "Dalam memberikan respons, chatbot **tidak** secara langsung menyebutkan kondisi keuangan saya **sebelum saya menjelaskannya** terlebih dahulu.",
     source: "Self-developed",
   },
   {
     code: "AT4",
     category: "Assistant Type (AT)",
-    statement: "Chatbot menghubungkan informasi tentang alokasi dana, kewajiban, dan tujuan keuangan saya ketika memberikan pertimbangan.",
+    statement:
+      "Dalam memberikan respons, chatbot **tidak menggunakan** informasi keuangan saya, **kecuali saya sampaikan** dalam percakapan.",
     source: "Self-developed",
   },
 
@@ -36,25 +40,29 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
   {
     code: "MAC1",
     category: "Mental Account Conflict (MAC)",
-    statement: "Pada skenario yang saya dapatkan, saya perlu mempertimbangkan dua tujuan keuangan yang sama-sama penting.",
+    statement:
+      "Pada skenario yang saya dapatkan, saya perlu mempertimbangkan **dua tujuan** keuangan **yang sama-sama penting**.",
     source: "Mayer & Freund (2022)",
   },
   {
     code: "MAC2",
     category: "Mental Account Conflict (MAC)",
-    statement: "Pada skenario yang saya dapatkan, dana yang tersedia harus dibagi untuk mencapai dua tujuan keuangan yang berbeda.",
+    statement:
+      "Pada skenario yang saya dapatkan, dana yang tersedia harus **dibagi** untuk mencapai **dua tujuan** keuangan yang berbeda.",
     source: "self-developed",
   },
   {
     code: "MAC3",
     category: "Mental Account Conflict (MAC)",
-    statement: "Pada skenario yang saya dapatkan, saya bisa fokus pada satu tujuan keuangan tanpa harus mempertimbangkan tujuan lainnya.",
+    statement:
+      "Pada skenario yang saya dapatkan, saya bisa fokus pada **satu tujuan** keuangan tanpa harus mempertimbangkan tujuan lainnya.",
     source: "Mayer & Freund (2022)",
   },
   {
     code: "MAC4",
     category: "Mental Account Conflict (MAC)",
-    statement: "Pada skenario yang saya dapatkan, saya dapat memenuhi satu tujuan keuangan tanpa harus mengurangi alokasi dana untuk tujuan lain yang sama penting.",
+    statement:
+      "Pada skenario yang saya dapatkan, saya **dapat memenuhi satu tujuan** keuangan tanpa harus mengurangi alokasi dana untuk tujuan lain yang sama penting.",
     source: "Mayer & Freund (2022)",
   },
 
