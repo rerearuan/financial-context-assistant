@@ -85,6 +85,7 @@ function ExperimentContent() {
     monthlyIncome: "",
     chatbotExperience: "",
     financialKnowledge: "",
+    contact: "",
   });
   const [occupationOther, setOccupationOther] = useState("");
 
@@ -222,6 +223,11 @@ function ExperimentContent() {
       return;
     }
 
+    if (!demographics.contact.trim()) {
+      alert("Harap isi kontak yang dapat dihubungi untuk keperluan hadiah.");
+      return;
+    }
+
     setSubmitting(true);
     setErrorMessage(null);
 
@@ -234,6 +240,7 @@ function ExperimentContent() {
           participantId: participant.id,
           demographics: {
             ...demographics,
+            contact: demographics.contact.trim(),
             occupation:
               demographics.occupation === "Lainnya"
                 ? `Lainnya (${occupationOther.trim()})`
@@ -348,6 +355,11 @@ function ExperimentContent() {
 
     if (!finalDecision.q1 || !finalDecision.q3.trim()) {
       alert("Mohon jawab seluruh pertanyaan keputusan akhir Anda.");
+      return;
+    }
+
+    if (scenario?.actionType !== "spending" && finalDecision.q1 === "Ya" && !finalDecision.q2) {
+      alert("Mohon pilih jumlah penambahan jika Anda memilih Ya.");
       return;
     }
 
@@ -802,6 +814,24 @@ function ExperimentContent() {
                 </div>
               </div>
 
+              {/* 8. Kontak yang Dapat Dihubungi */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1">
+                  8. Kontak yang dapat dihubungi (Email/No telp) *
+                </label>
+                <p className="text-xs text-slate-500 mb-2">
+                  * Hanya untuk keperluan hadiah
+                </p>
+                <input
+                  type="text"
+                  value={demographics.contact}
+                  onChange={(e) => setDemographics({ ...demographics, contact: e.target.value })}
+                  placeholder="Contoh: 08123456789 atau nama@email.com"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-xs sm:text-sm"
+                  required
+                />
+              </div>
+
               <div className="flex items-center gap-4 pt-3">
                 <button
                   type="button"
@@ -1243,19 +1273,14 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              {/* 2. Metode Pembayaran / Jumlah Tambahan */}
-              {finalDecision.q1 === "Ya" && (
+              {/* 2. Jumlah Tambahan (khusus saving jika Ya) */}
+              {scenario.actionType !== "spending" && finalDecision.q1 === "Ya" && (
                 <div>
                   <label className="block font-semibold text-slate-800 mb-2.5 text-sm sm:text-base">
-                    2. {scenario.actionType === "spending"
-                      ? "Jika Ya, metode pembayaran apa yang Anda gunakan? mengapa?"
-                      : "Jika Ya, berapa jumlah yang akan Anda tambahkan?"} *
+                    2. Jika Ya, berapa jumlah yang akan Anda tambahkan? *
                   </label>
                   <div className="space-y-2.5">
-                    {(scenario.actionType === "spending"
-                      ? ["Tunai", "Cicilan"]
-                      : ["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"]
-                    ).map((opt) => (
+                    {["Rp1.000.000", "Rp2.000.000", "Rp3.000.000", "Jumlah lainnya"].map((opt) => (
                       <label
                         key={opt}
                         className={`flex items-center gap-3.5 p-3.5 rounded-xl border cursor-pointer transition text-sm sm:text-base ${
@@ -1280,10 +1305,10 @@ function ExperimentContent() {
                 </div>
               )}
 
-              {/* 3. Alasan Keputusan Akhir */}
+              {/* Alasan Keputusan Akhir */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-2 text-sm sm:text-base">
-                  3. Jelaskan alasan keputusan Anda! *
+                  {scenario.actionType !== "spending" && finalDecision.q1 === "Ya" ? "3" : "2"}. Jelaskan alasan keputusan Anda! *
                 </label>
                 <textarea
                   rows={4}

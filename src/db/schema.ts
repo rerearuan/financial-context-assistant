@@ -148,6 +148,7 @@ export const participants = pgTable("participants", {
     monthlyIncome: string;
     chatbotExperience: string;
     financialKnowledge: string;
+    contact?: string;
   } | null>(),
   earlyDecision: jsonb("early_decision").$type<{
     q1: string;

@@ -77,11 +77,7 @@ Laptop yang Anda gunakan saat ini masih dapat digunakan, tetapi performanya mula
 
 **Karena kondisi tersebut**, selama beberapa bulan terakhir Anda memang telah merencanakan untuk mengganti laptop dan mulai menyisihkan uang untuk kebutuhan tersebut.
 
-Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.
-
-Tersedia dua metode pembayaran:
-● Tunai: Rp7.000.000
-● Cicilan: tenor 12 bulan, bunga flat 1,2% per bulan, serta biaya administrasi 1% dari harga barang`,
+Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan berikutnya diperkirakan diterima dalam 12 hari.
 ● Saldo rekening Anda saat ini: Rp18.000.000.
@@ -94,7 +90,7 @@ Tersedia dua metode pembayaran:
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan **Pembelian Laptop**.`,
-      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
+      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000.`,
       initialAction: {
         type: "spending",
         amount: 7000000,
@@ -104,7 +100,7 @@ Tersedia dua metode pembayaran:
         source: "scenario",
         paymentMethod: "cash",
       },
-      actionOptions: ["cash", "installment"],
+      actionOptions: ["cash"],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
         "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?",
@@ -138,12 +134,6 @@ Tersedia dua metode pembayaran:
           id: "q1",
           question: "Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan pembelian tersebut?",
           options: ["Ya", "Tidak"],
-          type: "radio",
-        },
-        {
-          id: "q2",
-          question: "Jika Ya, metode pembayaran apa yang Anda gunakan? mengapa?",
-          options: ["Tunai", "Cicilan"],
           type: "radio",
         },
         {
@@ -268,11 +258,7 @@ Karena kondisi tersebut, selama beberapa bulan terakhir Anda telah merencanakan 
 
 Bagi Anda, **mengganti laptop** dan **mengikuti program sertifikasi** sama-sama merupakan tujuan yang penting.
 
-Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.
-
-Tersedia dua metode pembayaran:
-● Tunai: Rp7.000.000
-● Cicilan: tenor 12 bulan, bunga flat 1,2% per bulan, serta biaya administrasi 1% dari harga barang`,
+Anda menemukan laptop yang sesuai dengan kebutuhan dengan harga normal Rp8.500.000. Saat ini laptop tersebut sedang ditawarkan dengan harga Rp7.000.000, dan promosi hanya berlaku sampai hari ini.`,
       kondisiKeuanganText: `● Pendapatan bulanan: Rp8.000.000.
 ● Pendapatan berikutnya diperkirakan diterima dalam 12 hari.
 ● Saldo rekening Anda saat ini: Rp18.000.000.
@@ -288,7 +274,7 @@ Tersedia dua metode pembayaran:
 ● Dalam 6 hari ke depan, terdapat tagihan sebesar Rp1.800.000 yang harus dibayar.
 ● Tidak terdapat pembayaran besar lain yang telah diketahui hingga pendapatan berikutnya diterima.`,
       tugasText: `Gunakan chatbot yang tersedia untuk membantu Anda mempertimbangkan keputusan **Pembelian Laptop**.`,
-      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000 dengan opsi tunai atau cicilan 12 bulan.`,
+      descriptionText: `Pertimbangan pembelian laptop baru seharga Rp7.000.000.`,
       initialAction: {
         type: "spending",
         amount: 7000000,
@@ -298,7 +284,7 @@ Tersedia dua metode pembayaran:
         source: "scenario",
         paymentMethod: "cash",
       },
-      actionOptions: ["cash", "installment"],
+      actionOptions: ["cash"],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
         "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?",
@@ -332,12 +318,6 @@ Tersedia dua metode pembayaran:
           id: "q1",
           question: "Setelah berdiskusi dengan chatbot, apakah Anda akan melakukan pembelian tersebut?",
           options: ["Ya", "Tidak"],
-          type: "radio",
-        },
-        {
-          id: "q2",
-          question: "Jika Ya, metode pembayaran apa yang Anda gunakan? mengapa?",
-          options: ["Tunai", "Cicilan"],
           type: "radio",
         },
         {

@@ -30,7 +30,7 @@ const CELLS: CellItem[] = [
     conflict: "Low Conflict (Nominal Rendah)",
     condition: "Basic",
     scenarioTitle: "Pembelian Laptop Baru",
-    nominalText: "Rp 7.000.000 (Tunai/Cicilan)",
+    nominalText: "Rp 7.000.000",
     description: "Chatbot standar berbasis skenario tanpa akses ke profil keuangan riil/sintetis.",
   },
   {
@@ -39,7 +39,7 @@ const CELLS: CellItem[] = [
     conflict: "Low Conflict (Nominal Rendah)",
     condition: "Context-Aware",
     scenarioTitle: "Pembelian Laptop Baru",
-    nominalText: "Rp 7.000.000 (Tunai/Cicilan)",
+    nominalText: "Rp 7.000.000",
     description: "Chatbot cerdas dengan akses ke profil transaksi, saldo, tagihan mendatang, dan guardrail.",
   },
   {
@@ -48,7 +48,7 @@ const CELLS: CellItem[] = [
     conflict: "High Conflict (Nominal Tinggi)",
     condition: "Basic",
     scenarioTitle: "Pembelian Laptop Baru",
-    nominalText: "Rp 7.000.000 (Tunai/Cicilan)",
+    nominalText: "Rp 7.000.000",
     description: "Chatbot standar tanpa evaluasi likuiditas mendalam di situasi ketat.",
   },
   {
@@ -57,7 +57,7 @@ const CELLS: CellItem[] = [
     conflict: "High Conflict (Nominal Tinggi)",
     condition: "Context-Aware",
     scenarioTitle: "Pembelian Laptop Baru",
-    nominalText: "Rp 7.000.000 (Tunai/Cicilan)",
+    nominalText: "Rp 7.000.000",
     description: "Chatbot proaktif mendeteksi defisit arus kas dan ancaman likuiditas jika membeli tunai.",
   },
   {
