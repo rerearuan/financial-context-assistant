@@ -207,6 +207,7 @@ export const INTENT_EXTRACTION_PROMPT = `
 Anda adalah modul ekstraksi maksud terstruktur (structured intent extractor) untuk asisten finansial.
 Analisis pesan terbaru dari pengguna dalam konteks tindakan keuangan yang sedang berjalan:
 Tindakan saat ini: {{CURRENT_ACTION}}
+{{PREVIOUS_CONTEXT}}
 
 Tugas Anda: Ekstrak maksud pesan pengguna ke dalam format JSON sesuai skema tanpa teks pengantar/penutup.
 

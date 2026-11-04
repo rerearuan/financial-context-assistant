@@ -7,7 +7,7 @@ import {
   PROMPT_VERSION,
 } from "./prompts/templates";
 import { ExtractedIntent, ExtractedIntentSchema } from "./prompts/intent-schema";
-import { StructuredContextPacket } from "./financial-engine/types";
+import { StructuredContextPacket, ConversationState } from "./financial-engine/types";
 import { sanitizeAmount, hasUserDisclosedAction } from "./financial-engine/validator";
 import {
   validateAssistantOutput,
@@ -71,7 +71,9 @@ export async function verifyModelAvailability(): Promise<{
  */
 export function heuristicExtractIntent(
   userMessage: string,
-  currentAction: StructuredContextPacket["action"]
+  currentAction: StructuredContextPacket["action"],
+  conversationState?: ConversationState | null,
+  lastAssistantMessage?: string | null
 ): ExtractedIntent {
   const lower = userMessage.toLowerCase().trim();
   const clean = lower;
@@ -252,32 +254,74 @@ export function heuristicExtractIntent(
   }
 
   // 7. Look for user provided finances (Extract first before newAmount to prevent capturing profile facts as plan modifications)
-  const balanceMatch = userMessage.match(
-    /(?:saldo(?:ku)?|isi rekening|tabungan total|uang di rekening)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
-  );
+  const balanceMatch =
+    userMessage.match(
+      /(?:saldo(?:ku)?|isi rekening|tabungan total|uang di rekening)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
+    ) ||
+    userMessage.match(
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)(?:[^a-z0-9]{0,20})?(?:saldo(?:ku)?|isi rekening|tabungan total|uang di rekening)/i
+    );
+
   const budgetMatch = userMessage.match(
     /anggaran(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
   );
-  const incomeMatch = userMessage.match(
-    /(?:gaji(?:ku)?|penghasilan|pendapatan|pemasukan|income)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
-  );
-  const liabilitiesMatch = userMessage.match(
-    /(?:tanggungan|kewajiban|tagihan|utang|cicilan|sewa)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
-  );
+
+  const incomeMatch =
+    userMessage.match(
+      /(?:gaji(?:ku)?|penghasilan|pendapatan|pemasukan|income)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
+    ) ||
+    userMessage.match(
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)(?:[^a-z0-9]{0,20})?(?:gaji(?:ku)?|penghasilan|pendapatan|pemasukan|income)/i
+    );
+
+  const liabilitiesMatch =
+    userMessage.match(
+      /(?:tanggungan|kewajiban|tagihan|utang|cicilan|sewa)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
+    ) ||
+    userMessage.match(
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)(?:[^a-z0-9]{0,20})?(?:tanggungan|kewajiban|tagihan|utang|cicilan|sewa)/i
+    );
+
   const emergencyTargetMatch = userMessage.match(
     /(?:target(?:nya)?|tujuan)(?:[^0-9]{0,30})?(?:emergency fund|dana darurat|tabungan darurat)?(?:[^0-9]{0,20})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
   );
   const bufferMatch = userMessage.match(
     /(?:dana darurat|buffer|emergency fund|tabungan darurat)(?:[^0-9]{0,30})?(?:saat ini|punya|sekarang|ada|sebesar)?(?:[^0-9]{0,20})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
   );
-  const routineMatch = userMessage.match(
-    /(?:pengeluaran(?:ku)? (?:biasanya|rutin|bulanan|harian)?|kebutuhan (?:rutin|harian|bulanan)|biaya (?:hidup|rutin|bulanan)|belanja (?:rutin|bulanan|harian)|bulanan|biasanya habis|biasanya keluar|biasanya)(?:[^0-9]{0,30})?(?:kurang lebih|sekitar|kira-kira)?(?:[^0-9]{0,10})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
-  );
+  const routineMatch =
+    userMessage.match(
+      /(?:pengeluaran(?:ku)? (?:biasanya|rutin|bulanan|harian)?|kebutuhan (?:rutin|harian|bulanan)|biaya (?:hidup|rutin|bulanan)|belanja (?:rutin|bulanan|harian)|bulanan|biasanya habis|biasanya keluar|biasanya)(?:[^0-9]{0,30})?(?:kurang lebih|sekitar|kira-kira)?(?:[^0-9]{0,10})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)/i
+    ) ||
+    userMessage.match(
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*\s*(?:juta|jt|ribu|rb|k)?)(?:[^a-z0-9]{0,20})?(?:pengeluaran(?:ku)?|kebutuhan (?:rutin|bulanan|harian)|biaya hidup)/i
+    );
+
   const spentSoFarMatch = userMessage.match(
     /(?:sudah (?:keluar|terpakai|habis|belanja)|pengeluaran bulan berjalan)(?:[^0-9]{0,30})?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k)?)/i
   );
 
   const rawUserFigures = extractMentionedAmounts(userMessage);
+
+  // Check if message is explicitly modifying plan or inquiring alternative nominal
+  const isAlternativeOrModification =
+    !isEstimationPhrase &&
+    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+      userMessage
+    ) ||
+      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:saya\s+)?(?:menyisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+        userMessage
+      ) ||
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))\s*(?:aja|saja|cuma|hanya|gimana|bagaimana)/i.test(
+        userMessage
+      ));
+
+  const isOnlyActionAmount =
+    rawUserFigures.length === 1 &&
+    rawUserFigures[0] === currentAction.amount &&
+    /(?:laptop|beli|tabung|nabung|tindakan|transaksi|rencana)\b/i.test(lower);
+
+  const isGeneralInquiry =
+    /(?:apakah|gimana|bagaimana|apa dampaknya|aman (?:dibeli|dijalankan|dilakukan)|bolehkah)\b/i.test(lower);
 
   let userProvidedFinances: ExtractedIntent["userProvidedFinances"] = null;
   if (
@@ -307,6 +351,53 @@ export function heuristicExtractIntent(
       emergencyTarget: rawTargetVal,
       rawUserFigures: rawUserFigures.length > 0 ? rawUserFigures : undefined,
     };
+  } else if (!isAlternativeOrModification && !isOnlyActionAmount && !isGeneralInquiry && rawUserFigures.length > 0) {
+    // Implicit numeric answer without explicit keyword (e.g. "10 juta", "10.000.000", "10jt")
+    const lastClarification =
+      conversationState?.askedClarifications?.[
+        conversationState.askedClarifications.length - 1
+      ];
+    const isAskingBalance =
+      lastClarification === "balance" ||
+      (lastAssistantMessage && /saldo|rekening/i.test(lastAssistantMessage));
+    const isAskingIncome =
+      lastClarification === "income" ||
+      (lastAssistantMessage && /pendapatan|pemasukan|gaji/i.test(lastAssistantMessage));
+    const isAskingRoutine =
+      lastClarification === "routine" ||
+      (lastAssistantMessage && /kebutuhan|pengeluaran|rutin/i.test(lastAssistantMessage));
+
+    let inferredBalance: number | undefined;
+    let inferredIncome: number | undefined;
+    let inferredRoutine: number | undefined;
+
+    if (isAskingBalance) {
+      inferredBalance = rawUserFigures[0];
+    } else if (isAskingIncome) {
+      inferredIncome = rawUserFigures[0];
+    } else if (isAskingRoutine) {
+      inferredRoutine = rawUserFigures[0];
+    } else if (
+      currentAction.type === "spending" &&
+      conversationState?.userProvidedFacts?.balance === undefined
+    ) {
+      inferredBalance = rawUserFigures[0];
+    } else if (
+      currentAction.type === "saving" &&
+      conversationState?.userProvidedFacts?.income === undefined
+    ) {
+      inferredIncome = rawUserFigures[0];
+    } else {
+      if (currentAction.type === "spending") inferredBalance = rawUserFigures[0];
+      else inferredIncome = rawUserFigures[0];
+    }
+
+    userProvidedFinances = {
+      balance: inferredBalance,
+      income: inferredIncome,
+      routine: inferredRoutine,
+      rawUserFigures,
+    };
   }
 
   // 8. Detect if user is asking system to recommend / calculate the nominal
@@ -319,16 +410,19 @@ export function heuristicExtractIntent(
   let newAmount: number | null = null;
   const isExplicitActionModification =
     !isRequestingNominal &&
-    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|menabung|beli|keluarin|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
       userMessage
     ) ||
-      /bagaimana jika (?:saya )?(?:menyisihkan|beli|keluarkan)\s+(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:saya\s+)?(?:menyisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+        userMessage
+      ) ||
+      /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))\s*(?:aja|saja|cuma|hanya|gimana|bagaimana)/i.test(
         userMessage
       ));
 
   const hasSpecificAmountQuestion =
     !isRequestingNominal &&
-    /^(?:bagaimana jika|kalau|opsi)\s+(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))\??$/i.test(
+    /^(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))(?:[ ?]|$)/i.test(
       clean
     );
 
@@ -391,7 +485,7 @@ export function heuristicExtractIntent(
     intentType = "conceptual_question";
   } else if (/(saran|rekomendasi|sebaiknya|berapa yang aman)/i.test(lower)) {
     intentType = "advice_request";
-  } else if (isInstallment || /(bagaimana jika|kalau|opsi lain)/i.test(lower)) {
+  } else if (isInstallment || /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal|opsi lain)/i.test(lower)) {
     intentType = "alternative_exploration";
   } else if (decision) {
     intentType = "final_decision";
@@ -426,12 +520,19 @@ export function heuristicExtractIntent(
  */
 export async function extractIntent(
   userMessage: string,
-  currentAction: StructuredContextPacket["action"]
+  currentAction: StructuredContextPacket["action"],
+  conversationState?: ConversationState | null,
+  lastAssistantMessage?: string | null
 ): Promise<ExtractedIntent> {
   const clean = userMessage.trim().toLowerCase();
 
   // Fast-Path 1: Standard quick phrases & greetings
-  const heuristic = heuristicExtractIntent(userMessage, currentAction);
+  const heuristic = heuristicExtractIntent(
+    userMessage,
+    currentAction,
+    conversationState,
+    lastAssistantMessage
+  );
   if (
     heuristic.intentType === "greeting_or_ping" ||
     heuristic.intentType === "decline_discussion" ||
@@ -459,9 +560,16 @@ export async function extractIntent(
     const ai = getGeminiClient();
     const model = getGeminiModel();
 
+    const prevContextSnippet = lastAssistantMessage
+      ? `Pertanyaan terakhir dari asisten: "${lastAssistantMessage}"`
+      : "";
+
     const promptText = `${INTENT_EXTRACTION_PROMPT.replace(
       "{{CURRENT_ACTION}}",
       `${currentAction.type} sebesar Rp ${currentAction.amount.toLocaleString("id-ID")} untuk ${currentAction.targetCategory}`
+    ).replace(
+      "{{PREVIOUS_CONTEXT}}",
+      prevContextSnippet
     )}\n\nPesan pengguna:\n"${userMessage}"`;
 
     const response = await ai.models.generateContent({
@@ -738,8 +846,8 @@ export function generateSafeFallbackResponse(
   }
 
   // 7. Basic Condition
-  if (condition === "basic" && calculation.status === "needs_clarification") {
-    const uf = conversationState.userProvidedFacts;
+  if (condition === "basic") {
+    const uf = conversationState.userProvidedFacts || contextPacket.availableProfile?.userProvidedFinances || {};
     if (action.type === "saving") {
       if (uf.routine && !uf.income && !uf.balance) {
         return (
@@ -751,6 +859,20 @@ export function generateSafeFallbackResponse(
         return (
           `Pendapatan bulanan Rp ${uf.income.toLocaleString("id-ID")} telah kami catat. ` +
           `Berapa perkiraan total pengeluaran wajib atau kebutuhan rutin bulanan Anda agar kami dapat menghitung sisa dana yang aman untuk dialokasikan?`
+        );
+      }
+      if (uf.income && (uf.routine || uf.balance)) {
+        const totalLiabilities = uf.liabilities || 0;
+        const routineExp = uf.routine || 0;
+        const surplusBeforeSaving = uf.income - totalLiabilities - routineExp;
+        const surplusAfterSaving = surplusBeforeSaving - action.amount;
+        const isDeficit = surplusAfterSaving < 0;
+        return (
+          `Berdasarkan data yang Anda berikan (pendapatan Rp ${uf.income.toLocaleString("id-ID")}${routineExp > 0 ? `, kebutuhan rutin Rp ${routineExp.toLocaleString("id-ID")}` : ""}${totalLiabilities > 0 ? `, dan tagihan Rp ${totalLiabilities.toLocaleString("id-ID")}` : ""}), ` +
+          `sisa uang belanja sebelum tabungan adalah Rp ${surplusBeforeSaving.toLocaleString("id-ID")}. ` +
+          (isDeficit
+            ? `Menyisihkan tabungan Rp ${action.amount.toLocaleString("id-ID")} akan menyebabkan defisit kas sebesar Rp ${Math.abs(surplusAfterSaving).toLocaleString("id-ID")}. Disarankan untuk menyesuaikan nominal tabungan menjadi lebih aman.`
+            : `Setelah menyisihkan tabungan Rp ${action.amount.toLocaleString("id-ID")}, masih tersisa uang belanja Rp ${surplusAfterSaving.toLocaleString("id-ID")}. Alokasi tabungan ini aman dilakukan.`)
         );
       }
       return (
@@ -765,12 +887,28 @@ export function generateSafeFallbackResponse(
         `Untuk menilai apakah pembelian laptop Rp ${action.amount.toLocaleString("id-ID")} aman dilakukan, berapa perkiraan saldo rekening Anda saat ini?`
       );
     }
-    if (uf.balance && !uf.routine) {
+    if (uf.balance && !uf.routine && !uf.liabilities) {
       const sisa = uf.balance - action.amount;
       return (
         `Dari saldo rekening Rp ${uf.balance.toLocaleString("id-ID")}, setelah pembelian laptop Rp ${action.amount.toLocaleString("id-ID")} tersisa saldo Rp ${sisa.toLocaleString("id-ID")}. ` +
         `Sebelum menilai kelayakan akhirnya, apakah ada tagihan terdekat atau kebutuhan rutin yang perlu dipertahankan sampai gajian berikutnya?`
       );
+    }
+    if (uf.balance && (uf.routine || uf.liabilities)) {
+      const sisa = uf.balance - action.amount;
+      const totalLiabilities = uf.liabilities || 0;
+      const routineExp = uf.routine || 0;
+      const sisaAkhir = sisa - totalLiabilities - routineExp;
+      const isDeficit = sisaAkhir < 0;
+      return (
+        `Dari saldo rekening Rp ${uf.balance.toLocaleString("id-ID")}, setelah pembelian laptop Rp ${action.amount.toLocaleString("id-ID")} tersisa saldo Rp ${sisa.toLocaleString("id-ID")}. ` +
+        (totalLiabilities > 0 ? `Setelah membayar tagihan Rp ${totalLiabilities.toLocaleString("id-ID")}, tersisa Rp ${(sisa - totalLiabilities).toLocaleString("id-ID")}. ` : "") +
+        (routineExp > 0
+          ? (isDeficit
+              ? `Dengan kebutuhan rutin Rp ${routineExp.toLocaleString("id-ID")}, sisa saldo tidak mencukupi (terjadi potensi defisit Rp ${Math.abs(sisaAkhir).toLocaleString("id-ID")}).`
+              : `Dengan estimasi kebutuhan rutin Rp ${routineExp.toLocaleString("id-ID")}, sisa uang kebutuhan Anda masih mencukupi Rp ${sisaAkhir.toLocaleString("id-ID")}.`)
+          : "")
+      ).trim();
     }
     if (isFollowup) {
       const isAskingConcept = /(pertimbangan|kenapa|mengapa|bagaimana|apa alasannya)/i.test(cleanMsg);
@@ -791,25 +929,6 @@ export function generateSafeFallbackResponse(
       `saldo rekening Anda akan berkurang sebesar nominal tersebut. Karena informasi saldo kas operasional atau alokasi anggaran Anda belum tercatat dalam sesi ini, ` +
       `untuk menghitung kelayakan rencana ini secara presisi, berapa perkiraan saldo rekening yang Anda miliki saat ini dan tagihan terdekat sebelum pemasukan berikutnya?`
     );
-  }
-
-  // 7b. Basic Condition when user provided some figures but balance/operating cash is still unknown
-  if (condition === "basic" && calculation.balanceAfterAction === null) {
-    const uf = conversationState.userProvidedFacts;
-    if (action.type === "saving") {
-      const routineStr = uf.routine ? ` (kebutuhan wajib sekitar Rp ${uf.routine.toLocaleString("id-ID")})` : "";
-      const targetStr = uf.emergencyTarget ? ` (target Rp ${uf.emergencyTarget.toLocaleString("id-ID")}, saat ini Rp ${(uf.emergencyCurrent || 0).toLocaleString("id-ID")})` : "";
-      return (
-        `Rencana penyisihan Rp ${action.amount.toLocaleString("id-ID")} untuk Dana Darurat${targetStr} telah dicatat bersama informasi pengeluaran Anda${routineStr}. ` +
-        `Untuk memastikan apakah sisa uang belanja Anda aman dan tidak mengalami defisit setelah penyisihan tersebut, berapa perkiraan pendapatan atau saldo rekening Anda saat ini?`
-      );
-    } else {
-      const routineStr = uf.routine ? ` dan kebutuhan rutin Rp ${uf.routine.toLocaleString("id-ID")}` : "";
-      return (
-        `Rencana pembelian Rp ${action.amount.toLocaleString("id-ID")}${routineStr} telah kami catat. ` +
-        `Untuk menghitung apakah pembelian tersebut aman dari risiko kekurangan uang belanja, silakan informasikan total saldo rekening Anda saat ini.`
-      );
-    }
   }
 
   // 8. Context-Aware Targeted Response

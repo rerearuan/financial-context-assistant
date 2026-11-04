@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { sessions, messages, syntheticProfiles } from "@/db/schema";
-import { eq, asc } from "drizzle-orm";
+import { eq, asc, desc, and } from "drizzle-orm";
 import crypto from "crypto";
 import { extractIntent, generateAssistantResponse, getGeminiModel } from "@/lib/gemini";
 import { buildStructuredContextPacket } from "@/lib/financial-engine/context-packager";
@@ -46,10 +46,12 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     source: "scenario",
   };
 
-  const intent = await extractIntent(messageText, actionBefore);
-
-  // Initialize or retrieve conversation state
+  // Initialize or retrieve conversation state and last assistant message
   let convState: ConversationState = demoSess.conversationState || getInitialConversationState(actionBefore);
+  const existingMsgs = demoMessages.get(sessionId) || [];
+  const lastAssistantMsg = [...existingMsgs].reverse().find((m) => m.role === "assistant")?.content || null;
+
+  const intent = await extractIntent(messageText, actionBefore, convState, lastAssistantMsg);
 
   // Update confusion count
   if (intent.intentType === "confusion") {
@@ -215,7 +217,6 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     }
   }
 
-  const existingMsgs = demoMessages.get(sessionId) || [];
   const fullChatHistory = [
     ...existingMsgs.map((m) => ({ role: m.role, content: m.content })),
     { role: "user" as const, content: messageText },
@@ -440,17 +441,25 @@ export async function POST(
       source: "scenario",
     };
 
-    const intent = await extractIntent(message.trim(), actionBefore);
+    // Handle session state and previous assistant context
+    const existingDetails = session.currentAction.userProvidedDetails as Record<string, unknown> | undefined;
+    let convState: ConversationState = (session.currentAction as any).conversationState || getInitialConversationState(actionBefore);
+
+    const prevAssistantMsgs = await db
+      .select()
+      .from(messages)
+      .where(and(eq(messages.sessionId, sessionId), eq(messages.role, "assistant")))
+      .orderBy(desc(messages.createdAt))
+      .limit(1);
+    const lastAssistantMsg = prevAssistantMsgs[0]?.content || null;
+
+    const intent = await extractIntent(message.trim(), actionBefore, convState, lastAssistantMsg);
 
     // Save extracted intent to user message record
     await db
       .update(messages)
       .set({ extractedIntent: intent })
       .where(eq(messages.id, userMsgId));
-
-    // Handle session state
-    const existingDetails = session.currentAction.userProvidedDetails as Record<string, unknown> | undefined;
-    let convState: ConversationState = (session.currentAction as any).conversationState || getInitialConversationState(actionBefore);
 
     if (intent.intentType === "confusion") {
       convState.confusionCount += 1;
