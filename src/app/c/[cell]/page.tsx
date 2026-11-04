@@ -47,7 +47,15 @@ function DirectCellLoader() {
             }
           }
           // Redirect to chat
-          router.replace(`/chat/${data.sessionId}?source=form`);
+          const partQuery = data.participantId ? `&participantId=${data.participantId}` : "";
+          if (typeof window !== "undefined" && data.participantId) {
+            try {
+              localStorage.setItem("exp_participant_id", data.participantId);
+            } catch {
+              // ignore
+            }
+          }
+          router.replace(`/chat/${data.sessionId}?source=form${partQuery}`);
         }
       } catch (err: unknown) {
         if (isMounted) {

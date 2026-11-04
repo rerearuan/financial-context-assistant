@@ -306,16 +306,49 @@ function ChatPageContent() {
     await executeSendMessage(text);
   };
 
-  const handleFinishDiscussion = () => {
-    const effectivePartId =
+  const handleFinishDiscussion = async () => {
+    let effectivePartId =
       participantId ||
       session?.participantId ||
       (typeof window !== "undefined" ? localStorage.getItem("exp_participant_id") : null);
 
+    if (!effectivePartId && session) {
+      try {
+        const res = await fetch("/api/experiment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "ensure_participant_for_session",
+            sessionId: session.sessionId,
+            scenarioId: session.scenarioId,
+            condition: session.condition,
+            participantCode: session.participantCode,
+          }),
+        });
+        if (res.ok) {
+          const d = await res.json();
+          if (d.participant?.id) {
+            effectivePartId = d.participant.id;
+          }
+        }
+      } catch (err) {
+        console.error("Gagal menghubungkan partisipan untuk sesi:", err);
+      }
+    }
+
     if (effectivePartId) {
-      router.push(`/experiment?participantId=${effectivePartId}&step=6`);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem("exp_participant_id", effectivePartId);
+        } catch {
+          // ignore
+        }
+      }
+      const sessId = session?.sessionId || sessionId;
+      router.push(`/experiment?participantId=${effectivePartId}&sessionId=${sessId}&step=6`);
     } else {
-      setShowCompletionModal(true);
+      const sessId = session?.sessionId || sessionId;
+      router.push(`/experiment?sessionId=${sessId}&step=6`);
     }
   };
 
@@ -350,7 +383,7 @@ function ChatPageContent() {
 
   const defaultReply =
     session.scenario.actionType === "saving"
-      ? ["Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?"]
+      ? ["Bagaimana jika bulan ini saya menyisihkan Rp 4.000.000 untuk tabungan Dana Darurat?"]
       : ["Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?"];
 
   const quickReplies =
@@ -402,7 +435,7 @@ function ChatPageContent() {
             onClick={handleFinishDiscussion}
             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-sm cursor-pointer"
           >
-            <span className="hidden sm:inline">Selesai Diskusi & Lanjut ke Keputusan Akhir</span>
+            <span className="hidden sm:inline">Selesai Diskusi & Lanjut ke Tugas</span>
             <span className="sm:hidden">Selesai</span>
             <ArrowRight className="w-4 h-4 shrink-0" />
           </button>

@@ -114,6 +114,7 @@ function ExperimentContent() {
       setLoading(true);
       const urlPartId = searchParams.get("participantId");
       const urlStep = searchParams.get("step");
+      const urlSessionId = searchParams.get("sessionId");
       const savedPartId = urlPartId || localStorage.getItem("exp_participant_id");
 
       if (savedPartId) {
@@ -134,6 +135,37 @@ function ExperimentContent() {
           }
         } catch (e) {
           console.error("Gagal memuat partisipan yang ada:", e);
+        }
+      }
+
+      // If sessionId is present in URL (e.g. redirected from chat)
+      if (urlSessionId) {
+        try {
+          const res = await fetch("/api/experiment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "ensure_participant_for_session",
+              sessionId: urlSessionId,
+            }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.participant) {
+              setParticipant(data.participant);
+              if (data.scenario) setScenario(data.scenario);
+              localStorage.setItem("exp_participant_id", data.participant.id);
+              if (urlStep) {
+                setStep(parseInt(urlStep, 10));
+              } else {
+                setStep(data.participant.currentStep || 1);
+              }
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (e) {
+          console.error("Gagal memuat sesi partisipan dari sessionId:", e);
         }
       }
 

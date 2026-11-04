@@ -22,18 +22,25 @@ export async function GET(
     if (part) {
       let scenarioData = null;
       if (part.scenarioId) {
-        const [sc] = await db
-          .select()
-          .from(scenarios)
-          .where(eq(scenarios.id, part.scenarioId));
-        if (sc) {
-          const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === part.scenarioId);
-          scenarioData = {
-            ...sc,
-            tugasText: pkg?.scenario.tugasText || sc.tugasText,
-            tugasQuestions: pkg?.scenario.tugasQuestions || sc.tugasQuestions,
-            comprehensionQuestions: sc.comprehensionQuestions || pkg?.scenario.comprehensionQuestions || [],
-          };
+        const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === part.scenarioId);
+        try {
+          const [sc] = await db
+            .select()
+            .from(scenarios)
+            .where(eq(scenarios.id, part.scenarioId));
+          if (sc) {
+            scenarioData = {
+              ...sc,
+              tugasText: pkg?.scenario.tugasText || sc.tugasText,
+              tugasQuestions: pkg?.scenario.tugasQuestions || sc.tugasQuestions,
+              comprehensionQuestions: sc.comprehensionQuestions || pkg?.scenario.comprehensionQuestions || [],
+            };
+          }
+        } catch {
+          // ignore
+        }
+        if (!scenarioData && pkg) {
+          scenarioData = pkg.scenario;
         }
       }
 

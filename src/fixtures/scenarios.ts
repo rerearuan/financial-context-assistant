@@ -479,7 +479,7 @@ Pada periode ini, **tidak terdapat tujuan finansial besar lain** yang secara khu
       actionOptions: [1000000, 2000000, 3000000],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?",
+        "Bagaimana jika bulan ini saya menyisihkan Rp 4.000.000 untuk tabungan Dana Darurat?",
       ],
       comprehensionQuestions: [
         {
@@ -671,7 +671,7 @@ Bagi Anda, meningkatkan Dana Darurat dan mengikuti program sertifikasi sama-sama
       actionOptions: [1000000, 2000000, 3000000],
       initialAssistantMessage: `Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan yang ingin Anda konsultasikan hari ini?`,
       quickReplies: [
-        "Bagaimana jika bulan ini saya menyisihkan Rp 2.000.000 untuk tabungan Dana Darurat?",
+        "Bagaimana jika bulan ini saya menyisihkan Rp 4.000.000 untuk tabungan Dana Darurat?",
       ],
       comprehensionQuestions: [
         {

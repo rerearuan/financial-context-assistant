@@ -88,11 +88,10 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       timestamp: new Date().toISOString(),
     });
   } else if (
-    intent.intentType === "modify_action" &&
+    (intent.intentType === "modify_action" || intent.intentType === "alternative_exploration") &&
     intent.newAmount &&
     intent.newAmount > 0 &&
-    intent.newAmount !== actionBefore.amount &&
-    !intent.isAlternativeOnly
+    intent.newAmount !== actionBefore.amount
   ) {
     targetAmount = intent.newAmount;
     updatedAction.amount = targetAmount;
@@ -100,7 +99,7 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
     convState.exploredAlternatives.push({
       amount: targetAmount,
       type: actionBefore.type,
-      label: "Modifikasi nominal langsung",
+      label: intent.isAlternativeOnly ? "Eksplorasi nominal alternatif" : "Modifikasi nominal langsung",
       timestamp: new Date().toISOString(),
     });
   }
@@ -490,18 +489,17 @@ export async function POST(
         timestamp: new Date().toISOString(),
       });
     } else if (
-      intent.intentType === "modify_action" &&
+      (intent.intentType === "modify_action" || intent.intentType === "alternative_exploration") &&
       intent.newAmount &&
       intent.newAmount > 0 &&
-      intent.newAmount !== actionBefore.amount &&
-      !intent.isAlternativeOnly
+      intent.newAmount !== actionBefore.amount
     ) {
       updatedAction.amount = intent.newAmount;
       updatedAction.modifiedByUser = true;
       convState.exploredAlternatives.push({
         amount: intent.newAmount,
         type: actionBefore.type,
-        label: "Modifikasi nominal",
+        label: intent.isAlternativeOnly ? "Eksplorasi nominal alternatif" : "Modifikasi nominal",
         timestamp: new Date().toISOString(),
       });
     }

@@ -305,10 +305,10 @@ export function heuristicExtractIntent(
   // Check if message is explicitly modifying plan or inquiring alternative nominal
   const isAlternativeOrModification =
     !isEstimationPhrase &&
-    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|menyisihkan|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
       userMessage
     ) ||
-      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:saya\s+)?(?:menyisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:(?:bulan ini|nanti|hari ini|saat ini)\s+)?(?:saya\s+)?(?:menyisihkan|sisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
         userMessage
       ) ||
       /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))\s*(?:aja|saja|cuma|hanya|gimana|bagaimana)/i.test(
@@ -410,10 +410,10 @@ export function heuristicExtractIntent(
   let newAmount: number | null = null;
   const isExplicitActionModification =
     !isRequestingNominal &&
-    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+    (/(?:ubah|ganti|jadikan|sesuaikan|jadi|coba|opsi|nabung|tabung|menabung|beli|keluarin|menyisihkan|sisihkan|harga|nominal)\s+(?:menjadi\s+|sebesar\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
       userMessage
     ) ||
-      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:saya\s+)?(?:menyisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
+      /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:(?:bulan ini|nanti|hari ini|saat ini)\s+)?(?:saya\s+)?(?:menyisihkan|sisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))/i.test(
         userMessage
       ) ||
       /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))\s*(?:aja|saja|cuma|hanya|gimana|bagaimana)/i.test(
@@ -422,7 +422,7 @@ export function heuristicExtractIntent(
 
   const hasSpecificAmountQuestion =
     !isRequestingNominal &&
-    /^(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))(?:[ ?]|$)/i.test(
+    /^(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal(?:kan)?|seandainya|opsi)\s+(?:(?:bulan ini|nanti|hari ini|saat ini)\s+)?(?:saya\s+)?(?:menyisihkan|sisihkan|beli|keluarkan|tabung|nabung\s+)?(?:rp\.?\s*)?(\d+(?:[.,]\d+)?\s*(?:juta|jt|ribu|rb|k|\.000))(?:[ ?]|$)/i.test(
       clean
     );
 

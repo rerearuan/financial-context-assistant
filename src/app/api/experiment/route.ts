@@ -22,6 +22,117 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { action } = body;
 
+    // 0. ENSURE PARTICIPANT FOR SESSION (From Chatbot link to Tugas)
+    if (action === "ensure_participant_for_session") {
+      const { sessionId, scenarioId, condition, participantCode } = body;
+      if (!sessionId) {
+        return NextResponse.json({ error: "sessionId diperlukan" }, { status: 400 });
+      }
+
+      // 1. Check DB for existing participant by sessionId
+      try {
+        const [existingPart] = await db
+          .select()
+          .from(participants)
+          .where(eq(participants.sessionId, sessionId))
+          .limit(1);
+
+        if (existingPart) {
+          const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === existingPart.scenarioId);
+          return NextResponse.json({
+            participant: existingPart,
+            scenario: pkg?.scenario || null,
+          });
+        }
+      } catch (err) {
+        console.warn("DB check error for participant:", err);
+      }
+
+      // 2. Check demoParticipants
+      const demoPart = Array.from(demoParticipants.values()).find((p) => p.sessionId === sessionId);
+      if (demoPart) {
+        const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === demoPart.scenarioId);
+        return NextResponse.json({
+          participant: demoPart,
+          scenario: pkg?.scenario || null,
+        });
+      }
+
+      // 3. Resolve scenarioId, condition, and code
+      let resolvedScenarioId = scenarioId;
+      let resolvedCondition = condition;
+      let resolvedCode = participantCode;
+
+      if (!resolvedScenarioId || !resolvedCondition) {
+        try {
+          const [sess] = await db.select().from(sessions).where(eq(sessions.id, sessionId));
+          if (sess) {
+            resolvedScenarioId = sess.scenarioId;
+            resolvedCondition = sess.condition;
+            resolvedCode = sess.participantCode;
+          }
+        } catch {
+          // ignore
+        }
+      }
+
+      if (!resolvedScenarioId) {
+        const demoSess = demoSessions.get(sessionId);
+        if (demoSess) {
+          resolvedScenarioId = demoSess.scenarioId;
+          resolvedCondition = demoSess.condition;
+          resolvedCode = demoSess.participantCode;
+        }
+      }
+
+      if (!resolvedScenarioId) {
+        const scMatch = sessionId.match(/^ses_(spending_low|spending_high|saving_low|saving_high)_(basic|context_aware)_/);
+        if (scMatch) {
+          resolvedScenarioId = scMatch[1];
+          resolvedCondition = scMatch[2];
+        } else {
+          const devMatch = sessionId.match(/^dev_(.+?)_(basic|context_aware)$/);
+          if (devMatch) {
+            resolvedScenarioId = devMatch[1];
+            resolvedCondition = devMatch[2];
+          }
+        }
+      }
+
+      const participantId = `part_${crypto.randomBytes(12).toString("hex")}`;
+      const code = resolvedCode || `RESP-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+      const pkg = SCENARIO_PACKAGES.find((p) => p.scenario.id === resolvedScenarioId) || SCENARIO_PACKAGES[0];
+
+      const newPartRecord: any = {
+        id: participantId,
+        participantCode: code,
+        consent: true,
+        scenarioId: resolvedScenarioId || pkg.scenario.id,
+        condition: resolvedCondition || "basic",
+        sessionId,
+        currentStep: 6,
+        isCompleted: false,
+        disqualified: false,
+      };
+
+      try {
+        await db.insert(participants).values(newPartRecord);
+      } catch (insertErr) {
+        console.warn("DB insert error for participant in ensure_participant_for_session:", insertErr);
+      }
+
+      demoParticipants.set(participantId, {
+        ...newPartRecord,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      return NextResponse.json({
+        participant: newPartRecord,
+        scenario: pkg.scenario,
+      });
+    }
+
     // 1. START: Initialize new participant
     if (action === "start") {
       const participantId = `part_${crypto.randomBytes(12).toString("hex")}`;

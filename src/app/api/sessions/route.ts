@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { sessions, scenarios, messages } from "@/db/schema";
+import { sessions, scenarios, messages, participants } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
 import { getGeminiModel } from "@/lib/gemini";
 import { PROMPT_VERSION } from "@/lib/prompts/templates";
 import { EXPERIMENT_CELLS } from "@/lib/randomizer";
 import { SCENARIO_PACKAGES } from "@/fixtures/scenarios";
-import { demoSessions, demoMessages, DemoSession, DemoMessage } from "@/lib/demo-store";
+import { demoSessions, demoMessages, demoParticipants, DemoSession, DemoMessage, DemoParticipant } from "@/lib/demo-store";
 import { generateSessionId } from "@/lib/session-resolver";
 
 export const dynamic = "force-dynamic";
@@ -100,7 +100,9 @@ export async function POST(req: NextRequest) {
         ? ["scenario", "synthetic_profile"]
         : ["scenario"];
 
-    // 4. Try to save session in database
+    const participantId = `part_${crypto.randomBytes(12).toString("hex")}`;
+
+    // 4. Try to save session & participant in database
     try {
       await db.insert(sessions).values({
         id: sessionId,
@@ -113,6 +115,19 @@ export async function POST(req: NextRequest) {
         maxFollowupAllowed: maxFollowup,
         promptVersion: PROMPT_VERSION,
         modelId,
+      });
+
+      await db.insert(participants).values({
+        id: participantId,
+        participantCode: code,
+        consent: true,
+        cellNumber: cellNumber ? Number(cellNumber) : undefined,
+        scenarioId,
+        condition,
+        sessionId,
+        currentStep: 6,
+        isCompleted: false,
+        disqualified: false,
       });
 
       await db.insert(messages).values({
@@ -141,6 +156,22 @@ export async function POST(req: NextRequest) {
     };
     demoSessions.set(sessionId, demoSess);
 
+    const demoPart: DemoParticipant = {
+      id: participantId,
+      participantCode: code,
+      consent: true,
+      cellNumber: cellNumber ? Number(cellNumber) : undefined,
+      scenarioId,
+      condition,
+      sessionId,
+      currentStep: 6,
+      isCompleted: false,
+      disqualified: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    demoParticipants.set(participantId, demoPart);
+
     const demoMsg: DemoMessage = {
       id: initialMsgId,
       sessionId,
@@ -153,6 +184,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       sessionId,
+      participantId,
       participantCode: code,
       scenarioId,
       condition,
