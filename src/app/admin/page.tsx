@@ -23,6 +23,8 @@ import {
   ArrowUpDown,
   Sparkles,
   AlertTriangle,
+  User,
+  UserCheck,
 } from "lucide-react";
 import { POST_QUESTIONNAIRE_ITEMS } from "@/lib/survey-questions";
 
@@ -60,6 +62,7 @@ interface ParticipantRecord {
     occupation: string;
     financialKnowledge: string;
     chatbotExperience: string;
+    contact?: string;
   };
   earlyDecision: {
     decision?: string;
@@ -132,6 +135,7 @@ export default function AdminDashboardPage() {
   const [activeParticipantForChat, setActiveParticipantForChat] = useState<ParticipantRecord | null>(null);
 
   const [activeSurveyParticipant, setActiveSurveyParticipant] = useState<ParticipantRecord | null>(null);
+  const [activeDemographicsParticipant, setActiveDemographicsParticipant] = useState<ParticipantRecord | null>(null);
 
   // Check Auth & Load Data
   const loadDashboardData = async () => {
@@ -676,13 +680,28 @@ export default function AdminDashboardPage() {
 
                         {/* Demografi */}
                         <td className="py-3.5 px-3">
-                          <p className="text-slate-800">
-                            {p.demographics.age !== "-" ? `${p.demographics.age} thn` : "-"},{" "}
-                            <span className="text-slate-500">{p.demographics.gender}</span>
-                          </p>
-                          <p className="text-[11px] text-slate-500 truncate max-w-[140px]" title={String(p.demographics.occupation)}>
-                            {p.demographics.occupation}
-                          </p>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5 font-semibold text-slate-800">
+                              <span>{p.demographics.age !== "-" ? `${p.demographics.age} thn` : "-"}</span>
+                              <span className="text-slate-300">&bull;</span>
+                              <span className="text-slate-600 font-normal">{p.demographics.gender}</span>
+                            </div>
+                            <p className="text-[11px] text-slate-700 font-medium truncate max-w-[150px]" title={String(p.demographics.occupation)}>
+                              {p.demographics.occupation}
+                            </p>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium truncate max-w-[150px]" title={`Penghasilan: ${p.demographics.monthlyIncome}`}>
+                                {p.demographics.monthlyIncome}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => setActiveDemographicsParticipant(p)}
+                              className="text-[10px] font-semibold text-blue-600 hover:text-blue-800 text-left mt-0.5 flex items-center gap-1 cursor-pointer"
+                            >
+                              <User className="w-2.5 h-2.5" />
+                              <span>Profil Lengkap</span>
+                            </button>
+                          </div>
                         </td>
 
                         {/* Keputusan Akhir */}
@@ -751,6 +770,13 @@ export default function AdminDashboardPage() {
                         {/* Aksi */}
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-1.5">
+                            <button
+                              onClick={() => setActiveDemographicsParticipant(p)}
+                              title="Lihat Profil Demografi Lengkap"
+                              className="p-1.5 rounded-lg border border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-colors cursor-pointer"
+                            >
+                              <UserCheck className="w-3.5 h-3.5" />
+                            </button>
                             {p.sessionId && (
                               <button
                                 onClick={() => openChatModal(p)}
@@ -938,6 +964,131 @@ export default function AdminDashboardPage() {
             <div className="py-3 px-6 border-t border-slate-100 bg-white flex justify-end">
               <button
                 onClick={() => setActiveSurveyParticipant(null)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: DEMOGRAPHICS BREAKDOWN VIEWER */}
+      {activeDemographicsParticipant && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="py-4 px-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                  <UserCheck className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Karakteristik Demografi &bull; {activeDemographicsParticipant.participantCode}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    Sel #{activeDemographicsParticipant.cellNumber ?? "-"} ({activeDemographicsParticipant.condition ?? "-"}) &bull; {activeDemographicsParticipant.id}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveDemographicsParticipant(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 p-6 overflow-y-auto space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {/* 1. Usia */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    1. Usia Responden
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {activeDemographicsParticipant.demographics.age !== "-" ? `${activeDemographicsParticipant.demographics.age} Tahun` : "-"}
+                  </span>
+                </div>
+
+                {/* 2. Jenis Kelamin */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    2. Jenis Kelamin
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {activeDemographicsParticipant.demographics.gender}
+                  </span>
+                </div>
+
+                {/* 3. Pendidikan Terakhir */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    3. Pendidikan Terakhir
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {activeDemographicsParticipant.demographics.education}
+                  </span>
+                </div>
+
+                {/* 4. Pekerjaan Saat Ini */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    4. Pekerjaan Saat Ini
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">
+                    {activeDemographicsParticipant.demographics.occupation}
+                  </span>
+                </div>
+
+                {/* 5. Pendapatan Pribadi per Bulan */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 sm:col-span-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    5. Pendapatan Pribadi per Bulan (Kriteria Screening)
+                  </span>
+                  <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 inline-block">
+                    {activeDemographicsParticipant.demographics.monthlyIncome}
+                  </span>
+                </div>
+
+                {/* 6. Pengalaman Menggunakan AI Chatbot */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    6. Pengalaman Menggunakan AI Chatbot
+                  </span>
+                  <span className="text-sm font-bold text-purple-700">
+                    {activeDemographicsParticipant.demographics.chatbotExperience}
+                  </span>
+                </div>
+
+                {/* 7. Pengetahuan Keuangan Pribadi */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    7. Pengetahuan Keuangan Pribadi
+                  </span>
+                  <span className="text-sm font-bold text-blue-700">
+                    {activeDemographicsParticipant.demographics.financialKnowledge}
+                  </span>
+                </div>
+
+                {/* 8. Kontak Hadiah / Undian */}
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 sm:col-span-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    8. Kontak Responden (Email / WhatsApp untuk Undian)
+                  </span>
+                  <span className="text-sm font-mono font-bold text-slate-800">
+                    {activeDemographicsParticipant.demographics.contact || "-"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="py-3 px-6 border-t border-slate-100 bg-white flex justify-end">
+              <button
+                onClick={() => setActiveDemographicsParticipant(null)}
                 className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
               >
                 Tutup

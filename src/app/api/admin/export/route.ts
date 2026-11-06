@@ -94,6 +94,7 @@ export async function GET(req: NextRequest) {
         "Pekerjaan": demo.occupation || "",
         "Pengalaman Chatbot": demo.chatbotExperience || "",
         "Pengetahuan Finansial": demo.financialKnowledge || "",
+        "Kontak Responden": demo.contact || "",
         // Keputusan
         "Keputusan Awal": earlyDec.decision || "",
         "Keputusan Akhir": finalDec.decision || "",

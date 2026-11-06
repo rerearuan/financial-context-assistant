@@ -138,6 +138,7 @@ export async function GET(req: NextRequest) {
           occupation: demo.occupation || "-",
           financialKnowledge: demo.financialKnowledge || "-",
           chatbotExperience: demo.chatbotExperience || "-",
+          contact: demo.contact || "-",
         },
         earlyDecision: earlyDec,
         finalDecision: {

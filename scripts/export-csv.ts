@@ -127,6 +127,9 @@ export async function exportDatabaseToCsv(outDir = process.cwd()) {
       monthly_income: demo.monthlyIncome || "",
       education: demo.education || "",
       occupation: demo.occupation || "",
+      chatbot_experience: demo.chatbotExperience || "",
+      financial_knowledge: demo.financialKnowledge || "",
+      contact: demo.contact || "",
       // Keputusan Awal & Akhir
       early_decision: earlyDec.decision || "",
       final_decision: finalDec.decision || "",

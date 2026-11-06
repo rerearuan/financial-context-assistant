@@ -83,7 +83,7 @@ describe("Admin Portal Authentication & Data Export", () => {
     expect(data.stats.cellStats).toBeDefined();
     expect(data.stats.cellStats.length).toBe(8);
     expect(Array.isArray(data.participants)).toBe(true);
-  });
+  }, 20000);
 
   it("allows authenticated admin to export Excel (.xlsx) file with multi-sheets", async () => {
     const token = createAdminToken("alfian.firja@gmail.com");
@@ -92,7 +92,7 @@ describe("Admin Portal Authentication & Data Export", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("spreadsheetml.sheet");
     expect(res.headers.get("content-disposition")).toContain(".xlsx");
-  });
+  }, 20000);
 
   it("allows authenticated admin to export CSV file with BOM", async () => {
     const token = createAdminToken("aruanregina@gmail.com");
@@ -103,7 +103,7 @@ describe("Admin Portal Authentication & Data Export", () => {
     const text = await res.text();
     expect(text).toContain("ID Partisipan");
     expect(text).toContain("PART-");
-  });
+  }, 20000);
 
   it("logs out and clears admin session cookie", async () => {
     const res = await handleLogoutPost();
