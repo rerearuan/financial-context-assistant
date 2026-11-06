@@ -1,3 +1,7 @@
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config();
+
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import * as schema from "./schema";
@@ -9,8 +13,8 @@ const connectionString =
 const pool = new Pool({
   connectionString,
   ssl:
-    process.env.NODE_ENV === "production" &&
-    !connectionString.includes("localhost")
+    !connectionString.includes("localhost") &&
+    !connectionString.includes("127.0.0.1")
       ? { rejectUnauthorized: false }
       : false,
   max: 10,
