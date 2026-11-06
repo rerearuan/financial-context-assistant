@@ -8,6 +8,31 @@ import { desc, asc } from "drizzle-orm";
 import fs from "fs";
 import path from "path";
 
+function formatDateTimeWIB(d: Date | null | undefined): string {
+  if (!d) return "";
+  const dateObj = new Date(d);
+  if (isNaN(dateObj.getTime())) return "";
+  const tzDate = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+  const yyyy = tzDate.getFullYear();
+  const mm = String(tzDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(tzDate.getDate()).padStart(2, "0");
+  const hh = String(tzDate.getHours()).padStart(2, "0");
+  const min = String(tzDate.getMinutes()).padStart(2, "0");
+  const ss = String(tzDate.getSeconds()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+}
+
+function formatDateWIB(d: Date | null | undefined): string {
+  if (!d) return "";
+  const dateObj = new Date(d);
+  if (isNaN(dateObj.getTime())) return "";
+  const tzDate = new Date(dateObj.toLocaleString("en-US", { timeZone: "Asia/Jakarta" }));
+  const yyyy = tzDate.getFullYear();
+  const mm = String(tzDate.getMonth() + 1).padStart(2, "0");
+  const dd = String(tzDate.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function escapeCsv(val: unknown): string {
   if (val === null || val === undefined) return "";
   if (val instanceof Date) {
@@ -74,17 +99,28 @@ export async function exportDatabaseToCsv(outDir = process.cwd()) {
     const earlyDec = (p.earlyDecision as any) || {};
     const postQ = (p.postQuestionnaire as any) || {};
 
+    const startTime = p.createdAt ? new Date(p.createdAt).getTime() : 0;
+    const endTime = p.updatedAt ? new Date(p.updatedAt).getTime() : 0;
+    let durationSec = "";
+    if (startTime > 0 && endTime > 0 && endTime >= startTime) {
+      durationSec = Math.round((endTime - startTime) / 1000).toString();
+    }
+
     const record: Record<string, unknown> = {
       participant_id: p.id,
       participant_code: p.participantCode,
+      tanggal_pengerjaan: formatDateWIB(p.createdAt),
+      waktu_mulai_wib: formatDateTimeWIB(p.createdAt),
+      waktu_selesai_wib: p.isCompleted ? formatDateTimeWIB(p.updatedAt) : "",
+      durasi_detik: durationSec,
       cell_number: p.cellNumber,
       scenario_id: p.scenarioId,
       condition: p.condition,
       current_step: p.currentStep,
       is_completed: p.isCompleted,
       disqualified: p.disqualified,
-      created_at: p.createdAt,
-      updated_at: p.updatedAt,
+      created_at_utc: p.createdAt ? new Date(p.createdAt).toISOString() : "",
+      updated_at_utc: p.updatedAt ? new Date(p.updatedAt).toISOString() : "",
       // Demografi
       age: demo.age || "",
       gender: demo.gender || "",
