@@ -143,6 +143,7 @@ export const participants = pgTable("participants", {
   demographics: jsonb("demographics").$type<{
     age: number;
     gender: string;
+    domicile?: string;
     education: string;
     occupation: string;
     monthlyIncome: string;

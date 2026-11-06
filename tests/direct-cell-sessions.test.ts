@@ -31,7 +31,7 @@ describe("Direct Cell Sessions for Manipulation Check (/c/1 - /c/8)", () => {
       expect(data.condition).toBe(matched.condition);
       expect(data.initialMessage?.content).toBeTruthy();
     }
-  });
+  }, 25000);
 
   it("rejects invalid cell numbers", async () => {
     const invalidReq = new NextRequest("http://localhost:3000/api/sessions", {

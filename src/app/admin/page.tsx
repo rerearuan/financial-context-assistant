@@ -57,6 +57,7 @@ interface ParticipantRecord {
   demographics: {
     age: string | number;
     gender: string;
+    domicile?: string;
     monthlyIncome: string;
     education: string;
     occupation: string;
@@ -257,8 +258,9 @@ export default function AdminDashboardPage() {
         const idMatch = p.id?.toLowerCase().includes(q);
         const reasonMatch = p.finalDecision?.justification?.toLowerCase().includes(q);
         const occupationMatch = String(p.demographics?.occupation || "").toLowerCase().includes(q);
+        const domicileMatch = String(p.demographics?.domicile || "").toLowerCase().includes(q);
         const conditionMatch = p.condition?.toLowerCase().includes(q);
-        if (!codeMatch && !idMatch && !reasonMatch && !occupationMatch && !conditionMatch) {
+        if (!codeMatch && !idMatch && !reasonMatch && !occupationMatch && !domicileMatch && !conditionMatch) {
           return false;
         }
       }
@@ -686,6 +688,11 @@ export default function AdminDashboardPage() {
                               <span className="text-slate-300">&bull;</span>
                               <span className="text-slate-600 font-normal">{p.demographics.gender}</span>
                             </div>
+                            {p.demographics.domicile && p.demographics.domicile !== "-" && (
+                              <p className="text-[10.5px] text-blue-700 font-medium truncate max-w-[150px]" title={`Domisili: ${p.demographics.domicile}`}>
+                                📍 {p.demographics.domicile}
+                              </p>
+                            )}
                             <p className="text-[11px] text-slate-700 font-medium truncate max-w-[150px]" title={String(p.demographics.occupation)}>
                               {p.demographics.occupation}
                             </p>
@@ -1023,60 +1030,71 @@ export default function AdminDashboardPage() {
                   </span>
                 </div>
 
-                {/* 3. Pendidikan Terakhir */}
+                {/* 3. Domisili Tempat Tinggal */}
+                <div className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/40 sm:col-span-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 block mb-1">
+                    3. Domisili Tempat Tinggal
+                  </span>
+                  <span className="text-sm font-bold text-blue-900 flex items-center gap-1.5">
+                    <span>📍</span>
+                    <span>{activeDemographicsParticipant.demographics.domicile || "-"}</span>
+                  </span>
+                </div>
+
+                {/* 4. Pendidikan Terakhir */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    3. Pendidikan Terakhir
+                    4. Pendidikan Terakhir
                   </span>
                   <span className="text-sm font-bold text-slate-900">
                     {activeDemographicsParticipant.demographics.education}
                   </span>
                 </div>
 
-                {/* 4. Pekerjaan Saat Ini */}
+                {/* 5. Pekerjaan Saat Ini */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    4. Pekerjaan Saat Ini
+                    5. Pekerjaan Saat Ini
                   </span>
                   <span className="text-sm font-bold text-slate-900">
                     {activeDemographicsParticipant.demographics.occupation}
                   </span>
                 </div>
 
-                {/* 5. Pendapatan Pribadi per Bulan */}
+                {/* 6. Pendapatan Pribadi per Bulan */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 sm:col-span-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    5. Pendapatan Pribadi per Bulan (Kriteria Screening)
+                    6. Pendapatan Pribadi per Bulan (Kriteria Screening)
                   </span>
                   <span className="text-sm font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 inline-block">
                     {activeDemographicsParticipant.demographics.monthlyIncome}
                   </span>
                 </div>
 
-                {/* 6. Pengalaman Menggunakan AI Chatbot */}
+                {/* 7. Pengalaman Menggunakan AI Chatbot */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    6. Pengalaman Menggunakan AI Chatbot
+                    7. Pengalaman Menggunakan AI Chatbot
                   </span>
                   <span className="text-sm font-bold text-purple-700">
                     {activeDemographicsParticipant.demographics.chatbotExperience}
                   </span>
                 </div>
 
-                {/* 7. Pengetahuan Keuangan Pribadi */}
+                {/* 8. Pengetahuan Keuangan Pribadi */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    7. Pengetahuan Keuangan Pribadi
+                    8. Pengetahuan Keuangan Pribadi
                   </span>
                   <span className="text-sm font-bold text-blue-700">
                     {activeDemographicsParticipant.demographics.financialKnowledge}
                   </span>
                 </div>
 
-                {/* 8. Kontak Hadiah / Undian */}
+                {/* 9. Kontak Hadiah / Undian */}
                 <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 sm:col-span-2">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    8. Kontak Responden (Email / WhatsApp untuk Undian)
+                    9. Kontak Responden (Email / WhatsApp untuk Undian)
                   </span>
                   <span className="text-sm font-mono font-bold text-slate-800">
                     {activeDemographicsParticipant.demographics.contact || "-"}

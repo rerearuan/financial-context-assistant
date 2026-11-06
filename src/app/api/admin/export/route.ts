@@ -89,6 +89,7 @@ export async function GET(req: NextRequest) {
         // Demografi
         "Usia": demo.age || "",
         "Jenis Kelamin": demo.gender || "",
+        "Domisili": demo.domicile || "",
         "Penghasilan Bulanan": demo.monthlyIncome || "",
         "Pendidikan Terakhir": demo.education || "",
         "Pekerjaan": demo.occupation || "",

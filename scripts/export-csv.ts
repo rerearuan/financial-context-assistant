@@ -124,6 +124,7 @@ export async function exportDatabaseToCsv(outDir = process.cwd()) {
       // Demografi
       age: demo.age || "",
       gender: demo.gender || "",
+      domicile: demo.domicile || "",
       monthly_income: demo.monthlyIncome || "",
       education: demo.education || "",
       occupation: demo.occupation || "",

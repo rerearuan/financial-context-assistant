@@ -133,6 +133,7 @@ export async function GET(req: NextRequest) {
         demographics: {
           age: demo.age || "-",
           gender: demo.gender || "-",
+          domicile: demo.domicile || "-",
           monthlyIncome: demo.monthlyIncome || "-",
           education: demo.education || "-",
           occupation: demo.occupation || "-",

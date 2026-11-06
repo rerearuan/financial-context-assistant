@@ -157,6 +157,15 @@ export const LIKERT_OPTIONS = [
 
 export const DEMOGRAPHIC_OPTIONS = {
   gender: ["Laki-laki", "Perempuan"],
+  domicile: [
+    "Jabodetabek (Jakarta, Bogor, Depok, Tangerang, Bekasi)",
+    "Pulau Jawa (di luar Jabodetabek)",
+    "Sumatra",
+    "Kalimantan",
+    "Sulawesi",
+    "Bali dan Nusa Tenggara",
+    "Maluku dan Papua",
+  ],
   education: [
     "SMP/Sederajat",
     "SMA/Sederajat",

@@ -80,6 +80,7 @@ function ExperimentContent() {
   const [demographics, setDemographics] = useState({
     age: "",
     gender: "",
+    domicile: "",
     education: "",
     occupation: "",
     monthlyIncome: "",
@@ -240,6 +241,7 @@ function ExperimentContent() {
     if (
       !demographics.age ||
       !demographics.gender ||
+      !demographics.domicile ||
       !demographics.education ||
       !demographics.occupation ||
       !demographics.monthlyIncome ||
@@ -694,10 +696,40 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              {/* 3. Jenjang Pendidikan */}
+              {/* 3. Domisili Tempat Tinggal */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-1.5">
-                  3. Apa jenjang pendidikan terakhir atau yang sedang Anda tempuh? *
+                  3. Dimana domisili tempat Anda tinggal? *
+                </label>
+                <div className="space-y-1.5">
+                  {DEMOGRAPHIC_OPTIONS.domicile.map((dom) => (
+                    <label
+                      key={dom}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer text-xs transition ${
+                        demographics.domicile === dom
+                          ? "bg-blue-50 border-blue-600 text-blue-800 font-semibold"
+                          : "bg-white border-slate-200 hover:bg-slate-50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="domicile"
+                        value={dom}
+                        checked={demographics.domicile === dom}
+                        onChange={(e) => setDemographics({ ...demographics, domicile: e.target.value })}
+                        className="w-4 h-4 text-blue-600"
+                        required
+                      />
+                      <span>{dom}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Jenjang Pendidikan */}
+              <div>
+                <label className="block font-semibold text-slate-800 mb-1.5">
+                  4. Apa jenjang pendidikan terakhir atau yang sedang Anda tempuh? *
                 </label>
                 <select
                   value={demographics.education}
@@ -714,10 +746,10 @@ function ExperimentContent() {
                 </select>
               </div>
 
-              {/* 4. Pekerjaan */}
+              {/* 5. Pekerjaan */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-1.5">
-                  4. Apa pekerjaan saat ini? *
+                  5. Apa pekerjaan saat ini? *
                 </label>
                 <select
                   value={demographics.occupation}
@@ -746,10 +778,10 @@ function ExperimentContent() {
                 )}
               </div>
 
-              {/* 5. Pendapatan Bulanan Pribadi (Screening) */}
+              {/* 6. Pendapatan Bulanan Pribadi (Screening) */}
               <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <label className="block font-semibold text-slate-800 mb-1.5">
-                  5. Berapa pendapatan bulanan pribadi Anda? (tidak termasuk pemberian orang tua) *
+                  6. Berapa pendapatan bulanan pribadi Anda? (tidak termasuk pemberian orang tua) *
                 </label>
                 <div className="space-y-1.5 mt-2">
                   {DEMOGRAPHIC_OPTIONS.monthlyIncome.map((inc) => (
@@ -779,10 +811,10 @@ function ExperimentContent() {
                 </p>
               </div>
 
-              {/* 6. Pengalaman Menggunakan Chatbot AI */}
+              {/* 7. Pengalaman Menggunakan Chatbot AI */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-1.5">
-                  6. Apakah Anda pernah menggunakan chatbot AI untuk mencari informasi atau membantu mempertimbangkan keputusan keuangan pribadi? *
+                  7. Apakah Anda pernah menggunakan chatbot AI untuk mencari informasi atau membantu mempertimbangkan keputusan keuangan pribadi? *
                 </label>
                 <p className="text-xs text-slate-500 mb-2">
                   Contoh: Bertanya kepada chatbot AI (seperti ChatGPT, Gemini, Copilot, atau asisten AI lainnya) mengenai cara mengatur pengeluaran, menyusun anggaran, atau merencanakan tabungan.
@@ -814,10 +846,10 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              {/* 7. Tingkat Pengetahuan Pengelolaan Keuangan Pribadi */}
+              {/* 8. Tingkat Pengetahuan Pengelolaan Keuangan Pribadi */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-1.5">
-                  7. Bagaimana Anda menilai tingkat pengetahuan Anda mengenai pengelolaan keuangan pribadi? *
+                  8. Bagaimana Anda menilai tingkat pengetahuan Anda mengenai pengelolaan keuangan pribadi? *
                 </label>
                 <div className="grid grid-cols-5 gap-1.5 mt-2">
                   {DEMOGRAPHIC_OPTIONS.financialKnowledge.map((lvl) => (
@@ -846,10 +878,10 @@ function ExperimentContent() {
                 </div>
               </div>
 
-              {/* 8. Kontak yang Dapat Dihubungi */}
+              {/* 9. Kontak yang Dapat Dihubungi */}
               <div>
                 <label className="block font-semibold text-slate-800 mb-1">
-                  8. Kontak yang dapat dihubungi (Email/No telp) *
+                  9. Kontak yang dapat dihubungi (Email/No telp) *
                 </label>
                 <p className="text-xs text-slate-500 mb-2">
                   * Hanya untuk keperluan hadiah
