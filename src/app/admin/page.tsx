@@ -22,6 +22,7 @@ import {
   Layers,
   ArrowUpDown,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import { POST_QUESTIONNAIRE_ITEMS } from "@/lib/survey-questions";
 
@@ -109,6 +110,12 @@ export default function AdminDashboardPage() {
     cellStats: CellStat[];
   } | null>(null);
 
+  const [dbStatus, setDbStatus] = useState<{
+    connected: boolean;
+    host: string;
+    error: string | null;
+  } | null>(null);
+
   const [participants, setParticipants] = useState<ParticipantRecord[]>([]);
 
   // Filters
@@ -146,6 +153,9 @@ export default function AdminDashboardPage() {
       if (dataRes.ok) {
         const result = await dataRes.json();
         setStats(result.stats);
+        if (result.dbStatus) {
+          setDbStatus(result.dbStatus);
+        }
         setParticipants(result.participants || []);
       }
     } catch (err) {
@@ -330,6 +340,31 @@ export default function AdminDashboardPage() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Database Connection Warning Banner if not connected to live DB */}
+        {dbStatus && !dbStatus.connected && (
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 shadow-2xs space-y-2">
+            <div className="flex items-center gap-2.5 font-bold text-sm text-amber-900">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+              <span>Database Cloud Belum Terhubung di Vercel</span>
+            </div>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              Website di Vercel saat ini berjalan tanpa koneksi database PostgreSQL cloud (variabel lingkungan{" "}
+              <code className="font-mono bg-amber-200/60 px-1.5 py-0.5 rounded font-bold">DATABASE_URL</code> belum disetting di Vercel).
+              Oleh karena itu data partisipan tidak tersimpan di server cloud Vercel. Seluruh 16 data uji coba yang telah dibuat sebelumnya tersimpan di PostgreSQL lokal laptop Anda (
+              <code className="font-mono bg-amber-200/60 px-1.5 py-0.5 rounded font-bold">localhost:5432/skripsi_chat</code>).
+            </p>
+            <div className="pt-1.5 text-xs text-amber-800">
+              <strong className="block mb-1">Cara agar responden asli tersimpan permanen di website Vercel:</strong>
+              <ol className="list-decimal list-inside space-y-0.5 pl-1 text-[11px] text-amber-900/90">
+                <li>Buat database PostgreSQL gratis di <a href="https://neon.tech" target="_blank" rel="noreferrer" className="underline font-bold text-blue-700">Neon.tech</a> atau <a href="https://supabase.com" target="_blank" rel="noreferrer" className="underline font-bold text-blue-700">Supabase</a>.</li>
+                <li>Copy connection string PostgreSQL-nya.</li>
+                <li>Buka <strong>Vercel Dashboard &rarr; Project Settings &rarr; Environment Variables</strong>, lalu tambahkan key <code className="font-mono font-bold bg-amber-200/60 px-1 py-0.2 rounded">DATABASE_URL</code> dengan value connection string tersebut.</li>
+                <li>Redeploy di Vercel, lalu buka link <a href="/api/dev/setup-db" target="_blank" className="underline font-bold text-blue-700">/api/dev/setup-db</a> satu kali untuk otomatis setup tabel.</li>
+              </ol>
+            </div>
+          </div>
+        )}
+
         {/* KPI Stats Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs">

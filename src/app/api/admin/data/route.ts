@@ -43,12 +43,31 @@ export async function GET(req: NextRequest) {
     let partList: any[] = [];
     let sessList: any[] = [];
     let msgList: any[] = [];
+    let isDbConnected = true;
+    let dbHost = "unknown";
+    let dbErrorMessage: string | null = null;
 
     try {
+      if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes("localhost")) {
+        if (process.env.VERCEL) {
+          throw new Error("DATABASE_URL belum dikonfigurasi di environment variables Vercel.");
+        }
+      }
+
+      if (process.env.DATABASE_URL) {
+        try {
+          dbHost = new URL(process.env.DATABASE_URL).host;
+        } catch {
+          dbHost = "configured";
+        }
+      }
+
       partList = await db.select().from(participants).orderBy(desc(participants.createdAt));
       sessList = await db.select().from(sessions).orderBy(desc(sessions.createdAt));
       msgList = await db.select().from(messages).orderBy(desc(messages.createdAt));
-    } catch (dbErr) {
+    } catch (dbErr: any) {
+      isDbConnected = false;
+      dbErrorMessage = dbErr?.message || "Koneksi database PostgreSQL tidak dapat diakses.";
       console.warn("DB not reachable in /api/admin/data, using in-memory demo store:", dbErr);
       partList = Array.from(demoParticipants.values());
       sessList = Array.from(demoSessions.values());
@@ -156,6 +175,11 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      dbStatus: {
+        connected: isDbConnected,
+        host: dbHost,
+        error: dbErrorMessage,
+      },
       stats: {
         totalParticipants,
         completedCount,
