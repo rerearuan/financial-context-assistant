@@ -28,11 +28,11 @@ export const MAX_PARTICIPANTS_PER_CELL = 25; // 25 x 8 = 200 total
  */
 export async function assignBalancedCell(): Promise<CellAssignment> {
   try {
-    // Query counts per cell
+    // Query counts of COMPLETED participants per cell to guarantee perfectly even distribution
     const cellCounts = await db
       .select({
         cellNumber: participants.cellNumber,
-        count: sql<number>`count(*)::int`,
+        count: sql<number>`count(*) FILTER (WHERE ${participants.isCompleted} = true)::int`,
       })
       .from(participants)
       .where(eq(participants.disqualified, false))
