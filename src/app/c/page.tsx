@@ -131,7 +131,7 @@ export default function CellsDirectoryPage() {
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed max-w-3xl">
             Halaman ini memuat tautan langsung (<em>direct link</em>) ke masing-masing dari 8 kombinasi perlakuan eksperimen (desain faktorial 2x2x2).
-            Responden yang mengklik tautan di bawah dapat <strong>langsung berinteraksi dengan chatbot tanpa perlu mengisi kuesioner awal</strong> di website.
+            Responden yang mengklik tautan di bawah akan menggunakan kombinasi perlakuan yang dipilih dan tetap mengikuti seluruh tahapan penelitian di website.
           </p>
 
           <div className="mt-4 p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-start gap-2.5">
@@ -141,7 +141,7 @@ export default function CellsDirectoryPage() {
                 Petunjuk Pemasangan di Google Form:
               </span>
               <span>
-                Tempelkan tautan masing-masing kombinasi (misal <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-700">/c/1</code> pada Form Manip Check 1, <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-700">/c/2</code> pada Form Manip Check 2, dst.). Setelah responden selesai chat, mereka akan diarahkan untuk kembali ke Google Form.
+                Tempelkan tautan masing-masing kombinasi (misal <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-700">/c/1</code> untuk kombinasi 1, <code className="bg-white px-1.5 py-0.5 rounded border border-slate-300 font-mono text-blue-700">/c/2</code> untuk kombinasi 2, dst.). Responden tetap wajib mengisi demografi, pemeriksaan pemahaman, keputusan awal, chat, keputusan akhir, dan kuesioner.
               </span>
             </div>
           </div>

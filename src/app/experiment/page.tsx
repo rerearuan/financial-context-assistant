@@ -64,6 +64,7 @@ interface ScenarioDetails {
 function ExperimentContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const requestedCell = searchParams.get("cell");
 
   const [step, setStep] = useState<number>(1);
   const [participant, setParticipant] = useState<ParticipantData | null>(null);
@@ -116,7 +117,7 @@ function ExperimentContent() {
       const urlPartId = searchParams.get("participantId");
       const urlStep = searchParams.get("step");
       const urlSessionId = searchParams.get("sessionId");
-      const savedPartId = urlPartId || localStorage.getItem("exp_participant_id");
+      const savedPartId = urlPartId || (requestedCell ? null : localStorage.getItem("exp_participant_id"));
 
       if (savedPartId) {
         try {
@@ -281,6 +282,7 @@ function ExperimentContent() {
                 : demographics.occupation,
             age: parseInt(demographics.age, 10),
           },
+          fixedCellNumber: requestedCell ? Number(requestedCell) : undefined,
         }),
       });
 

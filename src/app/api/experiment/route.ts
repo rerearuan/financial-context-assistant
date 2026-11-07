@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { participants, sessions, scenarios, messages } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
-import { assignBalancedCell } from "@/lib/randomizer";
+import { assignBalancedCell, EXPERIMENT_CELLS } from "@/lib/randomizer";
 import { getGeminiModel } from "@/lib/gemini";
 import { PROMPT_VERSION } from "@/lib/prompts/templates";
 import { SCENARIO_PACKAGES, COMPREHENSION_QUESTIONS_BY_SCENARIO } from "@/fixtures/scenarios";
@@ -226,7 +226,7 @@ export async function POST(req: NextRequest) {
 
     // 3. DEMOGRAPHICS & BALANCED CELL RANDOMIZATION
     if (action === "demographics") {
-      const { participantId, demographics } = body;
+      const { participantId, demographics, fixedCellNumber } = body;
       if (!participantId || !demographics) {
         return NextResponse.json({ error: "Data demografi diperlukan" }, { status: 400 });
       }
@@ -260,7 +260,17 @@ export async function POST(req: NextRequest) {
       }
 
       // Backend Balanced Randomization across 8 cells (25 x 8 = 200 total)
-      const assignment = await assignBalancedCell();
+      const requestedCell = fixedCellNumber === undefined ? null : Number(fixedCellNumber);
+      if (
+        requestedCell !== null &&
+        (!Number.isInteger(requestedCell) || requestedCell < 1 || requestedCell > 8)
+      ) {
+        return NextResponse.json({ error: "Cell eksperimen tidak valid." }, { status: 400 });
+      }
+      const assignment =
+        requestedCell === null
+          ? await assignBalancedCell()
+          : EXPERIMENT_CELLS.find((cell) => cell.cellNumber === requestedCell)!;
       const { cellNumber, scenarioId, condition } = assignment;
 
       // Find scenario definition

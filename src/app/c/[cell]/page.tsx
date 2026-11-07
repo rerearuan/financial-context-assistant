@@ -22,47 +22,7 @@ function DirectCellLoader() {
     let isMounted = true;
 
     async function initDirectChat() {
-      try {
-        const res = await fetch("/api/sessions", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            cellNumber: cellNum,
-            source: "form",
-          }),
-        });
-
-        if (!res.ok) {
-          const errData = await res.json().catch(() => ({}));
-          throw new Error(errData.error || "Gagal membuat sesi percakapan.");
-        }
-
-        const data = await res.json();
-        if (isMounted && data.sessionId) {
-          if (typeof window !== "undefined") {
-            try {
-              localStorage.setItem(`session_cell_${data.sessionId}`, String(cellNum));
-            } catch {
-              // ignore localStorage errors
-            }
-          }
-          // Redirect to chat
-          const partQuery = data.participantId ? `&participantId=${data.participantId}` : "";
-          if (typeof window !== "undefined" && data.participantId) {
-            try {
-              localStorage.setItem("exp_participant_id", data.participantId);
-            } catch {
-              // ignore
-            }
-          }
-          router.replace(`/chat/${data.sessionId}?source=form${partQuery}`);
-        }
-      } catch (err: unknown) {
-        if (isMounted) {
-          const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
-          setError(msg);
-        }
-      }
+      if (isMounted) router.replace(`/experiment?cell=${cellNum}`);
     }
 
     initDirectChat();
