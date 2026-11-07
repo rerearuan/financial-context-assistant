@@ -76,9 +76,13 @@ export async function GET(req: NextRequest) {
 
     // Map messages count by sessionId
     const msgCountMap = new Map<string, number>();
+    const msgHistoryMap = new Map<string, any[]>();
     for (const m of msgList) {
       if (m.sessionId) {
         msgCountMap.set(m.sessionId, (msgCountMap.get(m.sessionId) || 0) + 1);
+        const history = msgHistoryMap.get(m.sessionId) || [];
+        history.push(m);
+        msgHistoryMap.set(m.sessionId, history);
       }
     }
 
@@ -130,6 +134,19 @@ export async function GET(req: NextRequest) {
         waktuSelesai: p.isCompleted ? formatDateTimeWIB(p.updatedAt) : "-",
         durasiDetik: durationSec,
         messageCount: p.sessionId ? (msgCountMap.get(p.sessionId) || 0) : 0,
+        chatHistory: p.sessionId
+          ? (msgHistoryMap.get(p.sessionId) || [])
+              .sort(
+                (a, b) =>
+                  new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+              )
+              .map((m) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                createdAt: formatDateTimeWIB(m.createdAt),
+              }))
+          : [],
         demographics: {
           age: demo.age || "-",
           gender: demo.gender || "-",
@@ -141,11 +158,18 @@ export async function GET(req: NextRequest) {
           chatbotExperience: demo.chatbotExperience || "-",
           contact: demo.contact || "-",
         },
-        earlyDecision: earlyDec,
+        earlyDecision: {
+          decision: earlyDec.decision || (earlyDec.q1 ? (earlyDec.q2 ? `${earlyDec.q1} (${earlyDec.q2})` : earlyDec.q1) : "-"),
+          justification: earlyDec.justification || earlyDec.q3 || "-",
+          ...earlyDec,
+        },
         finalDecision: {
-          decision: finalDec.decision || "-",
-          justification: finalDec.justification || "-",
+          decision: finalDec.decision || (finalDec.q1 ? (finalDec.q2 ? `${finalDec.q1} (${finalDec.q2})` : finalDec.q1) : "-"),
+          justification: finalDec.justification || finalDec.q3 || "-",
           answers: finalDec.answers || {},
+          q1: finalDec.q1,
+          q2: finalDec.q2,
+          q3: finalDec.q3,
         },
         postQuestionnaire: postQ,
         scaleAverages,

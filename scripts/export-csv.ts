@@ -132,9 +132,10 @@ export async function exportDatabaseToCsv(outDir = process.cwd()) {
       financial_knowledge: demo.financialKnowledge || "",
       contact: demo.contact || "",
       // Keputusan Awal & Akhir
-      early_decision: earlyDec.decision || "",
-      final_decision: finalDec.decision || "",
-      final_justification: finalDec.justification || "",
+      early_decision: earlyDec.decision || (earlyDec.q1 ? (earlyDec.q2 ? `${earlyDec.q1} (${earlyDec.q2})` : earlyDec.q1) : ""),
+      early_justification: earlyDec.justification || earlyDec.q3 || "",
+      final_decision: finalDec.decision || (finalDec.q1 ? (finalDec.q2 ? `${finalDec.q1} (${finalDec.q2})` : finalDec.q1) : ""),
+      final_justification: finalDec.justification || finalDec.q3 || "",
     };
 
     // Tambahkan 20 item kuesioner sebagai kolom terpisah (AT1..AT4, MAC1..MAC4, OCC1..OCC4, PFDA1..PFDA4, RMAS1..RMAS4)

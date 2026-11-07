@@ -97,9 +97,10 @@ export async function GET(req: NextRequest) {
         "Pengetahuan Finansial": demo.financialKnowledge || "",
         "Kontak Responden": demo.contact || "",
         // Keputusan
-        "Keputusan Awal": earlyDec.decision || "",
-        "Keputusan Akhir": finalDec.decision || "",
-        "Alasan Keputusan Akhir": finalDec.justification || "",
+        "Keputusan Awal": earlyDec.decision || (earlyDec.q1 ? (earlyDec.q2 ? `${earlyDec.q1} (${earlyDec.q2})` : earlyDec.q1) : ""),
+        "Alasan Keputusan Awal": earlyDec.justification || earlyDec.q3 || "",
+        "Keputusan Akhir": finalDec.decision || (finalDec.q1 ? (finalDec.q2 ? `${finalDec.q1} (${finalDec.q2})` : finalDec.q1) : ""),
+        "Alasan Keputusan Akhir": finalDec.justification || finalDec.q3 || "",
       };
 
       // 20 Item Kuesioner (AT1-4, MAC1-4, OCC1-4, PFDA1-4, RMAS1-4)
