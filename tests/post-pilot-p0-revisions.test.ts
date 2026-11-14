@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { sanitizeAmount, extractSpokenIndonesianAmount } from "@/lib/financial-engine/validator";
+import { sanitizeAmount, extractSpokenIndonesianAmount, hasUserDisclosedAction } from "@/lib/financial-engine/validator";
 import { extractMentionedAmounts, validateAssistantOutput } from "@/lib/financial-engine/output-guardrail";
 import { heuristicExtractIntent, generateSafeFallbackResponse, getGeminiModel } from "@/lib/gemini";
 import { calculateFinancialConsequences } from "@/lib/financial-engine/calculator";
@@ -349,6 +349,95 @@ describe("Post-Pilot P0 Revisions & Verification Suite", () => {
       expect(DEFAULT_GENERATION_PARAMS.temperature).toBe(0.1);
       expect(DEFAULT_GENERATION_PARAMS.topP).toBe(0.9);
       expect(DEFAULT_GENERATION_PARAMS.maxOutputTokens).toBe(600);
+    });
+  });
+
+  // =========================================================================
+  // 6. EXPERIMENTAL ISOLATION & ACCURACY (BASIC VS CONTEXT-AWARE)
+  // =========================================================================
+  describe("6. Experimental Isolation & Real Case Verification", () => {
+    it("Basic chatbot with undisclosed action calculates pure user figures without deducting laptop", () => {
+      const userMessage = "saldo 18jt, dana darurat 5jt, tagihan 1,8jt. sisa berapa";
+      const action = { ...spendLowPkg.scenario.initialAction, source: "scenario" as const };
+      const chatHistory = [{ role: "user" as const, content: userMessage }];
+
+      const disclosed = hasUserDisclosedAction(chatHistory, action);
+      expect(disclosed).toBe(false);
+
+      const intent = heuristicExtractIntent(userMessage, action);
+      expect(intent.userProvidedFinances?.balance).toBe(18000000);
+      expect(intent.userProvidedFinances?.liabilities).toBe(1800000);
+      expect(intent.userProvidedFinances?.buffer).toBe(5000000);
+
+      const packet = buildStructuredContextPacket({
+        condition: "basic",
+        action,
+        userProvidedFinances: intent.userProvidedFinances,
+        hasUserDisclosedAction: disclosed,
+      });
+
+      // Verification: Action of 7M MUST NOT be deducted!
+      expect(packet.calculation.initialBalance).toBe(18000000);
+      expect(packet.calculation.balanceAfterAction).toBe(18000000);
+      expect(packet.calculation.remainingCashAfterImmediateObligations).toBe(16200000); // 18M - 1.8M = 16.2M
+      const surplusAfterEmergency = (packet.calculation.remainingCashAfterImmediateObligations || 0) - (packet.calculation.bufferImpact.minBuffer || 0);
+      expect(surplusAfterEmergency).toBe(11200000); // 16.2M - 5M = 11.2M
+
+      // Fallback response check: No mention of laptop or 7 million!
+      const fallback = generateSafeFallbackResponse(packet, userMessage, chatHistory);
+      expect(fallback).toContain("16.200.000");
+      expect(fallback).toContain("11.200.000");
+      expect(fallback.toLowerCase()).not.toContain("laptop");
+      expect(fallback).not.toContain("7.000.000");
+    });
+
+    it("Follow-up with 'sorry, cicilan 1,8jt' treats 1.8M as liability and does NOT parse as Rp18", () => {
+      const action = { ...spendLowPkg.scenario.initialAction, source: "scenario" as const };
+      const intent = heuristicExtractIntent("sorry, cicilan 1,8jt", action);
+
+      expect(intent.userProvidedFinances?.liabilities).toBe(1800000);
+      expect(intent.userProvidedFinances?.liabilities).not.toBe(18);
+      expect(intent.focalDimension).toBe("bills");
+      expect(intent.intentType).toBe("clarify_info");
+      expect(intent.preferredPaymentMethod).toBeNull();
+
+      const chatHistory = [
+        { role: "user" as const, content: "saldo 18jt, dana darurat 5jt, tagihan 1,8jt. sisa berapa" },
+        { role: "assistant" as const, content: "Sisa saldo Anda Rp 16.200.000 dan sisa dana bebas Rp 11.200.000." },
+        { role: "user" as const, content: "sorry, cicilan 1,8jt" },
+      ];
+      expect(hasUserDisclosedAction(chatHistory, action)).toBe(false);
+    });
+
+    it("Discloses action ONLY when user explicitly asks to purchase laptop", () => {
+      const action = { ...spendLowPkg.scenario.initialAction, source: "scenario" as const };
+      const chatHistory = [
+        { role: "user" as const, content: "saldo 18jt, dana darurat 5jt, tagihan 1,8jt. sisa berapa" },
+        { role: "assistant" as const, content: "Sisa saldo Anda Rp 16.200.000 dan sisa dana bebas Rp 11.200.000." },
+        { role: "user" as const, content: "kalau mau beli laptop 7jt gimana?" },
+      ];
+
+      const disclosed = hasUserDisclosedAction(chatHistory, action);
+      expect(disclosed).toBe(true);
+
+      const packet = buildStructuredContextPacket({
+        condition: "basic",
+        action,
+        userProvidedFinances: {
+          balance: 18000000,
+          liabilities: 1800000,
+          buffer: 5000000,
+          source: "user_message",
+        },
+        hasUserDisclosedAction: disclosed,
+      });
+
+      // Now laptop 7M IS deducted
+      expect(packet.calculation.initialBalance).toBe(18000000);
+      expect(packet.calculation.balanceAfterAction).toBe(11000000); // 18M - 7M = 11M
+      expect(packet.calculation.remainingCashAfterImmediateObligations).toBe(9200000); // 11M - 1.8M = 9.2M
+      const surplus = (packet.calculation.remainingCashAfterImmediateObligations || 0) - (packet.calculation.bufferImpact.minBuffer || 0);
+      expect(surplus).toBe(4200000); // 9.2M - 5M = 4.2M
     });
   });
 });

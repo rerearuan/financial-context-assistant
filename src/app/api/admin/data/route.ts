@@ -74,6 +74,23 @@ export async function GET(req: NextRequest) {
       msgList = Array.from(demoMessages.values()).flat();
     }
 
+    // Filter out automated test rows (PART-, TEST-, DEV-, AUTOTEST-, P-) so Admin UI displays only genuine participants
+    const isTestCode = (code: string | null | undefined): boolean => {
+      if (!code) return false;
+      return (
+        code.startsWith("PART-") ||
+        code.startsWith("TEST-") ||
+        code.startsWith("DEV-") ||
+        code.startsWith("AUTOTEST-") ||
+        code.startsWith("P-")
+      );
+    };
+
+    partList = partList.filter((p) => !isTestCode(p.participantCode));
+    const validSessionIds = new Set(partList.map((p) => p.sessionId).filter(Boolean));
+    sessList = sessList.filter((s) => !isTestCode(s.participantCode) && validSessionIds.has(s.id));
+    msgList = msgList.filter((m) => validSessionIds.has(m.sessionId));
+
     // Map messages count by sessionId
     const msgCountMap = new Map<string, number>();
     const msgHistoryMap = new Map<string, any[]>();

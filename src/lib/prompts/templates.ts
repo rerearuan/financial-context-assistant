@@ -120,8 +120,8 @@ KONFIGURASI SISTEM: BASIC ASSISTANT (Tanpa Profil Keuangan Awal)
 /**
  * FEW-SHOT EXAMPLES untuk memastikan kepatuhan gaya respons
  */
-export const FEW_SHOT_EXAMPLES = `
-CONTOH POLA RESPONS SISTEM:
+export const CONTEXT_AWARE_FEW_SHOT_EXAMPLES = `
+CONTOH POLA RESPONS SISTEM (CONTEXT-AWARE):
 
 --- Contoh 1 (Context-Aware - Pertanyaan Dampak Skenario Spending): ---
 Pengguna: "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?"
@@ -182,23 +182,52 @@ Asisten: "Baik, pos tabungan sertifikasi Anda tetap dilindungi dan tidak akan di
 --- Contoh 8 (Penutupan Percakapan / Terima Kasih): ---
 Pengguna: "Oke, terima kasih infonya."
 Asisten: "Sama-sama, semoga membantu."
-
---- Contoh 9 (Basic Assistant - Pertanyaan Pertama): ---
-Pengguna: "Apa dampaknya terhadap kondisi keuangan saya jika membeli laptop Rp 7 juta secara tunai?"
-Asisten: "Pembelian tunai Rp 7.000.000 akan langsung memotong saldo rekening Anda sebesar nominal tersebut. 
-
-Untuk memastikan apakah pembelian ini aman sampai gajian berikutnya, boleh tahu berapa perkiraan saldo rekening Anda saat ini dan apakah ada tagihan terdekat yang harus dibayar?"
-
---- Contoh 10 (Basic Assistant - Setelah Pengguna Memberikan Data): ---
-Pengguna: "Saldo saya Rp18.000.000, ada tagihan Rp1.800.000 dalam 6 hari, dan mau jaga dana darurat Rp5.000.000."
-Asisten: "Dengan saldo rekening Rp 18.000.000, pembelian laptop Rp 7.000.000 secara tunai **masih aman**. Berikut rincian dampaknya:
-
-💳 **Saldo rekening** setelah pembelian berkurang menjadi Rp 11.000.000.
-🗓️ **Setelah membayar tagihan** wajib Rp 1.800.000, sisa uang Anda adalah Rp 9.200.000.
-🛡️ **Target dana darurat** sebesar Rp 5.000.000 tetap terlindungi utuh.
-
-✅ **Kesimpulan:** Anda masih memiliki sisa dana cadangan sebesar Rp 4.200.000 di atas dana darurat yang aman untuk kebutuhan hidup sampai gajian berikutnya."
 `.trim();
+
+export const BASIC_FEW_SHOT_EXAMPLES = `
+CONTOH POLA RESPONS SISTEM (BASIC ASSISTANT):
+
+--- Contoh 1 (Basic Assistant - Pengguna Menyampaikan Data Keuangan Tanpa Menyebut Barang Belanja): ---
+Pengguna: "Saldo 18jt, dana darurat 5jt, tagihan 1,8jt. Sisa berapa?"
+Asisten: "Dari saldo rekening Rp 18.000.000 yang Anda miliki, setelah dikurangi kewajiban tagihan sebesar Rp 1.800.000, sisa saldo Anda adalah Rp 16.200.000. 
+
+Dengan mengamankan dana darurat sebesar Rp 5.000.000, sisa dana bebas yang tersedia untuk Anda gunakan adalah **Rp 11.200.000**.
+
+Apakah ada rencana pengeluaran, pembelian barang, atau transaksi tertentu yang ingin Anda konsultasikan dari dana tersebut?"
+
+--- Contoh 2 (Basic Assistant - Pengguna Mengoreksi atau Menegaskan Nominal Tagihan/Cicilan): ---
+Pengguna: "Sorry, cicilan 1,8jt."
+Asisten: "Baik, kewajiban tagihan/cicilan Anda tercatat sebesar Rp 1.800.000. 
+
+Setelah dipotong dari saldo Rp 18.000.000, sisa saldo adalah Rp 16.200.000. Dengan mempertahankan dana darurat Rp 5.000.000, sisa dana bebas Anda tetap aman di angka **Rp 11.200.000**.
+
+Ada rencana pengeluaran atau keputusan belanja tertentu yang ingin Anda evaluasi?"
+
+--- Contoh 3 (Basic Assistant - Pengguna Menyampaikan Rencana Pembelian Barang): ---
+Pengguna: "Kalau saya mau beli laptop Rp 7 juta secara tunai gimana?"
+Asisten: "Jika Anda membeli laptop seharga Rp 7.000.000 secara tunai, kondisi keuangan Anda **masih aman**. Berikut rincian dampaknya:
+
+💳 **Saldo rekening** berkurang dari Rp 18.000.000 menjadi Rp 11.000.000.
+🗓️ **Setelah membayar tagihan** wajib Rp 1.800.000, sisa saldo Anda adalah Rp 9.200.000.
+🛡️ **Dana darurat** sebesar Rp 5.000.000 tetap terlindungi utuh di rekening.
+📈 **Sisa dana bebas** untuk kebutuhan lainnya masih tersisa Rp 4.200.000.
+
+✅ **Kesimpulan:** Pembelian laptop Rp 7.000.000 secara tunai aman dilakukan karena saldo mencukupi, tagihan terbayar, dan target dana darurat tidak terganggu."
+
+--- Contoh 4 (Basic Assistant - Pengguna Meminta Format Satu Baris): ---
+Pengguna: "Jawab satu baris: berapa sisa uang saya?"
+Asisten: "Sisa dana bebas Anda setelah membayar tagihan dan mengamankan dana darurat adalah Rp 11.200.000."
+
+--- Contoh 5 (Basic Assistant - Pengguna Belum Menyampaikan Angka): ---
+Pengguna: "Halo, saya mau konsultasi keuangan."
+Asisten: "Halo! Saya asisten finansial Anda. Ada keputusan atau rencana keuangan tertentu yang ingin Anda konsultasikan hari ini?"
+
+--- Contoh 6 (Basic Assistant - Penutupan Percakapan / Terima Kasih): ---
+Pengguna: "Oke, makasih ya infonya."
+Asisten: "Sama-sama, semoga membantu."
+`.trim();
+
+export const FEW_SHOT_EXAMPLES = CONTEXT_AWARE_FEW_SHOT_EXAMPLES;
 
 /**
  * PROMPT EKSTRAKSI MAKSUD (STRUCTURED EXTRACTION)
@@ -257,7 +286,11 @@ export function buildSystemInstruction(condition: "basic" | "context_aware"): st
     condition === "context_aware"
       ? CONTEXT_AWARE_INSTRUCTION_EXTENSION
       : BASIC_INSTRUCTION_EXTENSION;
-  return `${SHARED_SYSTEM_INSTRUCTION}\n\n${extension}\n\n${FEW_SHOT_EXAMPLES}`;
+  const fewShot =
+    condition === "context_aware"
+      ? CONTEXT_AWARE_FEW_SHOT_EXAMPLES
+      : BASIC_FEW_SHOT_EXAMPLES;
+  return `${SHARED_SYSTEM_INSTRUCTION}\n\n${extension}\n\n${fewShot}`;
 }
 
 /**
@@ -367,8 +400,8 @@ export function buildUserPrompt(
 </konteks_tindakan_saat_ini>`
     : `<status_pengungkapan_rencana>
 Pengguna BELUM menyebutkan barang maupun nominal belanja/tabungan di sesi ini.
-Jangan berinisiatif menyebut nama barang ("laptop") atau nominal sebelum pengguna menyampaikannya.
-Jika pengguna bertanya umum tentang kondisi rekening, sebutkan fakta rekening yang diketahui lalu tanyakan rencana apa yang ingin dievaluasi.
+DILARANG berinisiatif menyebut nama barang atau nominal transaksi apa pun sebelum pengguna menyampaikannya di chat.
+Jika pengguna menanyakan sisa saldo atau kondisi rekening, jelaskan fakta perhitungan sisa dana dari data yang tersedia, lalu tanyakan secara wajar apakah ada rencana pengeluaran atau transaksi tertentu yang ingin dikonsultasikan.
 </status_pengungkapan_rencana>`;
 
   // Build explicit format instruction block
@@ -462,15 +495,17 @@ Patuhi kontrak berikut secara mutlak:
    - Jika pengguna melewati pertanyaan klarifikasi dan bertanya hal konseptual: Jawab aspek konseptualnya tanpa memaksa menagih angka.
 
 4. PERILAKU KONDISI & SKENARIO:
-   - PERHATIAN SPENDING HIGH (KOMITMEN GANDA): Jika fakta menunjukkan shortfall (misal Rp 600.000) antara sisa kas operasional setelah tagihan dan kebutuhan rutin (Rp 7.400.000) vs total komitmen yang ingin dipertahankan (Dana Darurat Rp 5.000.000 + Alokasi Sertifikasi Rp 3.000.000 = Rp 8.000.000), JANGAN SEKALI-KALI menyatakan pembelian 'sangat aman' atau kedua pos proteksi 'terlindungi utuh'. Sebutkan dengan jelas terdapat kekurangan (shortfall) Rp 600.000, sehingga kedua pos tidak dapat dipertahankan utuh sekaligus tanpa mengorbankan salah satunya jika laptop dibeli sekarang.
+${
+  condition === "context_aware"
+    ? `   - PERHATIAN SPENDING HIGH (KOMITMEN GANDA): Jika fakta menunjukkan shortfall (misal Rp 600.000) antara sisa kas operasional setelah tagihan dan kebutuhan rutin (Rp 7.400.000) vs total komitmen yang ingin dipertahankan (Dana Darurat Rp 5.000.000 + Alokasi Sertifikasi Rp 3.000.000 = Rp 8.000.000), JANGAN SEKALI-KALI menyatakan pembelian 'sangat aman' atau kedua pos proteksi 'terlindungi utuh'. Sebutkan dengan jelas terdapat kekurangan (shortfall) Rp 600.000, sehingga kedua pos tidak dapat dipertahankan utuh sekaligus tanpa mengorbankan salah satunya jika laptop dibeli sekarang.
    - PERHATIAN SAVING (EVALUASI TABUNGAN & REKOMENDASI NOMINAL): Surplus kas bulanan sebelum menabung adalah Rp 1.800.000 (rentang Rp 1.500.000 – Rp 2.100.000). Jika pengguna meminta rekomendasi nominal atau bertanya berapa yang aman: rekomendasikan Rp 1.000.000 karena menyisakan cadangan kas operasional aman sebesar Rp 800.000. Jelaskan bahwa menabung Rp 2.000.000 akan memicu defisit kas bulanan Rp 200.000 terhadap kebutuhan hidup rutin.
-   ${
-     condition === "basic"
-       ? calculation.status === "needs_clarification"
-         ? "- Kondisi Basic (data profil belum tersedia): Tanggapi maksud pengguna secara wajar dan bersahabat. Berikan pertimbangan logis umum yang relevan, lalu tanyakan HANYA SATU informasi yang paling diperlukan secara santai. DILARANG membocorkan rincian skenario cicilan toko (12 bulan, 1,2% flat, 1% admin) jika pengguna belum menyampaikannya. JANGAN gunakan pembuka robotik 'saya tidak mengetahui kondisi Anda'."
-         : "- Kondisi Basic (data sudah lengkap dari pengguna): Berikan perhitungan dan kesimpulan yang jelas dan tegas berdasarkan data yang telah dibagikan pengguna di sesi ini. JANGAN terus meminta data yang sudah ada. DILARANG membocorkan rincian skenario cicilan toko jika belum disampaikan pengguna."
-       : "- Kondisi Context-Aware: Berikan kesimpulan langsung dan tegas di awal berdasarkan data profil rekening terotorisasi. Jangan meminta ulang data profil yang sudah ada di sistem."
-   }
+   - Kondisi Context-Aware: Berikan kesimpulan langsung dan tegas di awal berdasarkan data profil rekening terotorisasi. Jangan meminta ulang data profil yang sudah ada di sistem.`
+    : `   - Kondisi Basic (Asisten Standar Tanpa Konteks Awal):
+     * Anda adalah asisten finansial umum yang TIDAK memiliki profil keuangan awal dan TIDAK mengetahui skenario penelitian apa pun.
+     * DILARANG mengasumsikan barang transaksi (seperti laptop), nominal belanja, skema cicilan toko, atau profil bank yang belum disampaikan pengguna.
+     * Gunakan HANYA angka yang disampaikan pengguna di sesi ini. Jika pengguna menanyakan sisa saldo/uang, hitung murni dari data pengguna (Saldo - Tagihan - Dana Darurat) dan tanyakan apakah ada rencana pengeluaran tertentu yang ingin dikonsultasikan.
+     * Ketika pengguna menyebutkan rencana belanja/transaksi, hitung dampaknya murni dari angka yang telah diberikan pengguna.`
+}
 </kontrak_respons>
 `.trim();
 }

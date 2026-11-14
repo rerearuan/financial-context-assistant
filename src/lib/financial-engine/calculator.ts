@@ -48,7 +48,8 @@ export function calculateFinancialConsequences(
   action: FinancialAction,
   profile?: FinancialProfileContext | null,
   userProvidedOrConstraints?: UserProvidedFinances | UserConstraints | null,
-  constraintsParam?: UserConstraints | null
+  constraintsParam?: UserConstraints | null,
+  isActionDisclosed?: boolean
 ): FinancialCalculationResult {
   let userProvided: UserProvidedFinances | null = null;
   let constraints: UserConstraints | null = constraintsParam ?? null;
@@ -67,15 +68,16 @@ export function calculateFinancialConsequences(
   // Case A: Context-Aware (Synthetic Profile available)
   // =========================================================================
   if (profile) {
+    const isDisclosed = isActionDisclosed !== false;
     const selected = selectRelevantFinancialContext(profile, action);
     const initialBalance = profile.totalCashBalance;
     const isSaving = action.type === "saving";
     const isSpending = action.type === "spending";
 
     // 1. Bank Cash Balance vs Virtual Allocations
-    // Rule: Spending sends money outside -> bank cash decreases.
+    // Rule: Spending sends money outside -> bank cash decreases (only if action is disclosed).
     // Saving re-allocates inside the same account -> total bank cash is unchanged.
-    const netCashFlowImpact = isSpending ? action.amount : 0;
+    const netCashFlowImpact = isDisclosed ? (isSpending ? action.amount : 0) : 0;
     const balanceAfterAction = initialBalance - netCashFlowImpact;
     const canPayAction: AssessmentStatus = initialBalance >= netCashFlowImpact;
 
@@ -97,28 +99,34 @@ export function calculateFinancialConsequences(
       // Spending scenario (Laptop)
       const designatedAlloc = virtualAllocationsBefore["laptop"] ?? 0;
       operatingCashBefore = virtualAllocationsBefore["operating"] ?? 7000000;
-      budgetVariance = designatedAlloc - action.amount;
-      isBudgetExceeded = budgetVariance < 0;
-
-      if (isBudgetExceeded) {
-        const shortfall = Math.abs(budgetVariance);
-        // By default or by explicit constraint, do NOT touch certification funds unless user asks
-        const protectCert = constraints?.prohibitCertificationFunds !== false;
-        
-        if (protectCert) {
-          // Deduct shortfall purely from operating cash
-          operatingCashAfterAction = operatingCashBefore - shortfall;
-          virtualAllocationsAfter["laptop"] = 0;
-          virtualAllocationsAfter["operating"] = operatingCashAfterAction;
-          budgetShortfallCoverSource = "operating_cash";
-        } else {
-          // Allow certification funds to be touched if explicitly allowed
-          operatingCashAfterAction = operatingCashBefore;
-          budgetShortfallCoverSource = "certification_funds";
-        }
-      } else {
-        virtualAllocationsAfter["laptop"] = designatedAlloc - action.amount;
+      if (!isDisclosed) {
+        budgetVariance = designatedAlloc;
+        isBudgetExceeded = false;
         operatingCashAfterAction = operatingCashBefore;
+      } else {
+        budgetVariance = designatedAlloc - action.amount;
+        isBudgetExceeded = budgetVariance < 0;
+
+        if (isBudgetExceeded) {
+          const shortfall = Math.abs(budgetVariance);
+          // By default or by explicit constraint, do NOT touch certification funds unless user asks
+          const protectCert = constraints?.prohibitCertificationFunds !== false;
+          
+          if (protectCert) {
+            // Deduct shortfall purely from operating cash
+            operatingCashAfterAction = operatingCashBefore - shortfall;
+            virtualAllocationsAfter["laptop"] = 0;
+            virtualAllocationsAfter["operating"] = operatingCashAfterAction;
+            budgetShortfallCoverSource = "operating_cash";
+          } else {
+            // Allow certification funds to be touched if explicitly allowed
+            operatingCashAfterAction = operatingCashBefore;
+            budgetShortfallCoverSource = "certification_funds";
+          }
+        } else {
+          virtualAllocationsAfter["laptop"] = designatedAlloc - action.amount;
+          operatingCashAfterAction = operatingCashBefore;
+        }
       }
     } else {
       // Saving scenario (Emergency Fund Allocation)
@@ -398,13 +406,19 @@ export function calculateFinancialConsequences(
 
     // Balance fact
     if (isSpending) {
-      deterministicFacts.push(
-        `Saldo rekening saat ini: Rp ${initialBalance.toLocaleString("id-ID")}. Pembelian tunai laptop Rp ${action.amount.toLocaleString("id-ID")} akan mengurangi saldo rekening menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
-      );
-      if (isBudgetExceeded) {
+      if (!isDisclosed) {
         deterministicFacts.push(
-          `Alokasi khusus laptop saat ini adalah Rp ${(virtualAllocationsBefore["laptop"] || 0).toLocaleString("id-ID")}, sehingga terdapat kekurangan alokasi sebesar Rp ${Math.abs(budgetVariance || 0).toLocaleString("id-ID")}. Kekurangan ini ditutup dari uang kebutuhan bulan ini (tersisa Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}).`
+          `Saldo rekening terverifikasi saat ini: Rp ${initialBalance.toLocaleString("id-ID")}. Belum ada transaksi pembelian yang dilakukan.`
         );
+      } else {
+        deterministicFacts.push(
+          `Saldo rekening saat ini: Rp ${initialBalance.toLocaleString("id-ID")}. Pembelian tunai laptop Rp ${action.amount.toLocaleString("id-ID")} akan mengurangi saldo rekening menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+        );
+        if (isBudgetExceeded) {
+          deterministicFacts.push(
+            `Alokasi khusus laptop saat ini adalah Rp ${(virtualAllocationsBefore["laptop"] || 0).toLocaleString("id-ID")}, sehingga terdapat kekurangan alokasi sebesar Rp ${Math.abs(budgetVariance || 0).toLocaleString("id-ID")}. Kekurangan ini ditutup dari uang kebutuhan bulan ini (tersisa Rp ${operatingCashAfterAction?.toLocaleString("id-ID")}).`
+          );
+        }
       }
     } else {
       deterministicFacts.push(
@@ -671,16 +685,19 @@ export function calculateFinancialConsequences(
   }
 
   // Partial or full user provided finances
+  const isDisclosed = isActionDisclosed !== false;
+  const effectiveActionAmount = isDisclosed ? action.amount : 0;
+
   const initialBalance = userBalance !== null ? userBalance : userIncome;
   const balanceAfterAction =
-    initialBalance !== null ? (isSpending ? initialBalance - action.amount : initialBalance) : null;
+    initialBalance !== null ? (isSpending ? initialBalance - effectiveActionAmount : initialBalance) : null;
   const canPayAction: AssessmentStatus =
-    initialBalance !== null ? (isSpending ? initialBalance >= action.amount : true) : "unknown";
+    initialBalance !== null ? (isSpending ? initialBalance >= effectiveActionAmount : true) : "unknown";
 
   let budgetVariance: number | null = null;
   let isBudgetExceeded = false;
   if (userBudget !== null) {
-    budgetVariance = userBudget - action.amount;
+    budgetVariance = isDisclosed ? userBudget - action.amount : userBudget;
     isBudgetExceeded = budgetVariance < 0;
   }
 
@@ -689,7 +706,7 @@ export function calculateFinancialConsequences(
   if (isSaving) {
     const cashBase = userIncome !== null ? userIncome : userBalance;
     remainingCashAfterImmediateObligations =
-      cashBase !== null ? cashBase - totalLiabilitiesBeforeIncome - action.amount : null;
+      cashBase !== null ? cashBase - totalLiabilitiesBeforeIncome - effectiveActionAmount : null;
   } else {
     remainingCashAfterImmediateObligations =
       balanceAfterAction !== null ? balanceAfterAction - totalLiabilitiesBeforeIncome : null;
@@ -740,28 +757,48 @@ export function calculateFinancialConsequences(
     );
   }
 
-  if (initialBalance !== null && balanceAfterAction !== null) {
-    if (isSpending) {
+  if (initialBalance !== null) {
+    if (!isDisclosed) {
       deterministicFacts.push(
-        `Berdasarkan data pengguna, saldo rekening saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah pengeluaran Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening menjadi Rp ${balanceAfterAction.toLocaleString("id-ID")}.`
+        `Berdasarkan data yang disampaikan, saldo rekening saat ini Rp ${initialBalance.toLocaleString("id-ID")}.`
+      );
+      if (userLiabilities !== null && remainingCashAfterImmediateObligations !== null) {
+        deterministicFacts.push(
+          `Kewajiban tagihan/cicilan yang harus dibayar: Rp ${userLiabilities.toLocaleString("id-ID")}. Sisa saldo setelah melunasi tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
+        );
+      }
+      if (minBuffer > 0 && remainingCashAfterImmediateObligations !== null) {
+        const surplusBuffer = remainingCashAfterImmediateObligations - minBuffer;
+        deterministicFacts.push(
+          `Target dana darurat yang dipertahankan: Rp ${minBuffer.toLocaleString("id-ID")}. Sisa dana bebas yang tersedia adalah Rp ${surplusBuffer.toLocaleString("id-ID")}.`
+        );
+      }
+      deterministicFacts.push(
+        `Pengguna belum menyampaikan rencana transaksi belanja atau nominal pengeluaran tertentu.`
       );
     } else {
-      deterministicFacts.push(
-        `Total saldo rekening tetap Rp ${initialBalance.toLocaleString("id-ID")} karena penambahan tabungan merupakan pemindahan alokasi pos internal rekening.`
-      );
+      if (isSpending) {
+        deterministicFacts.push(
+          `Berdasarkan data pengguna, saldo rekening saat ini Rp ${initialBalance.toLocaleString("id-ID")}. Setelah pengeluaran Rp ${action.amount.toLocaleString("id-ID")}, saldo rekening menjadi Rp ${balanceAfterAction?.toLocaleString("id-ID")}.`
+        );
+      } else {
+        deterministicFacts.push(
+          `Total saldo rekening tetap Rp ${initialBalance.toLocaleString("id-ID")} karena penambahan tabungan merupakan pemindahan alokasi pos internal rekening.`
+        );
+      }
+
+      if (budgetVariance !== null) {
+        deterministicFacts.push(
+          `Alokasi anggaran yang disampaikan Rp ${userBudget?.toLocaleString("id-ID")}. Selisih anggaran: ${budgetVariance >= 0 ? "sisa Rp " + budgetVariance.toLocaleString("id-ID") : "melebihi pagu sebesar Rp " + Math.abs(budgetVariance).toLocaleString("id-ID")}.`
+        );
+      }
+
+      if (userLiabilities !== null && remainingCashAfterImmediateObligations !== null) {
+        deterministicFacts.push(
+          `Kewajiban tagihan yang disampaikan Rp ${userLiabilities.toLocaleString("id-ID")}. Sisa uang kebutuhan bulan ini setelah tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
+        );
+      }
     }
-  }
-
-  if (budgetVariance !== null) {
-    deterministicFacts.push(
-      `Alokasi anggaran yang disampaikan Rp ${userBudget?.toLocaleString("id-ID")}. Selisih anggaran: ${budgetVariance >= 0 ? "sisa Rp " + budgetVariance.toLocaleString("id-ID") : "melebihi pagu sebesar Rp " + Math.abs(budgetVariance).toLocaleString("id-ID")}.`
-    );
-  }
-
-  if (userLiabilities !== null && remainingCashAfterImmediateObligations !== null) {
-    deterministicFacts.push(
-      `Kewajiban tagihan yang disampaikan Rp ${userLiabilities.toLocaleString("id-ID")}. Sisa uang kebutuhan bulan ini setelah tagihan adalah Rp ${remainingCashAfterImmediateObligations.toLocaleString("id-ID")}.`
-    );
   }
 
   if (userRoutine !== null && routineResult) {

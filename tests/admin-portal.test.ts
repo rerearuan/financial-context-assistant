@@ -102,7 +102,7 @@ describe("Admin Portal Authentication & Data Export", () => {
     expect(res.headers.get("content-type")).toContain("text/csv");
     const text = await res.text();
     expect(text).toContain("ID Partisipan");
-    expect(text).toContain("PART-");
+    expect(text).toContain("RESP-");
   }, 20000);
 
   it("logs out and clears admin session cookie", async () => {

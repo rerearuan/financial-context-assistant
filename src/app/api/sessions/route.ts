@@ -102,43 +102,54 @@ export async function POST(req: NextRequest) {
 
     const participantId = `part_${crypto.randomBytes(12).toString("hex")}`;
 
-    // 4. Try to save session & participant in database
-    try {
-      await db.insert(sessions).values({
-        id: sessionId,
-        participantCode: code,
-        scenarioId,
-        condition,
-        currentAction: scenario.initialAction,
-        status: "in_progress",
-        followupCount: 0,
-        maxFollowupAllowed: maxFollowup,
-        promptVersion: PROMPT_VERSION,
-        modelId,
-      });
+    // 4. Try to save session & participant in database (skipped in test mode / test codes to prevent DB pollution)
+    const isTestMode =
+      process.env.VITEST === "true" ||
+      process.env.NODE_ENV === "test" ||
+      req.headers.get("x-test-mode") === "true" ||
+      code.startsWith("PART-") ||
+      code.startsWith("TEST-") ||
+      code.startsWith("DEV-") ||
+      code.startsWith("AUTOTEST-");
 
-      await db.insert(participants).values({
-        id: participantId,
-        participantCode: code,
-        consent: true,
-        cellNumber: cellNumber ? Number(cellNumber) : undefined,
-        scenarioId,
-        condition,
-        sessionId,
-        currentStep: 6,
-        isCompleted: false,
-        disqualified: false,
-      });
+    if (!isTestMode) {
+      try {
+        await db.insert(sessions).values({
+          id: sessionId,
+          participantCode: code,
+          scenarioId,
+          condition,
+          currentAction: scenario.initialAction,
+          status: "in_progress",
+          followupCount: 0,
+          maxFollowupAllowed: maxFollowup,
+          promptVersion: PROMPT_VERSION,
+          modelId,
+        });
 
-      await db.insert(messages).values({
-        id: initialMsgId,
-        sessionId,
-        role: "assistant",
-        content: initialContent,
-        sourcesUsed,
-      });
-    } catch (dbInsertErr) {
-      console.warn("DB insert error, session will be saved in demo-store:", dbInsertErr);
+        await db.insert(participants).values({
+          id: participantId,
+          participantCode: code,
+          consent: true,
+          cellNumber: cellNumber ? Number(cellNumber) : undefined,
+          scenarioId,
+          condition,
+          sessionId,
+          currentStep: 6,
+          isCompleted: false,
+          disqualified: false,
+        });
+
+        await db.insert(messages).values({
+          id: initialMsgId,
+          sessionId,
+          role: "assistant",
+          content: initialContent,
+          sourcesUsed,
+        });
+      } catch (dbInsertErr) {
+        console.warn("DB insert error, session will be saved in demo-store:", dbInsertErr);
+      }
     }
 
     // 5. Always persist in in-memory demo-store as guaranteed fallback

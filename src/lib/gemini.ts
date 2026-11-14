@@ -657,21 +657,25 @@ export function heuristicExtractIntent(
     }
   }
 
-  // 9. Detect preferred payment method (Cash vs Installment)
+  // 9. Detect preferred payment method (Cash vs Installment) for the purchase action
   let preferredPaymentMethod: ExtractedIntent["preferredPaymentMethod"] = null;
-  const isInstallment = /(cicil|cicilan|kredit|angsuran|tenor|12 bulan)/i.test(lower);
+  const isPurchaseInstallment =
+    /(?:cicil\s+laptop|cicilan\s+laptop|skema\s+cicilan|opsi\s+cicil|ambil\s+cicil|bayar\s+cicil|bisa\s+dicicil|apakah\s+bisa\s+cicil|kredit\s+laptop|tenor\s+12\s+bulan|12\s+bulan)/i.test(
+      lower
+    ) ||
+    (/(?:cicil|angsuran|kredit)/i.test(lower) && !parsedLiabilities && !/(?:tagihan|tanggungan|utang|sorry)/i.test(lower));
   const isCash = /(tunai|kontan|cash|langsung lunas)/i.test(lower);
-  if (isInstallment) preferredPaymentMethod = "installment";
+  if (isPurchaseInstallment) preferredPaymentMethod = "installment";
   else if (isCash) preferredPaymentMethod = "cash";
 
   // 10. Detect Focal Dimension
   let focalDimension: ExtractedIntent["focalDimension"] = "general";
   if (/(saldo|kas|uang kas)/i.test(lower)) focalDimension = "liquidity";
-  else if (/(tagihan|kewajiban|utang|sewa|kartu kredit)/i.test(lower)) focalDimension = "bills";
+  else if (/(tagihan|kewajiban|utang|sewa|kartu kredit|cicilan)/i.test(lower)) focalDimension = "bills";
   else if (/(kebutuhan rutin|belanja harian|biaya hidup)/i.test(lower)) focalDimension = "routine";
   else if (/(buffer|dana darurat)/i.test(lower)) focalDimension = "buffer";
   else if (/(sertifikasi|tujuan|laptop)/i.test(lower)) focalDimension = "goals";
-  else if (isInstallment) focalDimension = "installment";
+  else if (isPurchaseInstallment) focalDimension = "installment";
   else if (/(alternatif|pilihan lain|opsi)/i.test(lower)) focalDimension = "alternatives";
 
   // 10b. Detect Conceptual Question (user asks concept/principles without numbers)
@@ -694,14 +698,14 @@ export function heuristicExtractIntent(
     intentType = "conceptual_question";
   } else if (/(saran|rekomendasi|sebaiknya|berapa yang aman)/i.test(lower)) {
     intentType = "advice_request";
-  } else if (isInstallment || /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal|opsi lain)/i.test(lower)) {
+  } else if (userProvidedFinances) {
+    intentType = "clarify_info";
+  } else if (isPurchaseInstallment || /(?:bagaimana jika|bagaimana kalau|gimana kalau|kalau|misal|opsi lain)/i.test(lower)) {
     intentType = "alternative_exploration";
   } else if (decision) {
     intentType = "final_decision";
   } else if (newAmount && newAmount !== currentAction.amount) {
     intentType = "modify_action";
-  } else if (userProvidedFinances) {
-    intentType = "clarify_info";
   } else if (focalDimension !== "general") {
     intentType = "specific_aspect_query";
   }
@@ -862,6 +866,9 @@ export function generateSafeFallbackResponse(
   // Format Khusus: Satu Baris
   if (effectiveFormat === "one_line") {
     if (action.type === "spending") {
+      if (!isDisclosed && condition === "basic") {
+        return "Sisa dana bebas Anda dapat dihitung langsung dari saldo dikurangi kewajiban tagihan dan dana darurat.";
+      }
       if (cleanMsg.includes("pertimbangan")) {
         return "Pertimbangan utamanya adalah memastikan sisa uang di rekening Anda masih cukup untuk kebutuhan hidup dan tagihan wajib setelah pembelian.";
       }
@@ -879,6 +886,9 @@ export function generateSafeFallbackResponse(
 
   // Format Khusus: Ya atau Tidak, dan Berapa
   if (effectiveFormat === "yes_no_amount") {
+    if (!isDisclosed && condition === "basic") {
+      return "Keputusan ya atau tidaknya bergantung pada rencana nominal transaksi yang ingin Anda evaluasi.";
+    }
     if (action.type === "spending") {
       if (condition === "context_aware") {
         return "Ya, Anda bisa membeli tunai Rp 7.000.000 karena saldo dan tagihan terdekat masih aman di atas batas dana darurat.";
@@ -894,6 +904,16 @@ export function generateSafeFallbackResponse(
 
   // Format Khusus: Langsung Nominalnya
   if (effectiveFormat === "nominal_only") {
+    if (!isDisclosed && condition === "basic") {
+      const ufFacts = conversationState.userProvidedFacts || contextPacket.availableProfile?.userProvidedFinances || {};
+      const bal = ufFacts.balance ?? calculation.initialBalance;
+      const liab = ufFacts.liabilities ?? calculation.totalLiabilitiesBeforeIncome ?? 0;
+      const buf = ufFacts.buffer ?? 0;
+      if (bal !== null && bal !== undefined) {
+        return `Sisa dana bebas yang tersedia adalah Rp ${(bal - liab - buf).toLocaleString("id-ID")}.`;
+      }
+      return "Nominal dapat dihitung setelah data saldo dan tagihan Anda sampaikan.";
+    }
     if (action.type === "saving") {
       return "Nominal rekomendasi yang aman adalah Rp 1.000.000.";
     }
@@ -952,7 +972,27 @@ export function generateSafeFallbackResponse(
     }
   }
 
-  // 1a. Klarifikasi input angka ambigu tanpa satuan (misal "3" atau "5")
+  // 1a. Pengguna menyampaikan data keuangan awal tanpa menyebut rencana pembelian/tabungan (Undisclosed)
+  if (!isDisclosed && hasAnyUserFacts) {
+    if (condition === "basic") {
+      const bal = ufInitial.balance ?? calculation.initialBalance;
+      const liab = ufInitial.liabilities ?? calculation.totalLiabilitiesBeforeIncome ?? 0;
+      const buf = ufInitial.buffer ?? 0;
+      if (bal !== null && bal !== undefined) {
+        const remAfterLiab = bal - liab;
+        const freeCash = remAfterLiab - buf;
+        return (
+          `Dari saldo rekening Rp ${bal.toLocaleString("id-ID")} yang Anda sampaikan, setelah dikurangi kewajiban tagihan sebesar Rp ${liab.toLocaleString("id-ID")}, sisa saldo Anda adalah Rp ${remAfterLiab.toLocaleString("id-ID")}. ` +
+          (buf > 0
+            ? `Dengan mengamankan dana darurat sebesar Rp ${buf.toLocaleString("id-ID")}, sisa dana bebas yang tersedia adalah Rp ${freeCash.toLocaleString("id-ID")}. `
+            : "") +
+          `Apakah ada rencana pengeluaran atau transaksi tertentu yang ingin Anda konsultasikan dari dana tersebut?`
+        );
+      }
+    }
+  }
+
+  // 1b. Klarifikasi input angka ambigu tanpa satuan (misal "3" atau "5")
   if (
     responsePlan.intentType === "confusion" &&
     /^\s*(?:rp\.?\s*)?\d{1,3}(?:[.,]\d{1,2})?\s*$/i.test(cleanMsg) &&
@@ -1085,7 +1125,15 @@ export function generateSafeFallbackResponse(
   }
 
   // 5. Cicilan vs Tunai (Spending)
-  if (action.type === "spending" && (cleanMsg.includes("cicil") || responsePlan.intentType === "alternative_exploration")) {
+  const isAskingInstallmentPlan =
+    action.type === "spending" &&
+    isDisclosed &&
+    (cleanMsg.includes("cicil laptop") ||
+      cleanMsg.includes("opsi cicil") ||
+      cleanMsg.includes("bisa dicicil") ||
+      cleanMsg.includes("skema cicilan") ||
+      (responsePlan.intentType === "alternative_exploration" && cleanMsg.includes("cicil")));
+  if (isAskingInstallmentPlan) {
     if (calculation.installmentDetails) {
       const inst = calculation.installmentDetails;
       return (

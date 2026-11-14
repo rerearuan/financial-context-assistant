@@ -358,7 +358,30 @@ export async function POST(
       );
     }
 
-    // 2. Fetch official session from database
+    // 2. Fetch session (route to demo store in test mode to prevent DB pollution)
+    const isTestMode =
+      process.env.VITEST === "true" ||
+      process.env.NODE_ENV === "test" ||
+      req.headers.get("x-test-mode") === "true" ||
+      sessionId.startsWith("test_") ||
+      sessionId.startsWith("dev_");
+
+    if (isTestMode) {
+      let demoSess = demoSessions.get(sessionId);
+      if (!demoSess) {
+        const fallbackCell =
+          req.nextUrl.searchParams.get("cell") || req.headers.get("x-session-cell");
+        demoSess = (await getOrRestoreSession(sessionId, fallbackCell)) || undefined;
+      }
+
+      if (demoSess) {
+        if (clientChatHistory && Array.isArray(clientChatHistory)) {
+          restoreChatHistory(sessionId, clientChatHistory);
+        }
+        return handleDemoChat(demoSess, sessionId, message.trim());
+      }
+    }
+
     let session = null;
     try {
       const [dbSession] = await db

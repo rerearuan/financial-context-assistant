@@ -66,7 +66,8 @@ export function buildStructuredContextPacket(
       action,
       null, // Profile is strictly null for Basic
       userProvidedFinances || null,
-      userConstraints || null
+      userConstraints || null,
+      hasUserDisclosedAction
     );
 
     const dataSources: Array<"scenario" | "user_message" | "state_machine"> = ["scenario"];
@@ -94,7 +95,8 @@ export function buildStructuredContextPacket(
     action,
     syntheticProfile || null,
     userProvidedFinances || null,
-    userConstraints || null
+    userConstraints || null,
+    hasUserDisclosedAction
   );
 
   const dataSources: Array<"synthetic_profile" | "scenario" | "user_message" | "state_machine"> = [
