@@ -38,20 +38,6 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
 
   // Mental Account Conflict (MAC)
   {
-    code: "MAC1",
-    category: "Mental Account Conflict (MAC)",
-    statement:
-      "Pada skenario yang saya dapatkan, saya perlu mempertimbangkan **dua tujuan** keuangan **yang sama-sama penting**.",
-    source: "Mayer & Freund (2022)",
-  },
-  {
-    code: "MAC2",
-    category: "Mental Account Conflict (MAC)",
-    statement:
-      "Pada skenario yang saya dapatkan, dana yang tersedia harus **dibagi** untuk mencapai **dua tujuan** keuangan yang berbeda.",
-    source: "self-developed",
-  },
-  {
     code: "MAC3",
     category: "Mental Account Conflict (MAC)",
     statement:
@@ -65,12 +51,26 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
       "Pada skenario yang saya dapatkan, saya **dapat memenuhi satu tujuan** keuangan tanpa harus mengurangi alokasi dana untuk tujuan lain yang sama penting.",
     source: "Mayer & Freund (2022)",
   },
+  {
+    code: "MAC1",
+    category: "Mental Account Conflict (MAC)",
+    statement:
+      "Pada skenario yang saya dapatkan, saya perlu mempertimbangkan **dua tujuan** keuangan **yang sama-sama penting**.",
+    source: "Mayer & Freund (2022)",
+  },
+  {
+    code: "MAC2",
+    category: "Mental Account Conflict (MAC)",
+    statement:
+      "Pada skenario yang saya dapatkan, dana yang tersedia harus **dibagi** untuk mencapai **dua tujuan** keuangan yang berbeda.",
+    source: "self-developed",
+  },
 
   // Relevant Mental Account Salience (RMAS)
   {
     code: "RMAS1",
     category: "Relevant Mental Account Salience (RMAS)",
-    statement: "Saat membuat keputusan ini, saya teringat bahwa sebagian uang telah dialokasikan untuk keperluan tertentu.",
+    statement: "Saat membuat keputusan ini, saya teringat bahwa sebagian uang saya sudah diperuntukkan bagi kebutuhan tertentu.",
     source: "Self-developed",
   },
   {
@@ -96,7 +96,7 @@ export const POST_QUESTIONNAIRE_ITEMS: SurveyItem[] = [
   {
     code: "OCC1",
     category: "Opportunity Cost Consideration (OCC)",
-    statement: "Saya mempertimbangkan bagaimana keputusan ini dapat memengaruhi kemampuan saya untuk membiayai keperluan lain di kemudian hari.",
+    statement: "Saya mempertimbangkan bagaimana penggunaan dana untuk keputusan ini dapat memengaruhi kemampuan saya membiayai keperluan lain.",
     source: "Spiller (2011)",
   },
   {
