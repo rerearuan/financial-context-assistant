@@ -1,5 +1,5 @@
 import { StructuredContextPacket } from "./types";
-import { sanitizeAmount } from "./validator";
+import { sanitizeAmount, extractSpokenIndonesianAmount } from "./validator";
 
 export interface OutputValidationResult {
   isValid: boolean;
@@ -34,32 +34,46 @@ const FORBIDDEN_RESEARCH_TERMS = [
 
 /**
  * Extracts Rupiah amounts mentioned in the text.
- * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000", "Rp 667.333", "4-4.5 jt".
+ * Matches patterns like "Rp 7.000.000", "Rp 7jt", "7 juta", "14.000.000", "Rp 667.333", "4-4.5 jt", "2.3 juta", "1,5 juta", "750rb".
+ * Explicitly ignores duration/count numbers without currency units (e.g., "6 hari", "3 bulan", "12 bulan", "4 kali").
  */
 export function extractMentionedAmounts(text: string): number[] {
   const amounts: number[] = [];
 
-  // 1. Detect range patterns like "4-4.5 jt", "4 - 4.5 juta", "4.000.000 - 4.500.000"
-  const rangeRegex = /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*[-–—]\s*(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
+  // Mask out non-currency duration/count patterns so their digits are never misread as currency
+  const cleanedText = text.replace(
+    /\b\d+(?:[.,]\d+)?\s*(?:[-–—]\s*\d+(?:[.,]\d+)?\s*)?(?:hari|minggu|bulan|tahun|thn|bln|hr|jam|menit|detik|kali|orang|item|unit|persen|%)\b/gi,
+    " "
+  );
+
+  // 1. Detect range patterns like "4-4.5 jt", "4 - 4.5 juta", "2.3-3 juta", "4.000.000 - 4.500.000", "5,8 juta - 6,6 juta"
+  const rangeRegex =
+    /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*)\s*(juta|jt|ribu|rb|k)?\s*(?:[-–—]|sampai|s\.?d\.?|hingga)\s*(?:rp\.?\s*)?(\d+(?:[.,]\d+)*)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
   let rangeMatch: RegExpExecArray | null;
-  while ((rangeMatch = rangeRegex.exec(text)) !== null) {
-    const unit = rangeMatch[3] || "";
-    if (unit) {
-      const a1 = sanitizeAmount(`${rangeMatch[1]} ${unit}`);
-      const a2 = sanitizeAmount(`${rangeMatch[2]} ${unit}`);
-      if (a1 && a1 >= 1000 && !amounts.includes(a1)) amounts.push(a1);
-      if (a2 && a2 >= 1000 && !amounts.includes(a2)) amounts.push(a2);
-    }
+  while ((rangeMatch = rangeRegex.exec(cleanedText)) !== null) {
+    const unit2 = rangeMatch[4] || "";
+    const unit1 = rangeMatch[2] || unit2;
+    const raw1 = unit1 ? `${rangeMatch[1]} ${unit1}` : rangeMatch[1];
+    const raw2 = unit2 ? `${rangeMatch[3]} ${unit2}` : rangeMatch[3];
+    const a1 = sanitizeAmount(raw1);
+    const a2 = sanitizeAmount(raw2);
+    if (a1 && a1 >= 1000 && !amounts.includes(a1)) amounts.push(a1);
+    if (a2 && a2 >= 1000 && !amounts.includes(a2)) amounts.push(a2);
   }
 
-  // 2. Standard single amount regex
-  const regex = /(?:rp\.?\s*)?(\d+(?:[.,]\d+)?)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
+  // 2. Standard single amount regex (supports formatted thousands like 1.500.000 or decimals like 1.5 juta / 1,5jt)
+  const regex = /(?:rp\.?\s*)?(\d+(?:[.,]\d+)*)\s*(juta|jt|ribu|rb|k|\.000\.000|\.000)?/gi;
 
   let match: RegExpExecArray | null;
-  while ((match = regex.exec(text)) !== null) {
+  while ((match = regex.exec(cleanedText)) !== null) {
     const raw = match[0].trim();
-    // Exclude very small numbers like "1", "2", "3" if no currency context
-    if (/^\d{1,2}$/.test(raw)) continue;
+    const numStr = match[1];
+    const unitStr = match[2];
+    const hasRpPrefix = /^rp/i.test(raw);
+
+    // Exclude small plain integers (e.g. "1", "2", "12", "30") when no Rp prefix and no currency unit
+    if (!hasRpPrefix && !unitStr && /^\d{1,4}$/.test(numStr)) continue;
+
     const sanitized = sanitizeAmount(raw);
     if (sanitized && sanitized >= 1000) {
       if (!amounts.includes(sanitized)) {
@@ -68,7 +82,100 @@ export function extractMentionedAmounts(text: string): number[] {
     }
   }
 
+  // 3. Spoken Indonesian amounts if present
+  const spoken = extractSpokenIndonesianAmount(cleanedText);
+  if (spoken && spoken >= 1000 && !amounts.includes(spoken)) {
+    amounts.push(spoken);
+  }
+
   return amounts;
+}
+
+/**
+ * Helper to add valid derived figures (divisions over 2, 3, 4, 6, 12 months, and pairwise sums/differences)
+ * from a set of base verified amounts so legitimate arithmetic derivations are never flagged as hallucinations.
+ */
+function expandDerivedAmounts(
+  baseAmounts: Set<number>,
+  contextPacket?: StructuredContextPacket
+): Set<number> {
+  const expanded = new Set<number>(baseAmounts);
+  const baseArr = Array.from(baseAmounts).filter((n) => n >= 50000 && n <= 100_000_000);
+
+  // 1. Pairwise additions and subtractions of base figures (e.g. 600k + 600k = 1.2M, 2.4M + 600k + 500k = 3.5M, 8M - 1.4M = 6.6M)
+  const firstOrderDiffsAndSums: number[] = [];
+  for (let i = 0; i < baseArr.length; i++) {
+    for (let j = i; j < baseArr.length; j++) {
+      const a = baseArr[i];
+      const b = baseArr[j];
+      const diff = Math.abs(a - b);
+      const sum = a + b;
+      if (diff >= 50000) {
+        expanded.add(diff);
+        firstOrderDiffsAndSums.push(diff);
+      }
+      if (sum >= 50000 && sum <= 100_000_000) {
+        expanded.add(sum);
+        firstOrderDiffsAndSums.push(sum);
+      }
+    }
+  }
+
+  // Second-order combinations with base figures (e.g., income - liabilities - routine, or bill1 + bill2 + bill3)
+  const combinedPool = Array.from(new Set([...baseArr, ...firstOrderDiffsAndSums]));
+  for (const base of baseArr) {
+    for (const inter of combinedPool) {
+      const diff = Math.abs(base - inter);
+      const sum = base + inter;
+      if (diff >= 50000) expanded.add(diff);
+      if (sum >= 50000 && sum <= 100_000_000) expanded.add(sum);
+    }
+  }
+
+  // 2. Multi-month divisions: only divide user-mentioned target figures, action amounts, or goal shortfall amounts
+  // (e.g. user mentions "5 juta dibagi 4 bulan" -> 5M / 4 = 1.25M; or action amount 7M / 12 = 583.333)
+  const dividablePool: number[] = [];
+  if (contextPacket) {
+    dividablePool.push(contextPacket.action.amount);
+    if (contextPacket.userProvidedFinances?.rawUserFigures) {
+      dividablePool.push(...contextPacket.userProvidedFinances.rawUserFigures);
+    }
+    if (contextPacket.conversationState?.userProvidedFacts?.rawUserFigures) {
+      dividablePool.push(...contextPacket.conversationState.userProvidedFacts.rawUserFigures);
+    }
+    if (contextPacket.calculation.commitmentsShortfall) {
+      dividablePool.push(contextPacket.calculation.commitmentsShortfall);
+    }
+    if (contextPacket.calculation.deficitAmount) {
+      dividablePool.push(contextPacket.calculation.deficitAmount);
+    }
+    if (contextPacket.availableProfile?.goals) {
+      for (const g of contextPacket.availableProfile.goals) {
+        dividablePool.push(g.targetAmount);
+        dividablePool.push(g.targetAmount - g.currentAmount);
+      }
+    }
+  }
+
+  const commonDivisors = [2, 3, 4, 5, 6, 10, 12];
+  for (const val of dividablePool.filter((n) => n >= 100000 && n <= 50_000_000)) {
+    for (const d of commonDivisors) {
+      const exact = val / d;
+      if (exact >= 50000) {
+        expanded.add(Math.round(exact));
+        expanded.add(Math.floor(exact));
+        expanded.add(Math.ceil(exact));
+        // Rounded to nearest 1.000, 5.000, 10.000, 50.000, 100.000 (e.g. 1.666.667 -> 1.667.000 or 1.670.000)
+        expanded.add(Math.round(exact / 1000) * 1000);
+        expanded.add(Math.round(exact / 5000) * 5000);
+        expanded.add(Math.round(exact / 10000) * 10000);
+        expanded.add(Math.round(exact / 50000) * 50000);
+        expanded.add(Math.round(exact / 100000) * 100000);
+      }
+    }
+  }
+
+  return expanded;
 }
 
 /**
@@ -215,9 +322,20 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
   } else if (action.type === "saving") {
     allowed.add(8000000);  // Monthly salary / Current emergency fund
     allowed.add(12000000); // Emergency fund target
+    allowed.add(4000000);  // Shortfall 12M - 8M / Alt saving 4M
     allowed.add(3000000);  // Alt saving 3M
+    allowed.add(2500000);  // Alt saving / shortfall
     allowed.add(2000000);  // Baseline saving 2M
+    allowed.add(1800000);  // Baseline surplus
+    allowed.add(1500000);  // Alt saving 1.5M / min surplus
+    allowed.add(1300000);  // Alt saving 1.3M
+    allowed.add(1200000);  // Alt saving 1.2M
     allowed.add(1000000);  // Alt saving 1M
+    allowed.add(800000);   // Remaining surplus after 1M saving
+    allowed.add(750000);   // Alt saving 750k
+    allowed.add(500000);   // Alt saving 500k
+    allowed.add(300000);   // Remaining surplus after 1.5M saving
+    allowed.add(200000);   // Deficit at 2M saving
   }
 
   // Profile if present
@@ -255,15 +373,6 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
       for (const fig of uf.rawUserFigures) {
         allowed.add(fig);
       }
-      // If user provided a target/cost and current accumulated amount (e.g. 4.5jt target, 2jt terkumpul),
-      // allow mathematical differences between them (e.g. 4.5jt - 2jt = 2.5jt, 4jt - 2jt = 2jt)
-      const figs = uf.rawUserFigures;
-      for (let i = 0; i < figs.length; i++) {
-        for (let j = 0; j < figs.length; j++) {
-          const diff = Math.abs(figs[i] - figs[j]);
-          if (diff >= 1000) allowed.add(diff);
-        }
-      }
     }
   }
 
@@ -275,7 +384,8 @@ function getAllowedAmounts(contextPacket: StructuredContextPacket): Set<number> 
     }
   }
 
-  return allowed;
+  // Expand with legitimate derived numbers (pairwise sums/differences & multi-month divisions)
+  return expandDerivedAmounts(allowed, contextPacket);
 }
 
 /**

@@ -88,7 +88,6 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       timestamp: new Date().toISOString(),
     });
   } else if (
-    (intent.intentType === "modify_action" || intent.intentType === "alternative_exploration") &&
     intent.newAmount &&
     intent.newAmount > 0 &&
     intent.newAmount !== actionBefore.amount
@@ -117,23 +116,28 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
   let userProvidedFinances: UserProvidedFinances | null = null;
   const existingDetails = demoSess.currentAction.userProvidedDetails as Record<string, unknown> | undefined;
 
+  const cleanAmountVal = (v: unknown): number | undefined => {
+    if (typeof v !== "number" || isNaN(v) || v < 10000) return undefined;
+    return v;
+  };
+
   if (intent.userProvidedFinances) {
     userProvidedFinances = {
-      balance: intent.userProvidedFinances.balance ?? (existingDetails?.balance as number | undefined),
-      budget: intent.userProvidedFinances.budget ?? (existingDetails?.budget as number | undefined),
-      income: intent.userProvidedFinances.income ?? (existingDetails?.income as number | undefined),
-      liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
-      buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
-      routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
-      historicalRoutine: intent.userProvidedFinances.historicalRoutine ?? (existingDetails?.historicalRoutine as number | undefined),
-      spentSoFar: intent.userProvidedFinances.spentSoFar ?? (existingDetails?.spentSoFar as number | undefined),
-      emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
-      emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
+      balance: cleanAmountVal(intent.userProvidedFinances.balance) ?? (existingDetails?.balance as number | undefined),
+      budget: cleanAmountVal(intent.userProvidedFinances.budget) ?? (existingDetails?.budget as number | undefined),
+      income: cleanAmountVal(intent.userProvidedFinances.income) ?? (existingDetails?.income as number | undefined),
+      liabilities: cleanAmountVal(intent.userProvidedFinances.liabilities) ?? (existingDetails?.liabilities as number | undefined),
+      buffer: cleanAmountVal(intent.userProvidedFinances.buffer) ?? (existingDetails?.buffer as number | undefined),
+      routine: cleanAmountVal(intent.userProvidedFinances.routine) ?? (existingDetails?.routine as number | undefined),
+      historicalRoutine: cleanAmountVal(intent.userProvidedFinances.historicalRoutine) ?? (existingDetails?.historicalRoutine as number | undefined),
+      spentSoFar: cleanAmountVal(intent.userProvidedFinances.spentSoFar) ?? (existingDetails?.spentSoFar as number | undefined),
+      emergencyCurrent: cleanAmountVal(intent.userProvidedFinances.emergencyCurrent) ?? (existingDetails?.emergencyCurrent as number | undefined),
+      emergencyTarget: cleanAmountVal(intent.userProvidedFinances.emergencyTarget) ?? (existingDetails?.emergencyTarget as number | undefined),
       goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
       rawUserFigures: [
         ...new Set([
-          ...((existingDetails?.rawUserFigures as number[]) || []),
-          ...((intent.userProvidedFinances.rawUserFigures as number[]) || []),
+          ...((existingDetails?.rawUserFigures as number[]) || []).filter((n) => n >= 10000),
+          ...((intent.userProvidedFinances.rawUserFigures as number[]) || []).filter((n) => n >= 10000),
         ]),
       ],
       source: "user_message",
@@ -156,7 +160,7 @@ async function handleDemoChat(demoSess: DemoSession, sessionId: string, messageT
       emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
       emergencyTarget: existingDetails.emergencyTarget as number | undefined,
       goals: existingDetails.goals as string | undefined,
-      rawUserFigures: existingDetails.rawUserFigures as number[] | undefined,
+      rawUserFigures: (existingDetails.rawUserFigures as number[] | undefined)?.filter((n) => n >= 10000),
       source: "user_message",
     };
   }
@@ -489,7 +493,6 @@ export async function POST(
         timestamp: new Date().toISOString(),
       });
     } else if (
-      (intent.intentType === "modify_action" || intent.intentType === "alternative_exploration") &&
       intent.newAmount &&
       intent.newAmount > 0 &&
       intent.newAmount !== actionBefore.amount
@@ -513,23 +516,28 @@ export async function POST(
     };
 
     let userProvidedFinances: UserProvidedFinances | null = null;
+    const cleanAmountVal = (v: unknown): number | undefined => {
+      if (typeof v !== "number" || isNaN(v) || v < 10000) return undefined;
+      return v;
+    };
+
     if (intent.userProvidedFinances) {
       userProvidedFinances = {
-        balance: intent.userProvidedFinances.balance ?? (existingDetails?.balance as number | undefined),
-        budget: intent.userProvidedFinances.budget ?? (existingDetails?.budget as number | undefined),
-        income: intent.userProvidedFinances.income ?? (existingDetails?.income as number | undefined),
-        liabilities: intent.userProvidedFinances.liabilities ?? (existingDetails?.liabilities as number | undefined),
-        buffer: intent.userProvidedFinances.buffer ?? (existingDetails?.buffer as number | undefined),
-        routine: intent.userProvidedFinances.routine ?? (existingDetails?.routine as number | undefined),
-        historicalRoutine: intent.userProvidedFinances.historicalRoutine ?? (existingDetails?.historicalRoutine as number | undefined),
-        spentSoFar: intent.userProvidedFinances.spentSoFar ?? (existingDetails?.spentSoFar as number | undefined),
-        emergencyCurrent: intent.userProvidedFinances.emergencyCurrent ?? (existingDetails?.emergencyCurrent as number | undefined),
-        emergencyTarget: intent.userProvidedFinances.emergencyTarget ?? (existingDetails?.emergencyTarget as number | undefined),
+        balance: cleanAmountVal(intent.userProvidedFinances.balance) ?? (existingDetails?.balance as number | undefined),
+        budget: cleanAmountVal(intent.userProvidedFinances.budget) ?? (existingDetails?.budget as number | undefined),
+        income: cleanAmountVal(intent.userProvidedFinances.income) ?? (existingDetails?.income as number | undefined),
+        liabilities: cleanAmountVal(intent.userProvidedFinances.liabilities) ?? (existingDetails?.liabilities as number | undefined),
+        buffer: cleanAmountVal(intent.userProvidedFinances.buffer) ?? (existingDetails?.buffer as number | undefined),
+        routine: cleanAmountVal(intent.userProvidedFinances.routine) ?? (existingDetails?.routine as number | undefined),
+        historicalRoutine: cleanAmountVal(intent.userProvidedFinances.historicalRoutine) ?? (existingDetails?.historicalRoutine as number | undefined),
+        spentSoFar: cleanAmountVal(intent.userProvidedFinances.spentSoFar) ?? (existingDetails?.spentSoFar as number | undefined),
+        emergencyCurrent: cleanAmountVal(intent.userProvidedFinances.emergencyCurrent) ?? (existingDetails?.emergencyCurrent as number | undefined),
+        emergencyTarget: cleanAmountVal(intent.userProvidedFinances.emergencyTarget) ?? (existingDetails?.emergencyTarget as number | undefined),
         goals: intent.userProvidedFinances.goals ?? (existingDetails?.goals as string | undefined),
         rawUserFigures: [
           ...new Set([
-            ...((existingDetails?.rawUserFigures as number[]) || []),
-            ...((intent.userProvidedFinances.rawUserFigures as number[]) || []),
+            ...((existingDetails?.rawUserFigures as number[]) || []).filter((n) => n >= 10000),
+            ...((intent.userProvidedFinances.rawUserFigures as number[]) || []).filter((n) => n >= 10000),
           ]),
         ],
         source: "user_message",
@@ -552,7 +560,7 @@ export async function POST(
         emergencyCurrent: existingDetails.emergencyCurrent as number | undefined,
         emergencyTarget: existingDetails.emergencyTarget as number | undefined,
         goals: existingDetails.goals as string | undefined,
-        rawUserFigures: existingDetails.rawUserFigures as number[] | undefined,
+        rawUserFigures: (existingDetails.rawUserFigures as number[] | undefined)?.filter((n) => n >= 10000),
         source: "user_message",
       };
     }
